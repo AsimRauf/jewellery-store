@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next/font": "^14.2.15",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
     "jsonwebtoken": "^9.0.2",
