@@ -24,3 +24,41 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom styles for multiple select */
+.custom-multiselect {
+  background-color: white;
+  scrollbar-width: thin;
+  scrollbar-color: #a855f7 #f3f4f6;
+}
+
+.custom-multiselect::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-multiselect::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.custom-multiselect::-webkit-scrollbar-thumb {
+  background-color: #a855f7;
+  border-radius: 3px;
+}
+
+.custom-multiselect option {
+  padding: 8px 12px;
+  margin: 2px 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.custom-multiselect option:checked {
+  background: linear-gradient(0deg, #a855f7 0%, #a855f7 100%);
+  color: white;
+}
+
+.custom-multiselect option:hover:not(:checked) {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}

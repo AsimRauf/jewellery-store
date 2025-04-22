@@ -23,68 +23,49 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters']
+    minlength: [8, 'Password must be at least 8 characters']
   },
   role: {
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
   },
-  phoneNumber: {
-    type: String,
-    trim: true
-  },
-  addresses: [{
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    postalCode: { type: String },
-    country: { type: String },
-    isDefault: {
-      type: Boolean,
-      default: false
-    }
-  }],
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
-  verificationToken: String,
-  isVerified: {
+  refreshToken: String,
+  isActive: {
     type: Boolean,
-    default: false
+    default: true
   },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
-  lastLogin: Date
+  lastLogin: Date,
+  loginAttempts: {
+    type: Number,
+    default: 0
+  },
+  lockUntil: Date
 }, {
   timestamps: true
 });
 
-// Hash password before saving
+// Enhanced password hashing
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  this.password = await bcrypt.hash(this.password, 10);
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Method to compare password
-UserSchema.methods.comparePassword = async function(candidatePassword: string) {
-  return await bcrypt.compare(candidatePassword, this.password);
+// Enhanced password comparison
+UserSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
+  return await bcrypt.compare(password, this.password);
 };
 
-// Method to get full name
-UserSchema.virtual('fullName').get(function() {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-// Method to get user's default address
-UserSchema.methods.getDefaultAddress = function() {
-  return this.addresses.find((address: { isDefault: boolean }) => address.isDefault);
+// Method to increment failed login attempts
+UserSchema.methods.incrementLoginAttempts = async function() {
+  this.loginAttempts += 1;
+  if (this.loginAttempts >= 5) {
+    this.lockUntil = new Date(Date.now() + 30 * 60 * 1000); // Lock for 30 minutes
+  }
+  await this.save();
 };
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
-
 export default User;
