@@ -92,6 +92,12 @@ export async function POST(request: Request) {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Verify the token was saved
+    const updatedUser = await User.findById(user._id);
+    if (updatedUser.refreshToken !== refreshToken) {
+      console.error('Failed to save refresh token for user:', user._id);
+    }
+
     // Prepare response
     const response = NextResponse.json({
       message: 'Login successful',

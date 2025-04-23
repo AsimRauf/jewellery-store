@@ -4,11 +4,6 @@ import jwt from 'jsonwebtoken';
 
 export function middleware(request: NextRequest) {
   try {
-    // Skip processing for the refresh endpoint itself to prevent loops
-    if (request.nextUrl.pathname === '/api/auth/refresh') {
-      return NextResponse.next();
-    }
-
     // Get token from cookie
     const token = request.cookies.get('token')?.value;
     const refreshToken = request.cookies.get('refreshToken')?.value;
@@ -18,12 +13,6 @@ export function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/admin') || 
       request.nextUrl.pathname.startsWith('/api/admin');
     
-    // Check if it's the home page or a regular user page
-    const isRegularUserRoute = 
-      request.nextUrl.pathname === '/' || 
-      request.nextUrl.pathname.startsWith('/shop') ||
-      request.nextUrl.pathname.startsWith('/collections');
-    
     // Check if it's an API route that requires authentication
     const isProtectedApiRoute = 
       request.nextUrl.pathname.startsWith('/api/user') ||
@@ -31,7 +20,7 @@ export function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/api/cart') ||
       request.nextUrl.pathname.startsWith('/api/upload');
 
-    // Skip token verification for all auth endpoints
+    // Skip token verification for auth endpoints to avoid circular redirects
     if (request.nextUrl.pathname.startsWith('/api/auth/')) {
       return NextResponse.next();
     }
@@ -44,8 +33,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // If has token, verify it
-    if (token) {
+    // If has token, verify for admin routes
+    if (token && isAdminRoute) {
       try {
         // Verify access token
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
@@ -53,17 +42,12 @@ export function middleware(request: NextRequest) {
           role: string;
         };
 
-        // For admin routes, check admin role
-        if (isAdminRoute && decoded.role !== 'admin') {
+        // Check admin access
+        if (decoded.role !== 'admin') {
           if (request.nextUrl.pathname.startsWith('/api/')) {
             return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
           }
           return NextResponse.redirect(new URL('/', request.url));
-        }
-        
-        // If user is admin and trying to access regular user routes, redirect to admin dashboard
-        if (isRegularUserRoute && decoded.role === 'admin' && !request.nextUrl.searchParams.has('bypass_admin_redirect')) {
-          return NextResponse.redirect(new URL('/admin/rings/wedding', request.url));
         }
 
         // Add user info to request headers
@@ -76,30 +60,49 @@ export function middleware(request: NextRequest) {
             headers: requestHeaders,
           },
         });
-      } catch (error: unknown) {
-        // Token verification failed - likely expired
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.log('Token verification failed:', errorMessage);
-        
-        // Only redirect to refresh for non-API routes and only if refresh token exists
-        if (!request.nextUrl.pathname.startsWith('/api/') && refreshToken) {
-          // Instead of redirecting to refresh endpoint, let client handle it
-          // Just pass through and let client-side auth check handle refresh
-          return NextResponse.next();
+      } catch (error) {
+        // Token expired, redirect to login if no refresh token
+        if (!refreshToken) {
+          return NextResponse.redirect(new URL('/login', request.url));
         }
         
-        // For API routes or if no refresh token, return 401
-        if (request.nextUrl.pathname.startsWith('/api/')) {
-          return NextResponse.json({ error: 'Token expired' }, { status: 401 });
+        // For UI routes, redirect to login page
+        if (!request.nextUrl.pathname.startsWith('/api/')) {
+          return NextResponse.redirect(new URL('/login', request.url));
         }
         
-        // For UI routes with no refresh token, redirect to login
-        return NextResponse.redirect(new URL('/login', request.url));
+        // For API routes, return 401 so client can handle refresh
+        return NextResponse.json({ error: 'Token expired' }, { status: 401 });
+      }
+    }
+
+    // For protected API routes with token
+    if (token && isProtectedApiRoute) {
+      try {
+        // Verify access token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+          userId: string;
+          role: string;
+        };
+
+        // Add user info to request headers
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('userId', decoded.userId);
+        requestHeaders.set('userRole', decoded.role);
+
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      } catch (error) {
+        // Token expired, return 401 so client can handle refresh
+        return NextResponse.json({ error: 'Token expired' }, { status: 401 });
       }
     }
 
     return NextResponse.next();
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Middleware error:', error);
     
     // For API routes, return JSON error
@@ -120,7 +123,6 @@ export const config = {
     '/api/upload/:path*',
     '/api/user/:path*',
     '/api/orders/:path*', 
-    '/api/cart/:path*',
-    '/api/auth/refresh'
-  ],
+    '/api/cart/:path*'
+  ]
 };

@@ -1,26 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // Get the refresh token from cookies
-    const cookies = request.headers.get('cookie');
-    if (!cookies) {
+    console.log('Refresh endpoint called');
+    
+    // Get the refresh token from cookies using Next.js cookie API
+    const refreshToken = request.cookies.get('refreshToken')?.value;
+    
+    if (!refreshToken) {
+      console.log('No refresh token found in cookies');
       return NextResponse.json({ error: 'No refresh token provided' }, { status: 401 });
     }
-    
-    // Parse cookies to get refresh token
-    const refreshTokenCookie = cookies
-      .split(';')
-      .find(c => c.trim().startsWith('refreshToken='));
-      
-    if (!refreshTokenCookie) {
-      return NextResponse.json({ error: 'No refresh token provided' }, { status: 401 });
-    }
-    
-    const refreshToken = refreshTokenCookie.split('=')[1];
     
     // Verify refresh token
     let decoded;
@@ -29,6 +22,7 @@ export async function GET(request: Request) {
         userId: string;
         role: string;
       };
+      console.log('Token verified successfully for user:', decoded.userId);
     } catch (error) {
       console.error('Refresh token verification error:', error);
       return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 });
@@ -38,7 +32,13 @@ export async function GET(request: Request) {
     await connectDB();
     const user = await User.findById(decoded.userId);
     
-    if (!user || user.refreshToken !== refreshToken) {
+    if (!user) {
+      console.log('User not found:', decoded.userId);
+      return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 });
+    }
+    
+    if (user.refreshToken !== refreshToken) {
+      console.log('Token mismatch in database for user:', decoded.userId);
       return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 });
     }
     
@@ -70,7 +70,14 @@ export async function GET(request: Request) {
     
     // Create response with new tokens
     const response = NextResponse.json({
-      message: 'Token refreshed successfully'
+      message: 'Token refreshed successfully',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role
+      }
     });
     
     // Set new tokens as cookies
@@ -89,6 +96,13 @@ export async function GET(request: Request) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: '/'  // Make it available on all paths
     });
+    
+    // Check if there's a return URL in the query
+    const url = request.nextUrl.searchParams.get('returnUrl');
+    if (url && !url.includes('/api/auth/')) {
+      console.log('Redirecting to:', url);
+      return NextResponse.redirect(new URL(url, request.url));
+    }
     
     return response;
     
