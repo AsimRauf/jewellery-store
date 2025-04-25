@@ -1,11 +1,38 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function Hero() {
+  const [marginTop, setMarginTop] = useState('0');
+
+  useEffect(() => {
+    // Set initial margin based on screen width
+    const updateMargin = () => {
+      if (window.innerWidth < 768) {
+        setMarginTop('2rem'); // For mobile - using a much larger value
+      } else if (window.innerWidth < 1024) {
+        setMarginTop('2rem'); // For tablet
+      } else {
+        setMarginTop('0'); // For desktop
+      }
+    };
+
+    // Set initial value
+    updateMargin();
+
+    // Update on resize
+    window.addEventListener('resize', updateMargin);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', updateMargin);
+  }, []);
+
   return (
-    <section className="bg-[#f0d4a4] w-full overflow-hidden">
-      {/* Main container with controlled height */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-[90vh] relative">
+    <section className="bg-[#f0d4a4] w-full overflow-visible">
+      {/* Main container with modified height for mobile */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[90vh] lg:h-[90vh] relative">
         
         {/* Flex container for layout control */}
         <div className="flex flex-col lg:flex-row h-full w-full">
@@ -56,13 +83,15 @@ export default function Hero() {
             </div>
           </div>
           
-          {/* Right image container - precisely positioned */}
-          <div className="w-full lg:w-1/2 
-                          absolute lg:relative 
-                          bottom-0 left-0 right-0 lg:left-auto lg:right-0 
-                          flex justify-center lg:justify-end 
-                          md:mt-24 lg:mt-0 
-                          lg:items-end">
+          {/* Right image container with dynamic inline styles */}
+          <div 
+            className="w-full lg:w-1/2 
+                      relative lg:relative 
+                      mt-20 lg:mt-0
+                      flex justify-center lg:justify-end 
+                      lg:items-end"
+            style={{ marginTop }}
+          >
             <div className="h-[40vh] sm:h-[50vh] md:h-[55vh] lg:h-[75vh] xl:h-[80vh]
                             flex items-end">
               <Image

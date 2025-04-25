@@ -19,6 +19,35 @@
   font-family: "Monomakh Unicode", serif !important;
 }
 
+/* Hero image spacing controls for different devices */
+.mt-hero-image-mobile {
+  margin-top: 81rem !important; /* Default margin for small phones */
+}
+
+/* Adjust these values as needed for your specific device */
+@media (min-width: 375px) {
+  .mt-hero-image-mobile {
+    margin-top: 81rem !important; /* Default margin for small phones */
+  }
+}
+
+@media (min-width: 414px) {
+  .mt-hero-image-mobile {
+    margin-top: 81rem !important; /* Default margin for small phones */
+  }
+}
+
+.mt-hero-image-tablet {
+  margin-top: 81rem !important; /* Default margin for small phones */
+}
+
+/* You can add more specific breakpoints if needed */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .mt-hero-image-tablet {
+    margin-top: 81rem !important; /* Default margin for small phones */
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
