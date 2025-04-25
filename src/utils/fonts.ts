@@ -1,12 +1,4 @@
-import { Cinzel, Raleway } from 'next/font/google';
-
-// Cinzel for headings
-export const cinzel = Cinzel({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-cinzel',
-  weight: ['400', '500', '700', '900'],
-});
+import { Raleway } from 'next/font/google';
 
 // Raleway for body text
 export const raleway = Raleway({

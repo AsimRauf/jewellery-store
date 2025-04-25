@@ -1,15 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap');
+
 @import "tailwindcss";
+
+/* Add Monomakh Unicode font */
+@font-face {
+  font-family: "Monomakh Unicode";
+  src: url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.eot");
+  src: url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.eot?#iefix")format("embedded-opentype"),
+  url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.woff2")format("woff2"),
+  url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.woff")format("woff"),
+  url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.ttf")format("truetype"),
+  url("https://db.onlinewebfonts.com/t/0928a012dc26f49ac4fbc90fa9f7460a.svg#Monomakh Unicode")format("svg");
+  font-display: swap;
+}
+
+/* Add a direct CSS class for the font as a fallback */
+.font-monomakh {
+  font-family: "Monomakh Unicode", serif !important;
+}
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Remove or comment out any conflicting font variables */
+  /* --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono); */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Remove or comment out any conflicting font variables */
+  /* --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono); */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +45,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Use your defined font family instead */
+  font-family: var(--font-raleway), sans-serif;
 }
 
 /* Custom styles for multiple select */

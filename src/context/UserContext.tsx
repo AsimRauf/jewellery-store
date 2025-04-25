@@ -29,7 +29,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
 
-  // Wrap refreshToken in useCallback to prevent recreation on every render
+  // Make sure the refreshToken function is properly implemented
   const refreshToken = useCallback(async (): Promise<boolean> => {
     if (isRefreshing) return false; // Prevent multiple simultaneous refresh attempts
     
@@ -60,49 +60,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   // Wrap checkAuth in useCallback to prevent recreation on every render
   const checkAuth = useCallback(async () => {
     try {
-      console.log('Checking authentication...');
       const response = await fetch('/api/auth/check', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
       });
       
       const data = await response.json();
       
       if (data.authenticated) {
-        console.log('User authenticated:', data.user.email);
         setUser(data.user);
         setError(null);
-      } else {
-        console.log('Authentication check failed, attempting refresh...');
-        // Try to refresh the token
+      } else if (document.cookie.includes('refreshToken=')) {
         const refreshed = await refreshToken();
-        
         if (refreshed) {
-          // Check auth again after refresh
           const retryResponse = await fetch('/api/auth/check', {
-            credentials: 'include'
+            credentials: 'include',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
           });
-          
           const retryData = await retryResponse.json();
-          
           if (retryData.authenticated) {
-            console.log('Authentication successful after token refresh');
             setUser(retryData.user);
             setError(null);
-          } else {
-            console.log('Authentication failed even after token refresh');
-            setUser(null);
-            setError('Authentication failed');
           }
-        } else {
-          console.log('Token refresh failed, user not authenticated');
-          setUser(null);
-          setError('Authentication failed');
         }
       }
     } catch (error) {
       console.error('Auth check error:', error);
-      setUser(null);
-      setError(error instanceof Error ? error.message : 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -176,34 +163,65 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (response.status === 401 && 
           !(input instanceof Request ? input.url : input.toString()).includes('/api/auth/refresh')) {
         
-        console.log('Received 401, attempting token refresh...');
-        const refreshed = await refreshToken();
+        // Check if we have a refresh token before attempting refresh
+        const hasRefreshToken = document.cookie.includes('refreshToken=');
         
-        if (refreshed) {
-          // Retry the original request
-          console.log('Token refreshed, retrying original request');
-          return originalFetch(input, init);
-        }
-        
-        // If refresh failed and we're authenticated, log out
-        if (user) {
-          console.log('Token refresh failed, logging out');
-          logout();
+        if (hasRefreshToken) {
+          console.log('Received 401, attempting token refresh...');
+          const refreshed = await refreshToken();
+          
+          if (refreshed) {
+            // Retry the original request with fresh cookies
+            console.log('Token refreshed, retrying original request with fresh cookies');
+            
+            // Create a new request with the same parameters but fresh cookies
+            // The browser will automatically include the new cookies
+            const newInit = { ...init };
+            if (newInit.headers) {
+              // Clone headers to avoid modifying the original
+              newInit.headers = new Headers(newInit.headers);
+            }
+            
+            return originalFetch(input, newInit);
+          }
+          
+          // If refresh failed and we're authenticated, log out
+          if (user) {
+            console.log('Token refresh failed, logging out');
+            logout();
+          }
+        } else {
+          console.log('Received 401 but no refresh token exists, skipping refresh');
         }
       }
       
       return response;
-    };
-    
+    };    
     return () => {
       // Restore original fetch when component unmounts
       window.fetch = originalFetch;
     };
   }, [user, logout, refreshToken]);
 
+  // Make sure the useEffect for initial auth check is properly implemented
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    // Only check auth once when the component mounts
+    let isMounted = true;
+    
+    const performAuthCheck = async () => {
+      if (isMounted) {
+        await checkAuth();
+      }
+    };
+    
+    performAuthCheck();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array means this only runs once on mount
   
   return (
     <UserContext.Provider value={{ user, loading, login, logout, checkAuth, error }}>

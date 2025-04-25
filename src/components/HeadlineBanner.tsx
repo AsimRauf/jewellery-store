@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 export default function HeadlineBanner() {
   return (
-    <div className="bg-[#f0d4a4] text-gray-800 text-xs py-1.5 px-4 shadow-sm">
-      <div className="container mx-auto flex justify-center items-center">
+    <div className="bg-[#f0d4a4] text-gray-800 text-xs py-1.5 w-full overflow-hidden">
+      <div className="w-full mx-auto flex justify-center items-center px-4">
         <Link 
           href="/payment-options" 
           className="hover:underline flex items-center mx-4"

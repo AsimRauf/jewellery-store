@@ -308,7 +308,7 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
   const [newMetalOption, setNewMetalOption] = useState<MetalOption>({
     karat: '',
     color: '',
-    price: basePrice,
+    price: 0,
     description: '',
     finish_type: '',
     width_mm: 0,
@@ -450,7 +450,7 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
                   <td className="px-4 py-2">
                     <input
                       type="number"
-                      value={option.price}
+                      value={option.price || 0}
                       onChange={(e) => updateMetalOption(index, 'price', parseFloat(e.target.value) || 0)}
                       min={0}
                       step={0.01}
@@ -472,7 +472,7 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
                   <td className="px-4 py-2">
                     <input
                       type="number"
-                      value={option.width_mm}
+                      value={option.width_mm || 0}
                       onChange={(e) => updateMetalOption(index, 'width_mm', parseFloat(e.target.value) || 0)}
                       min={0}
                       step={0.1}
@@ -696,21 +696,6 @@ export default function AddWeddingRing() {
     setIsSubmitting(true);
 
     try {
-      // First validate all required fields
-      if (!formData.title || !formData.SKU || !formData.subcategory || formData.sizes.length === 0) {
-        toast.error('Please fill in all required fields');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validate metal options
-      if (formData.metalOptions.length === 0) {
-        toast.error('At least one metal option is required');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Upload images if any
       let uploadedImages: Array<{ url: string; publicId: string }> = [];
       if (temporaryImages.length > 0) {
         toast.loading('Uploading images...', { id: 'uploadProgress' });
@@ -720,7 +705,9 @@ export default function AddWeddingRing() {
             const base64 = await convertToBase64(file);
             const response = await fetch('/api/upload/image', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+              },
               credentials: 'include',
               body: JSON.stringify({ 
                 file: base64,
@@ -729,7 +716,8 @@ export default function AddWeddingRing() {
             });
             
             if (!response.ok) {
-              throw new Error('Failed to upload image');
+              const error = await response.json();
+              throw new Error(error.error || 'Failed to upload image');
             }
             
             return response.json();

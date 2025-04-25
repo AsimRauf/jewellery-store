@@ -20,7 +20,9 @@ export default function LoginPage() {
   const isAdminLogin = (pathname ?? '').startsWith('/admin');
 
   useEffect(() => {
+    // Only redirect if user is already logged in
     if (!loading && user) {
+      // User is already authenticated, redirect them
       if (user.role === 'admin') {
         router.replace('/admin/rings/wedding');
       } else {
@@ -56,7 +58,8 @@ export default function LoginPage() {
     );
   }
 
-  if (user) return null;
+  // Show login form even if user exists - the useEffect will handle redirection
+  // This prevents the component from unmounting and potentially causing issues with the session
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -70,73 +73,88 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete={isAdminLogin ? "current-password" : "on"}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-
-          {!isAdminLogin && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-purple-600 hover:text-purple-500">
-                  Forgot password?
-                </Link>
+        {/* Only show the form if user is not logged in */}
+        {!user && (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="rounded-md shadow-sm space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  disabled={isSubmitting}
+                />
               </div>
-              <div className="text-sm">
-                <Link href="/signup" className="font-medium text-purple-600 hover:text-purple-500">
-                  Create account
-                </Link>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete={isAdminLogin ? "current-password" : "on"}
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  disabled={isSubmitting}
+                />
               </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center">
-                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                Signing in...
+            {!isAdminLogin && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <Link href="/forgot-password" className="font-medium text-purple-600 hover:text-purple-500">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="text-sm">
+                  <Link href="/signup" className="font-medium text-purple-600 hover:text-purple-500">
+                    Create account
+                  </Link>
+                </div>
               </div>
-            ) : (
-              isAdminLogin ? 'Sign in to Admin' : 'Sign in'
             )}
-          </button>
-        </form>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center">
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  Signing in...
+                </div>
+              ) : (
+                isAdminLogin ? 'Sign in to Admin' : 'Sign in'
+              )}
+            </button>
+          </form>
+        )}
+        
+        {/* Show a message if user is already logged in */}
+        {user && (
+          <div className="text-center py-4">
+            <p className="text-green-600 font-medium">
+              You are already logged in as {user.firstName} {user.lastName}
+            </p>
+            <p className="text-gray-600 mt-2">
+              Redirecting you to your dashboard...
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

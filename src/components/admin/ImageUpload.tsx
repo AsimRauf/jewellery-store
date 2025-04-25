@@ -21,7 +21,7 @@ export default function MediaUpload({
 }: MediaUploadProps) {
   const [error, setError] = useState('');
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
     if (temporaryImages.length + files.length > maxImages) {
@@ -29,7 +29,7 @@ export default function MediaUpload({
       return;
     }
 
-    // Validate file sizes
+    // Validate file sizes and include credentials
     const invalidFiles = files.filter(file => file.size > 10 * 1024 * 1024);
     if (invalidFiles.length > 0) {
       setError('Some images exceed 10MB limit');

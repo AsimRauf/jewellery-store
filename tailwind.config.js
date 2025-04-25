@@ -10,7 +10,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        cinzel: ['var(--font-cinzel)', 'serif'],
+        monomakh: ['"Monomakh Unicode"', 'serif'],
         raleway: ['var(--font-raleway)', 'sans-serif'],
       },
     },
