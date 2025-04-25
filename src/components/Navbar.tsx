@@ -4,17 +4,42 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useState, useRef, useEffect } from 'react';
+import { RingEnums } from '@/constants/ringEnums';
 
+// Define the mega menu structure
 const CATEGORIES = [
   {
     name: 'Engagement',
     path: '/engagement',
-    subcategories: [] // To be implemented
+    subcategories: [
+      { name: 'All Engagement Rings', path: '/engagement/all' },
+      { name: 'Solitaire', path: '/engagement/solitaire' },
+      { name: 'Halo', path: '/engagement/halo' },
+      { name: 'Three Stone', path: '/engagement/three-stone' },
+      { name: 'Vintage', path: '/engagement/vintage' },
+      { name: 'Side Stone', path: '/engagement/side-stone' },
+    ],
+    styles: RingEnums.STYLES,
+    metals: RingEnums.METAL_COLORS.map(color => ({
+      name: color.charAt(0).toUpperCase() + color.slice(1),
+      path: `/engagement/metal/${color}`
+    }))
   },
   {
     name: 'Wedding',
     path: '/wedding',
-    subcategories: []
+    subcategories: [
+      { name: 'All Wedding Rings', path: '/wedding/all' },
+      { name: 'Women\'s Bands', path: '/wedding/womens' },
+      { name: 'Men\'s Bands', path: '/wedding/mens' },
+      { name: 'Eternity Bands', path: '/wedding/eternity' },
+      { name: 'Anniversary Bands', path: '/wedding/anniversary' },
+    ],
+    styles: RingEnums.STYLES,
+    metals: RingEnums.METAL_COLORS.map(color => ({
+      name: color.charAt(0).toUpperCase() + color.slice(1),
+      path: `/wedding/metal/${color}`
+    }))
   },
   {
     name: 'Diamond',
@@ -43,18 +68,24 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const accountDropdownRef = useRef<HTMLDivElement>(null);
+  const megaMenuRef = useRef<HTMLDivElement>(null);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target as Node)) {
         setIsAccountDropdownOpen(false);
+      }
+      
+      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target as Node)) {
+        setActiveMegaMenu(null);
       }
     }
 
@@ -66,6 +97,14 @@ export default function Navbar() {
 
   const toggleAccountDropdown = () => {
     setIsAccountDropdownOpen(!isAccountDropdownOpen);
+  };
+
+  const toggleMegaMenu = (categoryName: string) => {
+    if (activeMegaMenu === categoryName) {
+      setActiveMegaMenu(null);
+    } else {
+      setActiveMegaMenu(categoryName);
+    }
   };
 
   return (
@@ -197,10 +236,90 @@ export default function Navbar() {
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
             {CATEGORIES.map((category) => (
-              <li key={category.path}>
-                <Link href={category.path} className="py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors">
+              <li key={category.path} className="relative">
+                <button 
+                  className={`py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors ${activeMegaMenu === category.name ? 'text-amber-500' : ''}`}
+                  onClick={() => toggleMegaMenu(category.name)}
+                >
                   {category.name}
-                </Link>
+                  {category.subcategories.length > 0 && (
+                    <svg 
+                      className={`inline-block ml-1 h-4 w-4 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </button>
+                
+                {/* Mega Menu as Popover - Positioned under each category */}
+                {activeMegaMenu === category.name && category.subcategories.length > 0 && (
+                  <div 
+                    ref={megaMenuRef}
+                    className="absolute left-0 mt-1 bg-white shadow-lg z-40 border border-gray-200 rounded-md w-[600px]"
+                    style={{ maxWidth: 'calc(100vw - 2rem)' }}
+                  >
+                    <div className="py-6 px-6">
+                      <div className="grid grid-cols-3 gap-6">
+                        {/* First column - Subcategories */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Categories</h3>
+                          <ul className="space-y-2">
+                            {category.subcategories.map((subcategory) => (
+                              <li key={subcategory.path}>
+                                <Link 
+                                  href={subcategory.path}
+                                  className="text-gray-600 hover:text-amber-500 transition-colors"
+                                  onClick={() => setActiveMegaMenu(null)}
+                                >
+                                  {subcategory.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        {/* Second column - Styles */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Styles</h3>
+                          <ul className="space-y-2">
+                            {category.styles?.map((style) => (
+                              <li key={style}>
+                                <Link 
+                                  href={`${category.path}/style/${style.toLowerCase().replace(/\s+/g, '-')}`}
+                                  className="text-gray-600 hover:text-amber-500 transition-colors"
+                                  onClick={() => setActiveMegaMenu(null)}
+                                >
+                                  {style}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        {/* Third column - Metals */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Metals</h3>
+                          <ul className="space-y-2">
+                            {category.metals?.map((metal) => (
+                              <li key={metal.path}>
+                                <Link 
+                                  href={metal.path}
+                                  className="text-gray-600 hover:text-amber-500 transition-colors"
+                                  onClick={() => setActiveMegaMenu(null)}
+                                >
+                                  {metal.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -287,17 +406,52 @@ export default function Navbar() {
             </form>
           </div>
 
-          {/* Mobile Categories */}
+          {/* Mobile Categories with Expandable Subcategories */}
           <ul className="p-4">
             {CATEGORIES.map((category) => (
               <li key={category.path} className="border-b border-gray-100 last:border-none">
-                <Link 
-                  href={category.path} 
-                  className="block py-4 text-gray-700 hover:text-amber-500 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {category.name}
-                </Link>
+                {category.subcategories.length > 0 ? (
+                  <div className="py-4">
+                    <div 
+                      className="flex justify-between items-center text-gray-700 hover:text-amber-500 transition-colors cursor-pointer"
+                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name)}
+                    >
+                      <span>{category.name}</span>
+                      <svg 
+                        className={`h-5 w-5 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                    
+                    {/* Expandable subcategories for mobile */}
+                    {activeMegaMenu === category.name && (
+                      <div className="mt-2 ml-4 space-y-2">
+                        {category.subcategories.map((subcategory) => (
+                          <Link 
+                            key={subcategory.path}
+                            href={subcategory.path}
+                            className="block py-2 text-gray-600 hover:text-amber-500"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link 
+                    href={category.path} 
+                    className="block py-4 text-gray-700 hover:text-amber-500 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
