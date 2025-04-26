@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
+import { useFloating, offset, shift, flip, autoUpdate, useClick, useDismiss, useInteractions } from '@floating-ui/react';
+
 
 // Add these interfaces at the top of your file
 interface MenuItem {
@@ -107,28 +109,28 @@ const CATEGORIES: Category[] = [
     name: 'Wedding',
     path: '/wedding',
     subcategories: [
-      { 
-        name: 'All Wedding Rings', 
+      {
+        name: 'All Wedding Rings',
         path: '/wedding/all',
         icon: '/icons/wedding/all-rings.svg'
       },
-      { 
-        name: 'Women\'s Bands', 
+      {
+        name: 'Women\'s Bands',
         path: '/wedding/womens',
         icon: '/icons/wedding/womens-bands.svg'
       },
-      { 
-        name: 'Men\'s Bands', 
+      {
+        name: 'Men\'s Bands',
         path: '/wedding/mens',
         icon: '/icons/wedding/mens-bands.svg'
       },
-      { 
-        name: 'Eternity Bands', 
+      {
+        name: 'Eternity Bands',
         path: '/wedding/eternity',
         icon: '/icons/wedding/eternity-bands.svg'
       },
-      { 
-        name: 'Anniversary Bands', 
+      {
+        name: 'Anniversary Bands',
         path: '/wedding/anniversary',
         icon: '/icons/wedding/anniversary-bands.svg'
       },
@@ -146,10 +148,10 @@ const CATEGORIES: Category[] = [
           icon: "/icons/metals/two-tone.webp" // Hardcoded path
         };
       }
-      
+
       // For other metals
       const baseName = color.toLowerCase().replace(' gold', '');
-      
+
       return {
         name: color,
         path: `/wedding/metal-${color.toLowerCase().replace(/\s+/g, '-')}`,
@@ -287,6 +289,28 @@ const CATEGORIES: Category[] = [
 
 
 export default function Navbar() {
+  // Remove the existing activeMegaMenu state and toggleMegaMenu function
+
+  // Add this for each category in the mapping
+  const [isOpen, setIsOpen] = useState(false);
+  const { x, y, refs, strategy, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    middleware: [
+      offset(4),
+      flip(),
+      shift()
+    ],
+    whileElementsMounted: autoUpdate
+  });
+
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss
+  ]);
+
   const { user, logout } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -294,7 +318,7 @@ export default function Navbar() {
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const accountDropdownRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
@@ -306,7 +330,7 @@ export default function Navbar() {
       if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target as Node)) {
         setIsAccountDropdownOpen(false);
       }
-      
+
       if (megaMenuRef.current && !megaMenuRef.current.contains(event.target as Node)) {
         setActiveMegaMenu(null);
       }
@@ -343,7 +367,7 @@ export default function Navbar() {
       <nav className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full">
         <div className="w-full mx-auto flex items-center justify-between">
           {/* Hamburger Menu - Mobile Only */}
-          <button 
+          <button
             className="lg:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -356,17 +380,17 @@ export default function Navbar() {
           <div className="flex-shrink-0">
             <Link href="/">
               <div className="cursor-pointer">
-                <Image 
-                  src="/main_logo.png" 
-                  alt="Jewelry Store" 
-                  width={120} 
+                <Image
+                  src="/main_logo.png"
+                  alt="Jewelry Store"
+                  width={120}
                   height={30}
                   className="object-contain"
                 />
               </div>
             </Link>
           </div>
-          
+
           {/* Desktop Search */}
           <div className="hidden lg:block flex-grow max-w-md mx-8">
             <form onSubmit={handleSearch} className="relative">
@@ -391,14 +415,14 @@ export default function Navbar() {
             <Link href="/wishlist" className="hidden md:block">
               <div className="cursor-pointer relative p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
             </Link>
-            
+
             {/* User profile - Desktop Only */}
             <div className="relative hidden md:block" ref={accountDropdownRef}>
-              <div 
+              <div
                 className="cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors"
                 onClick={toggleAccountDropdown}
               >
@@ -406,7 +430,7 @@ export default function Navbar() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7 7z" />
                 </svg>
               </div>
-              
+
               {/* Dropdown menu */}
               {isAccountDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
@@ -422,7 +446,7 @@ export default function Navbar() {
                         <div className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-raleway">Orders</div>
                       </Link>
                       <hr className="my-1" />
-                      <button 
+                      <button
                         onClick={() => {
                           logout();
                           setIsAccountDropdownOpen(false);
@@ -445,7 +469,7 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-            
+
             {/* Cart - Always visible */}
             <Link href="/cart">
               <div className="cursor-pointer relative p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -466,162 +490,8 @@ export default function Navbar() {
       <div className="hidden lg:block border-t border-gray-200 w-full relative">
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
-            {CATEGORIES.map((category, index) => (
-              <li key={category.path} className="relative">
-                <button 
-
-                  ref={(el) => {
-                    if (el) menuButtonRefs.current[index] = el;
-                  }}
-                  className={`py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors ${activeMegaMenu === category.name ? 'text-amber-500' : ''}`}
-                  onClick={() => toggleMegaMenu(category.name, index)}
-                >
-                  {category.name}
-                  <svg 
-                    className={`inline-block ml-1 h-4 w-4 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                {/* Mega Menu as Popover - Positioned under each category */}
-                {activeMegaMenu === category.name && (
-                  <div 
-                    ref={megaMenuRef}
-                    className="absolute left-0 mt-1 bg-white shadow-lg z-40 border-t border-gray-200 w-screen"
-                    style={{ 
-                      position: 'fixed',
-                      top: 'auto',
-                      left: 0,
-                      right: 0,
-                      width: '100%'
-                    }}
-                  >
-                    <div className="py-6 px-6 max-w-7xl mx-auto">
-                      <div className="flex">
-                        {/* Left part - Styles and Metals */}
-                        <div className="left_part flex-grow">
-                          <div className="left_part_inner flex gap-8">
-                            {/* Shop by Style */}
-                            {category.styles && (
-                              <div className="menu_column w-64">
-                                <h3 className="text-lg font-semibold mb-4">SHOP BY STYLE</h3>
-                                <ul className="space-y-3">
-                                  {category.styles.map((style) => (
-                                    <Link 
-                                      key={style.path}
-                                      href={style.path}
-                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                      onClick={() => setActiveMegaMenu(null)}
-                                    >
-                                      {style.icon && (
-                                        <span className="icon mr-2">
-                                          <Image 
-                                            src={style.icon} 
-                                            alt="" 
-                                            width={25} 
-                                            height={16}
-                                            className="object-contain"
-                                          />
-                                        </span>
-                                      )}
-                                      <span>{style.name}</span>
-                                    </Link>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {/* Shop by Metal */}
-                            {category.metals && (
-                              <div className="menu_column w-64">
-                                <h3 className="text-lg font-semibold mb-4">SHOP BY METAL</h3>
-                                <ul className="space-y-3">
-                                  {category.metals.map((metal) => (
-                                    <Link 
-                                      key={metal.path}
-                                      href={metal.path}
-                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                      onClick={() => setActiveMegaMenu(null)}
-                                    >
-                                      {metal.icon && (
-                                        <span className="icon mr-2">
-                                          <Image 
-                                            src={metal.icon} 
-                                            alt="" 
-                                            width={18} 
-                                            height={19}
-                                            className="object-contain"
-                                          />
-                                        </span>
-                                      )}
-                                      <span>{metal.name}</span>
-                                    </Link>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Right part - Featured and Banner */}
-                        {(category.featured || category.bannerImage) && (
-                          <div className="right_part w-64 ml-6 border-l border-gray-200 pl-6">
-                            {/* Featured section */}
-                            {category.featured && (
-                              <div className="menu_column mb-6">
-                                <h3 className="text-lg font-semibold mb-4">FEATURED</h3>
-                                <ul className="space-y-3">
-                                  {category.featured.map((item) => (
-                                    <Link 
-                                      key={item.path}
-                                      href={item.path}
-                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                      onClick={() => setActiveMegaMenu(null)}
-                                    >
-                                      {item.icon && (
-                                        <span className="icon mr-2">
-                                          <Image 
-                                            src={item.icon} 
-                                            alt="" 
-                                            width={25} 
-                                            height={16}
-                                            className="object-contain"
-                                          />
-                                        </span>
-                                      )}
-                                      <span>{item.name}</span>
-                                    </Link>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-
-                            {/* Banner image */}
-                            {category.bannerImage && (
-                              <Link 
-                                href={category.bannerLink || category.path}
-                                onClick={() => setActiveMegaMenu(null)}
-                              >
-                                <Image 
-                                  src={category.bannerImage} 
-                                  alt="" 
-                                  width={332} 
-                                  height={481}
-                                  className="rounded-md object-cover"
-                                />
-                              </Link>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </li>
+            {CATEGORIES.map((category) => (
+              <MenuCategory key={category.path} category={category} />
             ))}
           </ul>
         </div>
@@ -652,7 +522,7 @@ export default function Navbar() {
                   <Link href="/wishlist" className="text-gray-700 hover:text-amber-500" onClick={() => setIsMobileMenuOpen(false)}>
                     Wishlist
                   </Link>
-                  <button 
+                  <button
                     onClick={() => {
                       logout();
                       setIsMobileMenuOpen(false);
@@ -665,15 +535,15 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col space-y-3">
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="bg-black text-white py-2 px-4 rounded-full text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign in
                 </Link>
-                <Link 
-                  href="/signup" 
+                <Link
+                  href="/signup"
                   className="border border-black text-black py-2 px-4 rounded-full text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -713,26 +583,25 @@ export default function Navbar() {
               <li key={category.path} className="border-b border-gray-100 last:border-none">
                 {category.subcategories.length > 0 ? (
                   <div className="py-4">
-                    <div 
+                    <div
                       className="flex justify-between items-center text-gray-700 hover:text-amber-500 transition-colors cursor-pointer"
-                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name)}
-                    >
+                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name, 0)}                    >
                       <span>{category.name}</span>
-                      <svg 
-                        className={`h-5 w-5 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className={`h-5 w-5 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </div>
-                    
+
                     {/* Expandable subcategories for mobile */}
                     {activeMegaMenu === category.name && (
                       <div className="mt-2 ml-4 space-y-2">
                         {category.subcategories.map((subcategory) => (
-                          <Link 
+                          <Link
                             key={subcategory.path}
                             href={subcategory.path}
                             className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
@@ -741,10 +610,10 @@ export default function Navbar() {
                             {subcategory.name}
                             {subcategory.icon && (
                               <span className="icon ml-2">
-                                <Image 
-                                  src={subcategory.icon} 
-                                  alt="" 
-                                  width={20} 
+                                <Image
+                                  src={subcategory.icon}
+                                  alt=""
+                                  width={20}
                                   height={14}
                                   className="object-contain"
                                 />
@@ -752,14 +621,14 @@ export default function Navbar() {
                             )}
                           </Link>
                         ))}
-                        
+
                         {/* Show styles in mobile menu if available */}
                         {category.styles && category.styles.length > 0 && (
                           <>
                             <div className="py-1 my-2 border-t border-gray-100"></div>
                             <div className="font-medium text-sm text-gray-500">SHOP BY STYLE</div>
                             {category.styles.map((style) => (
-                              <Link 
+                              <Link
                                 key={style.path}
                                 href={style.path}
                                 className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
@@ -768,10 +637,10 @@ export default function Navbar() {
                                 {style.name}
                                 {style.icon && (
                                   <span className="icon ml-2">
-                                    <Image 
-                                      src={style.icon} 
-                                      alt="" 
-                                      width={20} 
+                                    <Image
+                                      src={style.icon}
+                                      alt=""
+                                      width={20}
                                       height={14}
                                       className="object-contain"
                                     />
@@ -781,14 +650,14 @@ export default function Navbar() {
                             ))}
                           </>
                         )}
-                        
+
                         {/* Show metals in mobile menu if available */}
                         {category.metals && category.metals.length > 0 && (
                           <>
                             <div className="py-1 my-2 border-t border-gray-100"></div>
                             <div className="font-medium text-sm text-gray-500">SHOP BY METAL</div>
                             {category.metals.map((metal) => (
-                              <Link 
+                              <Link
                                 key={metal.path}
                                 href={metal.path}
                                 className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
@@ -797,10 +666,10 @@ export default function Navbar() {
                                 {metal.name}
                                 {metal.icon && (
                                   <span className="icon ml-2">
-                                    <Image 
-                                      src={metal.icon} 
-                                      alt="" 
-                                      width={16} 
+                                    <Image
+                                      src={metal.icon}
+                                      alt=""
+                                      width={16}
                                       height={16}
                                       className="object-contain"
                                     />
@@ -810,14 +679,14 @@ export default function Navbar() {
                             ))}
                           </>
                         )}
-                        
+
                         {/* Show featured items in mobile menu if available */}
                         {category.featured && category.featured.length > 0 && (
                           <>
                             <div className="py-1 my-2 border-t border-gray-100"></div>
                             <div className="font-medium text-sm text-gray-500">FEATURED</div>
                             {category.featured.map((item) => (
-                              <Link 
+                              <Link
                                 key={item.path}
                                 href={item.path}
                                 className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
@@ -826,10 +695,10 @@ export default function Navbar() {
                                 {item.name}
                                 {item.icon && (
                                   <span className="icon ml-2">
-                                    <Image 
-                                      src={item.icon} 
-                                      alt="" 
-                                      width={20} 
+                                    <Image
+                                      src={item.icon}
+                                      alt=""
+                                      width={20}
                                       height={14}
                                       className="object-contain"
                                     />
@@ -843,8 +712,8 @@ export default function Navbar() {
                     )}
                   </div>
                 ) : (
-                  <Link 
-                    href={category.path} 
+                  <Link
+                    href={category.path}
                     className="block py-4 text-gray-700 hover:text-amber-500 transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -859,7 +728,7 @@ export default function Navbar() {
 
       {/* Overlay for mobile menu */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-[55] lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -868,3 +737,152 @@ export default function Navbar() {
   );
 }
 
+const MenuCategory = ({ category }: { category: Category }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <li className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className={`py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors ${isOpen ? 'text-amber-500' : ''}`}
+      >
+        {category.name}
+        <svg 
+          className={`inline-block ml-1 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute left-0 mt-1 bg-white shadow-lg z-40 border-t border-gray-200 w-screen"
+          style={{ 
+            position: 'fixed',
+            top: 'auto',
+            left: 0,
+            right: 0,
+            width: '100%'
+          }}
+        >
+          <div className="py-6 px-6 max-w-7xl mx-auto">
+            <div className="flex">
+              <div className="left_part flex-grow">
+                <div className="left_part_inner flex gap-8">
+                  {category.styles && (
+                    <div className="menu_column w-64">
+                      <h3 className="text-lg font-semibold mb-4">SHOP BY STYLE</h3>
+                      <ul className="space-y-3">
+                        {category.styles.map((style) => (
+                          <Link 
+                            key={style.path}
+                            href={style.path}
+                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {style.icon && (
+                              <span className="icon mr-2">
+                                <Image 
+                                  src={style.icon} 
+                                  alt="" 
+                                  width={25} 
+                                  height={16}
+                                  className="object-contain"
+                                />
+                              </span>
+                            )}
+                            <span>{style.name}</span>
+                          </Link>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {category.metals && (
+                    <div className="menu_column w-64">
+                      <h3 className="text-lg font-semibold mb-4">SHOP BY METAL</h3>
+                      <ul className="space-y-3">
+                        {category.metals.map((metal) => (
+                          <Link 
+                            key={metal.path}
+                            href={metal.path}
+                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {metal.icon && (
+                              <span className="icon mr-2">
+                                <Image 
+                                  src={metal.icon} 
+                                  alt="" 
+                                  width={18} 
+                                  height={19}
+                                  className="object-contain"
+                                />
+                              </span>
+                            )}
+                            <span>{metal.name}</span>
+                          </Link>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {(category.featured || category.bannerImage) && (
+                <div className="right_part w-64 ml-6 border-l border-gray-200 pl-6">
+                  {category.featured && (
+                    <div className="menu_column mb-6">
+                      <h3 className="text-lg font-semibold mb-4">FEATURED</h3>
+                      <ul className="space-y-3">
+                        {category.featured.map((item) => (
+                          <Link 
+                            key={item.path}
+                            href={item.path}
+                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {item.icon && (
+                              <span className="icon mr-2">
+                                <Image 
+                                  src={item.icon} 
+                                  alt="" 
+                                  width={25} 
+                                  height={16}
+                                  className="object-contain"
+                                />
+                              </span>
+                            )}
+                            <span>{item.name}</span>
+                          </Link>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {category.bannerImage && (
+                    <Link 
+                      href={category.bannerLink || category.path}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Image 
+                        src={category.bannerImage} 
+                        alt="" 
+                        width={332} 
+                        height={481}
+                        className="rounded-md object-cover"
+                      />
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+};
