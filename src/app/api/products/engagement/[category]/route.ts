@@ -2,17 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import EngagementRing from '@/models/EngagementRing';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { category: string } }
-) {
+interface EngagementQuery {
+  isActive: boolean;
+  style?: string | { $in: string[] };
+  type?: string | { $in: string[] };
+  'metalOptions.color'?: string | { $in: string[] };
+}
+
+// Completely rewritten handler with simplified parameter structure
+export function GET(request: NextRequest) {
+  return handleRequest(request);
+}
+
+async function handleRequest(request: NextRequest) {
   try {
     await connectDB();
-    const { category } = params;
+    
+    // Extract category from URL path
+    const pathParts = request.nextUrl.pathname.split('/');
+    const category = pathParts[pathParts.length - 1];
+    
     const searchParams = request.nextUrl.searchParams;
     
-    // Base query
-    let query: any = { isActive: true };
+    // Base query with proper typing
+    const query: EngagementQuery = { isActive: true };
 
     // Handle initial category filter
     if (category !== 'all') {

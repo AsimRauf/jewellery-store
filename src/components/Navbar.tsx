@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
-import { useFloating, offset, shift, flip, autoUpdate, useClick, useDismiss, useInteractions } from '@floating-ui/react';
 
 
 // Add these interfaces at the top of your file
@@ -292,25 +291,9 @@ export default function Navbar() {
   // Remove the existing activeMegaMenu state and toggleMegaMenu function
 
   // Add this for each category in the mapping
-  const [isOpen, setIsOpen] = useState(false);
-  const { x, y, refs, strategy, context } = useFloating({
-    open: isOpen,
-    onOpenChange: setIsOpen,
-    middleware: [
-      offset(4),
-      flip(),
-      shift()
-    ],
-    whileElementsMounted: autoUpdate
-  });
+  
 
-  const click = useClick(context);
-  const dismiss = useDismiss(context);
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss
-  ]);
-
+ 
   const { user, logout } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

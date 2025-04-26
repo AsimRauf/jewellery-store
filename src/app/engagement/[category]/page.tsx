@@ -423,6 +423,7 @@ export default function EngagementCategoryPage() {
           stoneTypes: RingEnums.MAIN_STONE_TYPES
         });
       } catch (err) {
+        console.error('Error fetching products:', err);
         setError('Error loading products');
       } finally {
         setLoading(false);
@@ -1059,7 +1060,7 @@ export default function EngagementCategoryPage() {
                   <p className="text-gray-500 text-sm">Starting at 14K Gold</p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1">
-                  {product.metalOptions.slice(0, 3).map((metal, index) => (
+                  {product.metalOptions.slice(0, 3).map((metal) => (
                     <span 
                       key={`${metal.karat}-${metal.color}`}
                       className="text-xs px-2 py-1 bg-gray-50 rounded-full text-gray-600"
