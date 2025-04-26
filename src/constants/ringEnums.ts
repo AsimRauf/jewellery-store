@@ -8,8 +8,12 @@ export const RingEnums = {
   ],
   ETERNITY_SUBCATEGORIES: ["Full Eternity", "Half Eternity"],  
   STYLES: [
-    "Vintage", "Celtic", "Two Tone", "Nature", "Classic",
-    "Halo", "Three Stone", "Solitaire", "Gold", "Inspired"
+    "Vintage", 
+    "Nature Inspired", 
+    "Floral", 
+    "Classic", 
+    "Celtic", 
+    "Branch"
   ],
   TYPES: [
     "Bridal Set", "Halo", "Side Stone", "Solitaire",

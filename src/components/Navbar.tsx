@@ -16,7 +16,7 @@ interface MenuItem {
 interface Category {
   name: string;
   path: string;
-  subcategories: MenuItem[];
+  subcategories: MenuItem[]; // Remove optional marker
   styles?: MenuItem[];
   metals?: MenuItem[];
   featured?: MenuItem[];
@@ -63,58 +63,23 @@ const CATEGORIES: Category[] = [
   {
     name: 'Engagement',
     path: '/engagement',
-    subcategories: [
-      { 
-        name: 'All Engagement Rings', 
-        path: '/engagement/all',
-        icon: '/icons/engagement/all-rings.svg'
-      },
-      { 
-        name: 'Solitaire', 
-        path: '/engagement/solitaire',
-        icon: '/icons/engagement/solitaire.svg'
-      },
-      { 
-        name: 'Halo', 
-        path: '/engagement/halo',
-        icon: '/icons/engagement/halo.svg'
-      },
-      { 
-        name: 'Three Stone', 
-        path: '/engagement/three-stone',
-        icon: '/icons/engagement/three-stone.svg'
-      },
-      { 
-        name: 'Vintage', 
-        path: '/engagement/vintage',
-        icon: '/icons/styles/vintage.svg'
-      },
-      { 
-        name: 'Side Stone', 
-        path: '/engagement/side-stone',
-        icon: '/icons/engagement/side-stone.svg'
-      },
-    ],
+    subcategories: [], // Empty array but defined
     styles: RING_STYLES.map(style => ({
       ...style,
-      path: `/engagement${style.path}`
+      path: `/engagement/style-${style.name.toLowerCase().replace(/\s+/g, '-')}`
     })),
     metals: RingEnums.METAL_COLORS.map(color => {
-      // Special case for Two Tone Gold
       if (color === "Two Tone Gold") {
         return {
           name: "Two Tone Gold",
-          path: `/engagement/metal/two-tone-gold`,
-          icon: "/icons/metals/two-tone.webp" // Hardcoded path
+          path: `/engagement/metal-two-tone-gold`,
+          icon: "/icons/metals/two-tone.webp"
         };
       }
-      
-      // For other metals
       const baseName = color.toLowerCase().replace(' gold', '');
-      
       return {
         name: color,
-        path: `/engagement/metal/${color.toLowerCase().replace(/\s+/g, '-')}`,
+        path: `/engagement/metal-${baseName}`,
         icon: `/icons/metals/${baseName}.webp`
       };
     }),
@@ -187,7 +152,7 @@ const CATEGORIES: Category[] = [
       
       return {
         name: color,
-        path: `/wedding/metal/${color.toLowerCase().replace(/\s+/g, '-')}`,
+        path: `/wedding/metal-${color.toLowerCase().replace(/\s+/g, '-')}`,
         icon: `/icons/metals/${baseName}.webp`
       };
     }),
@@ -357,11 +322,17 @@ export default function Navbar() {
     setIsAccountDropdownOpen(!isAccountDropdownOpen);
   };
 
-  const toggleMegaMenu = (categoryName: string) => {
+  // Add new refs for menu buttons
+  const menuButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Enhanced toggle function with button focus management
+  const toggleMegaMenu = (categoryName: string, index: number) => {
     if (activeMegaMenu === categoryName) {
       setActiveMegaMenu(null);
+      menuButtonRefs.current[index]?.blur();
     } else {
       setActiveMegaMenu(categoryName);
+      menuButtonRefs.current[index]?.focus();
     }
   };
 
@@ -495,27 +466,29 @@ export default function Navbar() {
       <div className="hidden lg:block border-t border-gray-200 w-full relative">
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
-            {CATEGORIES.map((category) => (
+            {CATEGORIES.map((category, index) => (
               <li key={category.path} className="relative">
                 <button 
+
+                  ref={(el) => {
+                    if (el) menuButtonRefs.current[index] = el;
+                  }}
                   className={`py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors ${activeMegaMenu === category.name ? 'text-amber-500' : ''}`}
-                  onClick={() => toggleMegaMenu(category.name)}
+                  onClick={() => toggleMegaMenu(category.name, index)}
                 >
                   {category.name}
-                  {category.subcategories.length > 0 && (
-                    <svg 
-                      className={`inline-block ml-1 h-4 w-4 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
+                  <svg 
+                    className={`inline-block ml-1 h-4 w-4 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
                 
                 {/* Mega Menu as Popover - Positioned under each category */}
-                {activeMegaMenu === category.name && category.subcategories.length > 0 && (
+                {activeMegaMenu === category.name && (
                   <div 
                     ref={megaMenuRef}
                     className="absolute left-0 mt-1 bg-white shadow-lg z-40 border-t border-gray-200 w-screen"
@@ -529,97 +502,64 @@ export default function Navbar() {
                   >
                     <div className="py-6 px-6 max-w-7xl mx-auto">
                       <div className="flex">
-                        {/* Left part - Categories and Styles */}
+                        {/* Left part - Styles and Metals */}
                         <div className="left_part flex-grow">
                           <div className="left_part_inner flex gap-8">
-                            {/* First column - Subcategories */}
-                            {category.subcategories.length > 0 && (
-                              <div className="menu_column w-64">
-                                <h3 className="text-lg font-semibold mb-4 text-gray-800">Categories</h3>
-                                <ul className="space-y-3">
-                                  {category.subcategories.map((subcategory) => (
-                                    <li key={subcategory.path}>
-                                      <Link 
-                                        href={subcategory.path}
-                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                        onClick={() => setActiveMegaMenu(null)}
-                                      >
-                                        {subcategory.icon && (
-                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
-                                            <Image 
-                                              src={subcategory.icon} 
-                                              alt="" 
-                                              width={25} 
-                                              height={16}
-                                              className="object-contain"
-                                            />
-                                          </span>
-                                        )}
-                                        <span>{subcategory.name}</span>
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {/* Second column - Styles */}
+                            {/* Shop by Style */}
                             {category.styles && (
                               <div className="menu_column w-64">
-                                <h3 className="text-lg font-semibold mb-4 text-gray-800">SHOP BY STYLE</h3>
+                                <h3 className="text-lg font-semibold mb-4">SHOP BY STYLE</h3>
                                 <ul className="space-y-3">
                                   {category.styles.map((style) => (
-                                    <li key={style.path}>
-                                      <Link 
-                                        href={style.path}
-                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                        onClick={() => setActiveMegaMenu(null)}
-                                      >
-                                        {style.icon && (
-                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
-                                            <Image 
-                                              src={style.icon} 
-                                              alt="" 
-                                              width={25} 
-                                              height={16}
-                                              className="object-contain"
-                                            />
-                                          </span>
-                                        )}
-                                        <span>{style.name}</span>
-                                      </Link>
-                                    </li>
+                                    <Link 
+                                      key={style.path}
+                                      href={style.path}
+                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                      onClick={() => setActiveMegaMenu(null)}
+                                    >
+                                      {style.icon && (
+                                        <span className="icon mr-2">
+                                          <Image 
+                                            src={style.icon} 
+                                            alt="" 
+                                            width={25} 
+                                            height={16}
+                                            className="object-contain"
+                                          />
+                                        </span>
+                                      )}
+                                      <span>{style.name}</span>
+                                    </Link>
                                   ))}
                                 </ul>
                               </div>
                             )}
                             
-                            {/* Third column - Metals */}
+                            {/* Shop by Metal */}
                             {category.metals && (
                               <div className="menu_column w-64">
-                                <h3 className="text-lg font-semibold mb-4 text-gray-800">SHOP BY METAL</h3>
+                                <h3 className="text-lg font-semibold mb-4">SHOP BY METAL</h3>
                                 <ul className="space-y-3">
                                   {category.metals.map((metal) => (
-                                    <li key={metal.path}>
-                                      <Link 
-                                        href={metal.path}
-                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                        onClick={() => setActiveMegaMenu(null)}
-                                      >
-                                        {metal.icon && (
-                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
-                                            <Image 
-                                              src={metal.icon} 
-                                              alt="" 
-                                              width={18} 
-                                              height={19}
-                                              className="object-contain"
-                                            />
-                                          </span>
-                                        )}
-                                        <span>{metal.name}</span>
-                                      </Link>
-                                    </li>
+                                    <Link 
+                                      key={metal.path}
+                                      href={metal.path}
+                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                      onClick={() => setActiveMegaMenu(null)}
+                                    >
+                                      {metal.icon && (
+                                        <span className="icon mr-2">
+                                          <Image 
+                                            src={metal.icon} 
+                                            alt="" 
+                                            width={18} 
+                                            height={19}
+                                            className="object-contain"
+                                          />
+                                        </span>
+                                      )}
+                                      <span>{metal.name}</span>
+                                    </Link>
                                   ))}
                                 </ul>
                               </div>
@@ -630,58 +570,51 @@ export default function Navbar() {
                         {/* Right part - Featured and Banner */}
                         {(category.featured || category.bannerImage) && (
                           <div className="right_part w-64 ml-6 border-l border-gray-200 pl-6">
-                            <div className="right_part_inner">
-                              {/* Featured items */}
-                              {category.featured && (
-                                <div className="right_part_menu mb-6">
-                                  <div className="menu_column">
-                                    <h3 className="text-lg font-semibold mb-4 text-gray-800">FEATURED</h3>
-                                    <ul className="space-y-3">
-                                      {category.featured.map((item) => (
-                                        <li key={item.path}>
-                                          <Link 
-                                            href={item.path}
-                                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                                            onClick={() => setActiveMegaMenu(null)}
-                                          >
-                                            {item.icon && (
-                                              <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
-                                                <Image 
-                                                  src={item.icon} 
-                                                  alt="" 
-                                                  width={25} 
-                                                  height={16}
-                                                  className="object-contain"
-                                                />
-                                              </span>
-                                            )}
-                                            <span>{item.name}</span>
-                                          </Link>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Banner image */}
-                              {category.bannerImage && (
-                                <div className="mini_banner">
-                                  <Link 
-                                    href={category.bannerLink || category.path}
-                                    onClick={() => setActiveMegaMenu(null)}
-                                  >
-                                    <Image 
-                                      src={category.bannerImage} 
-                                      alt="" 
-                                      width={332} 
-                                      height={481}
-                                      className="rounded-md object-cover"
-                                    />
-                                  </Link>
-                                </div>
-                              )}
-                            </div>
+                            {/* Featured section */}
+                            {category.featured && (
+                              <div className="menu_column mb-6">
+                                <h3 className="text-lg font-semibold mb-4">FEATURED</h3>
+                                <ul className="space-y-3">
+                                  {category.featured.map((item) => (
+                                    <Link 
+                                      key={item.path}
+                                      href={item.path}
+                                      className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                      onClick={() => setActiveMegaMenu(null)}
+                                    >
+                                      {item.icon && (
+                                        <span className="icon mr-2">
+                                          <Image 
+                                            src={item.icon} 
+                                            alt="" 
+                                            width={25} 
+                                            height={16}
+                                            className="object-contain"
+                                          />
+                                        </span>
+                                      )}
+                                      <span>{item.name}</span>
+                                    </Link>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Banner image */}
+                            {category.bannerImage && (
+                              <Link 
+                                href={category.bannerLink || category.path}
+                                onClick={() => setActiveMegaMenu(null)}
+                              >
+                                <Image 
+                                  src={category.bannerImage} 
+                                  alt="" 
+                                  width={332} 
+                                  height={481}
+                                  className="rounded-md object-cover"
+                                />
+                              </Link>
+                            )}
                           </div>
                         )}
                       </div>
