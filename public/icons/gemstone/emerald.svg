@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="11" height="16" viewBox="0 0 11 16" fill="none">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M2.63.033A.154.154 0 0 1 2.725 0h5.55c.034 0 .068.012.095.033l2.574 2.019c.035.028.056.07.056.113v11.67c0 .044-.02.085-.056.113l-2.574 2.02a.154.154 0 0 1-.095.032h-5.55a.154.154 0 0 1-.095-.033L.056 13.948A.144.144 0 0 1 0 13.835V2.165c0-.044.02-.085.056-.113L2.63.032zm-.056.42L.576 2.018h1.998V.452zm0 1.858H.302V13.69h2.272V2.31zm0 11.67H.576l1.998 1.567V13.98zm.302 1.727v-1.727h5.248v1.727H2.876zm5.55-.16V13.98h1.998l-1.998 1.567zm2.272-1.86H8.426V2.312h2.272V13.69zM10.424 2.02H8.426V.452l1.998 1.567zM8.124.292H2.876v1.727h5.248V.292zm-.196 2.02H3.072L4.246 3.53h2.507l1.175-1.219zm-1.26 1.51H4.332v8.356h2.336V3.822zm.085 8.648H4.246l-1.174 1.219h4.856l-1.175-1.22zm1.37.994L6.97 12.267V3.733l1.154-1.197v10.928zm-5.247 0l1.154-1.197V3.733L2.876 2.536v10.928z" fill="url(#a)"></path>
+  <defs>
+    <radialGradient id="a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(55.492) scale(19.4165 620.684)">
+      <stop offset=".039" stop-color="#006D32"></stop>
+      <stop offset=".533" stop-color="#2DA564"></stop>
+      <stop offset="1" stop-color="#006D32"></stop>
+    </radialGradient>
+  </defs>
+</svg>

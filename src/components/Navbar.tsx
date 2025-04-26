@@ -6,62 +6,320 @@ import { useUser } from '@/context/UserContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
 
-// Define the mega menu structure
-const CATEGORIES = [
+// Add these interfaces at the top of your file
+interface MenuItem {
+  name: string;
+  path: string;
+  icon?: string;
+}
+
+interface Category {
+  name: string;
+  path: string;
+  subcategories: MenuItem[];
+  styles?: MenuItem[];
+  metals?: MenuItem[];
+  featured?: MenuItem[];
+  bannerImage?: string;
+  bannerLink?: string;
+}
+
+// Define the styles array once at the top level
+const RING_STYLES = [
+  {
+    name: 'Vintage',
+    path: '/style/vintage',
+    icon: '/icons/styles/vintage.svg'
+  },
+  {
+    name: 'Nature Inspired',
+    path: '/style/nature-inspired',
+    icon: '/icons/styles/nature-inspired.svg'
+  },
+  {
+    name: 'Floral',
+    path: '/style/floral',
+    icon: '/icons/styles/floral.svg'
+  },
+  {
+    name: 'Classic',
+    path: '/style/classic',
+    icon: '/icons/styles/classic.svg'
+  },
+  {
+    name: 'Celtic',
+    path: '/style/celtic',
+    icon: '/icons/styles/celtic.svg'
+  },
+  {
+    name: 'Branch',
+    path: '/style/branch',
+    icon: '/icons/styles/branch.svg'
+  }
+];
+
+// Define the mega menu structure with icons
+const CATEGORIES: Category[] = [
   {
     name: 'Engagement',
     path: '/engagement',
     subcategories: [
-      { name: 'All Engagement Rings', path: '/engagement/all' },
-      { name: 'Solitaire', path: '/engagement/solitaire' },
-      { name: 'Halo', path: '/engagement/halo' },
-      { name: 'Three Stone', path: '/engagement/three-stone' },
-      { name: 'Vintage', path: '/engagement/vintage' },
-      { name: 'Side Stone', path: '/engagement/side-stone' },
+      { 
+        name: 'All Engagement Rings', 
+        path: '/engagement/all',
+        icon: '/icons/engagement/all-rings.svg'
+      },
+      { 
+        name: 'Solitaire', 
+        path: '/engagement/solitaire',
+        icon: '/icons/engagement/solitaire.svg'
+      },
+      { 
+        name: 'Halo', 
+        path: '/engagement/halo',
+        icon: '/icons/engagement/halo.svg'
+      },
+      { 
+        name: 'Three Stone', 
+        path: '/engagement/three-stone',
+        icon: '/icons/engagement/three-stone.svg'
+      },
+      { 
+        name: 'Vintage', 
+        path: '/engagement/vintage',
+        icon: '/icons/styles/vintage.svg'
+      },
+      { 
+        name: 'Side Stone', 
+        path: '/engagement/side-stone',
+        icon: '/icons/engagement/side-stone.svg'
+      },
     ],
-    styles: RingEnums.STYLES,
-    metals: RingEnums.METAL_COLORS.map(color => ({
-      name: color.charAt(0).toUpperCase() + color.slice(1),
-      path: `/engagement/metal/${color}`
-    }))
+    styles: RING_STYLES.map(style => ({
+      ...style,
+      path: `/engagement${style.path}`
+    })),
+    metals: RingEnums.METAL_COLORS.map(color => {
+      // Special case for Two Tone Gold
+      if (color === "Two Tone Gold") {
+        return {
+          name: "Two Tone Gold",
+          path: `/engagement/metal/two-tone-gold`,
+          icon: "/icons/metals/two-tone.webp" // Hardcoded path
+        };
+      }
+      
+      // For other metals
+      const baseName = color.toLowerCase().replace(' gold', '');
+      
+      return {
+        name: color,
+        path: `/engagement/metal/${color.toLowerCase().replace(/\s+/g, '-')}`,
+        icon: `/icons/metals/${baseName}.webp`
+      };
+    }),
+    featured: [
+      {
+        name: 'Under $2500',
+        path: '/engagement/price/under-2500',
+        icon: '/icons/featured/under-2500.svg'
+      },
+      {
+        name: 'Ready To Ship',
+        path: '/engagement/ready-to-ship',
+        icon: '/icons/featured/ready-to-ship.svg'
+      },
+      {
+        name: 'Create Your Own',
+        path: '/customize',
+        icon: '/icons/featured/custom.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/customize'
   },
   {
     name: 'Wedding',
     path: '/wedding',
     subcategories: [
-      { name: 'All Wedding Rings', path: '/wedding/all' },
-      { name: 'Women\'s Bands', path: '/wedding/womens' },
-      { name: 'Men\'s Bands', path: '/wedding/mens' },
-      { name: 'Eternity Bands', path: '/wedding/eternity' },
-      { name: 'Anniversary Bands', path: '/wedding/anniversary' },
+      { 
+        name: 'All Wedding Rings', 
+        path: '/wedding/all',
+        icon: '/icons/wedding/all-rings.svg'
+      },
+      { 
+        name: 'Women\'s Bands', 
+        path: '/wedding/womens',
+        icon: '/icons/wedding/womens-bands.svg'
+      },
+      { 
+        name: 'Men\'s Bands', 
+        path: '/wedding/mens',
+        icon: '/icons/wedding/mens-bands.svg'
+      },
+      { 
+        name: 'Eternity Bands', 
+        path: '/wedding/eternity',
+        icon: '/icons/wedding/eternity-bands.svg'
+      },
+      { 
+        name: 'Anniversary Bands', 
+        path: '/wedding/anniversary',
+        icon: '/icons/wedding/anniversary-bands.svg'
+      },
     ],
-    styles: RingEnums.STYLES,
-    metals: RingEnums.METAL_COLORS.map(color => ({
-      name: color.charAt(0).toUpperCase() + color.slice(1),
-      path: `/wedding/metal/${color}`
-    }))
+    styles: RING_STYLES.map(style => ({
+      ...style,
+      path: `/wedding${style.path}`
+    })),
+    metals: RingEnums.METAL_COLORS.map(color => {
+      // Special case for Two Tone Gold
+      if (color === "Two Tone Gold") {
+        return {
+          name: "Two Tone Gold",
+          path: `/wedding/metal/two-tone-gold`,
+          icon: "/icons/metals/two-tone.webp" // Hardcoded path
+        };
+      }
+      
+      // For other metals
+      const baseName = color.toLowerCase().replace(' gold', '');
+      
+      return {
+        name: color,
+        path: `/wedding/metal/${color.toLowerCase().replace(/\s+/g, '-')}`,
+        icon: `/icons/metals/${baseName}.webp`
+      };
+    }),
+    featured: [
+      {
+        name: 'Under $2500',
+        path: '/wedding/price/under-2500',
+        icon: '/icons/featured/under-2500.svg'
+      },
+      {
+        name: 'Ready To Ship',
+        path: '/wedding/ready-to-ship',
+        icon: '/icons/featured/ready-to-ship.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/wedding/custom'
   },
   {
     name: 'Diamond',
     path: '/diamond',
-    subcategories: []
+    subcategories: [
+      {
+        name: 'Natural Diamonds',
+        path: '/diamond/natural',
+        icon: '/icons/customize/diamond.svg'
+      },
+      {
+        name: 'Lab Diamonds',
+        path: '/diamond/lab',
+        icon: '/icons/customize/lab-diamond.svg'
+      },
+      {
+        name: 'Diamond Education',
+        path: '/diamond/education',
+        icon: '/icons/diamond/education.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/diamond/custom'
   },
   {
     name: 'Gemstone',
     path: '/gemstone',
-    subcategories: []
+    subcategories: [
+      {
+        name: 'All Gemstones',
+        path: '/gemstone/all',
+        icon: '/icons/gemstone/all.svg'
+      },
+      {
+        name: 'Sapphire',
+        path: '/gemstone/sapphire',
+        icon: '/icons/gemstone/sapphire.svg'
+      },
+      {
+        name: 'Ruby',
+        path: '/gemstone/ruby',
+        icon: '/icons/gemstone/ruby.svg'
+      },
+      {
+        name: 'Emerald',
+        path: '/gemstone/emerald',
+        icon: '/icons/gemstone/emerald.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/gemstone/custom'
   },
   {
     name: 'Fine Jewellery',
     path: '/fine-jewellery',
-    subcategories: []
+    subcategories: [
+      {
+        name: 'Necklaces',
+        path: '/fine-jewellery/necklaces',
+        icon: '/icons/fine-jewellery/necklaces.svg'
+      },
+      {
+        name: 'Earrings',
+        path: '/fine-jewellery/earrings',
+        icon: '/icons/fine-jewellery/earrings.svg'
+      },
+      {
+        name: 'Bracelets',
+        path: '/fine-jewellery/bracelets',
+        icon: '/icons/fine-jewellery/bracelets.svg'
+      },
+      {
+        name: 'Men\'s Jewelry',
+        path: '/fine-jewellery/mens',
+        icon: '/icons/fine-jewellery/mens.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/fine-jewellery/custom'
   },
   {
     name: 'Customize',
     path: '/customize',
-    subcategories: []
+    subcategories: [
+      {
+        name: 'Start with a Setting',
+        path: '/customize/setting',
+        icon: '/icons/customize/setting.svg'
+      },
+      {
+        name: 'Start with a Diamond',
+        path: '/customize/diamond',
+        icon: '/icons/customize/diamond.svg'
+      },
+      {
+        name: 'Start with a Lab Diamond',
+        path: '/customize/lab-diamond',
+        icon: '/icons/customize/lab-diamond.svg'
+      },
+      {
+        name: 'Start with a Gemstone',
+        path: '/customize/gemstone',
+        icon: '/icons/customize/gemstone.svg'
+      },
+      {
+        name: 'Bridal Sets',
+        path: '/customize/bridal-sets',
+        icon: '/icons/customize/bridal-sets.svg'
+      }
+    ],
+    bannerImage: '/icons/banner/megamenu-banner.webp',
+    bannerLink: '/customize/bespoke'
   }
 ];
+
 
 export default function Navbar() {
   const { user, logout } = useUser();
@@ -107,6 +365,8 @@ export default function Navbar() {
     }
   };
 
+  console.log("Metal icons paths:", CATEGORIES[0].metals?.map(m => m.icon));
+
   return (
     <>
       <nav className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full">
@@ -126,10 +386,10 @@ export default function Navbar() {
             <Link href="/">
               <div className="cursor-pointer">
                 <Image 
-                  src="/main_logo.svg" 
+                  src="/main_logo.png" 
                   alt="Jewelry Store" 
-                  width={150} 
-                  height={50}
+                  width={120} 
+                  height={30}
                   className="object-contain"
                 />
               </div>
@@ -160,7 +420,7 @@ export default function Navbar() {
             <Link href="/wishlist" className="hidden md:block">
               <div className="cursor-pointer relative p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
             </Link>
@@ -172,7 +432,7 @@ export default function Navbar() {
                 onClick={toggleAccountDropdown}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7 7z" />
                 </svg>
               </div>
               
@@ -232,7 +492,7 @@ export default function Navbar() {
       </nav>
 
       {/* Categories Bar - Desktop */}
-      <div className="hidden lg:block border-t border-gray-200 w-full">
+      <div className="hidden lg:block border-t border-gray-200 w-full relative">
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
             {CATEGORIES.map((category) => (
@@ -258,64 +518,172 @@ export default function Navbar() {
                 {activeMegaMenu === category.name && category.subcategories.length > 0 && (
                   <div 
                     ref={megaMenuRef}
-                    className="absolute left-0 mt-1 bg-white shadow-lg z-40 border border-gray-200 rounded-md w-[600px]"
-                    style={{ maxWidth: 'calc(100vw - 2rem)' }}
+                    className="absolute left-0 mt-1 bg-white shadow-lg z-40 border-t border-gray-200 w-screen"
+                    style={{ 
+                      position: 'fixed',
+                      top: 'auto',
+                      left: 0,
+                      right: 0,
+                      width: '100%'
+                    }}
                   >
-                    <div className="py-6 px-6">
-                      <div className="grid grid-cols-3 gap-6">
-                        {/* First column - Subcategories */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Categories</h3>
-                          <ul className="space-y-2">
-                            {category.subcategories.map((subcategory) => (
-                              <li key={subcategory.path}>
-                                <Link 
-                                  href={subcategory.path}
-                                  className="text-gray-600 hover:text-amber-500 transition-colors"
-                                  onClick={() => setActiveMegaMenu(null)}
-                                >
-                                  {subcategory.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
+                    <div className="py-6 px-6 max-w-7xl mx-auto">
+                      <div className="flex">
+                        {/* Left part - Categories and Styles */}
+                        <div className="left_part flex-grow">
+                          <div className="left_part_inner flex gap-8">
+                            {/* First column - Subcategories */}
+                            {category.subcategories.length > 0 && (
+                              <div className="menu_column w-64">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800">Categories</h3>
+                                <ul className="space-y-3">
+                                  {category.subcategories.map((subcategory) => (
+                                    <li key={subcategory.path}>
+                                      <Link 
+                                        href={subcategory.path}
+                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                        onClick={() => setActiveMegaMenu(null)}
+                                      >
+                                        {subcategory.icon && (
+                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
+                                            <Image 
+                                              src={subcategory.icon} 
+                                              alt="" 
+                                              width={25} 
+                                              height={16}
+                                              className="object-contain"
+                                            />
+                                          </span>
+                                        )}
+                                        <span>{subcategory.name}</span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Second column - Styles */}
+                            {category.styles && (
+                              <div className="menu_column w-64">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800">SHOP BY STYLE</h3>
+                                <ul className="space-y-3">
+                                  {category.styles.map((style) => (
+                                    <li key={style.path}>
+                                      <Link 
+                                        href={style.path}
+                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                        onClick={() => setActiveMegaMenu(null)}
+                                      >
+                                        {style.icon && (
+                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
+                                            <Image 
+                                              src={style.icon} 
+                                              alt="" 
+                                              width={25} 
+                                              height={16}
+                                              className="object-contain"
+                                            />
+                                          </span>
+                                        )}
+                                        <span>{style.name}</span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {/* Third column - Metals */}
+                            {category.metals && (
+                              <div className="menu_column w-64">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800">SHOP BY METAL</h3>
+                                <ul className="space-y-3">
+                                  {category.metals.map((metal) => (
+                                    <li key={metal.path}>
+                                      <Link 
+                                        href={metal.path}
+                                        className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                        onClick={() => setActiveMegaMenu(null)}
+                                      >
+                                        {metal.icon && (
+                                          <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
+                                            <Image 
+                                              src={metal.icon} 
+                                              alt="" 
+                                              width={18} 
+                                              height={19}
+                                              className="object-contain"
+                                            />
+                                          </span>
+                                        )}
+                                        <span>{metal.name}</span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
                         </div>
                         
-                        {/* Second column - Styles */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Styles</h3>
-                          <ul className="space-y-2">
-                            {category.styles?.map((style) => (
-                              <li key={style}>
-                                <Link 
-                                  href={`${category.path}/style/${style.toLowerCase().replace(/\s+/g, '-')}`}
-                                  className="text-gray-600 hover:text-amber-500 transition-colors"
-                                  onClick={() => setActiveMegaMenu(null)}
-                                >
-                                  {style}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        
-                        {/* Third column - Metals */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4 text-gray-800">Metals</h3>
-                          <ul className="space-y-2">
-                            {category.metals?.map((metal) => (
-                              <li key={metal.path}>
-                                <Link 
-                                  href={metal.path}
-                                  className="text-gray-600 hover:text-amber-500 transition-colors"
-                                  onClick={() => setActiveMegaMenu(null)}
-                                >
-                                  {metal.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        {/* Right part - Featured and Banner */}
+                        {(category.featured || category.bannerImage) && (
+                          <div className="right_part w-64 ml-6 border-l border-gray-200 pl-6">
+                            <div className="right_part_inner">
+                              {/* Featured items */}
+                              {category.featured && (
+                                <div className="right_part_menu mb-6">
+                                  <div className="menu_column">
+                                    <h3 className="text-lg font-semibold mb-4 text-gray-800">FEATURED</h3>
+                                    <ul className="space-y-3">
+                                      {category.featured.map((item) => (
+                                        <li key={item.path}>
+                                          <Link 
+                                            href={item.path}
+                                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
+                                            onClick={() => setActiveMegaMenu(null)}
+                                          >
+                                            {item.icon && (
+                                              <span className="icon mr-2 w-6 h-6 flex items-center justify-center">
+                                                <Image 
+                                                  src={item.icon} 
+                                                  alt="" 
+                                                  width={25} 
+                                                  height={16}
+                                                  className="object-contain"
+                                                />
+                                              </span>
+                                            )}
+                                            <span>{item.name}</span>
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Banner image */}
+                              {category.bannerImage && (
+                                <div className="mini_banner">
+                                  <Link 
+                                    href={category.bannerLink || category.path}
+                                    onClick={() => setActiveMegaMenu(null)}
+                                  >
+                                    <Image 
+                                      src={category.bannerImage} 
+                                      alt="" 
+                                      width={332} 
+                                      height={481}
+                                      className="rounded-md object-cover"
+                                    />
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -434,12 +802,110 @@ export default function Navbar() {
                           <Link 
                             key={subcategory.path}
                             href={subcategory.path}
-                            className="block py-2 text-gray-600 hover:text-amber-500"
+                            className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
                             {subcategory.name}
+                            {subcategory.icon && (
+                              <span className="icon ml-2">
+                                <Image 
+                                  src={subcategory.icon} 
+                                  alt="" 
+                                  width={20} 
+                                  height={14}
+                                  className="object-contain"
+                                />
+                              </span>
+                            )}
                           </Link>
                         ))}
+                        
+                        {/* Show styles in mobile menu if available */}
+                        {category.styles && category.styles.length > 0 && (
+                          <>
+                            <div className="py-1 my-2 border-t border-gray-100"></div>
+                            <div className="font-medium text-sm text-gray-500">SHOP BY STYLE</div>
+                            {category.styles.map((style) => (
+                              <Link 
+                                key={style.path}
+                                href={style.path}
+                                className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {style.name}
+                                {style.icon && (
+                                  <span className="icon ml-2">
+                                    <Image 
+                                      src={style.icon} 
+                                      alt="" 
+                                      width={20} 
+                                      height={14}
+                                      className="object-contain"
+                                    />
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </>
+                        )}
+                        
+                        {/* Show metals in mobile menu if available */}
+                        {category.metals && category.metals.length > 0 && (
+                          <>
+                            <div className="py-1 my-2 border-t border-gray-100"></div>
+                            <div className="font-medium text-sm text-gray-500">SHOP BY METAL</div>
+                            {category.metals.map((metal) => (
+                              <Link 
+                                key={metal.path}
+                                href={metal.path}
+                                className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {metal.name}
+                                {metal.icon && (
+                                  <span className="icon ml-2">
+                                    <Image 
+                                      src={metal.icon} 
+                                      alt="" 
+                                      width={16} 
+                                      height={16}
+                                      className="object-contain"
+                                    />
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </>
+                        )}
+                        
+                        {/* Show featured items in mobile menu if available */}
+                        {category.featured && category.featured.length > 0 && (
+                          <>
+                            <div className="py-1 my-2 border-t border-gray-100"></div>
+                            <div className="font-medium text-sm text-gray-500">FEATURED</div>
+                            {category.featured.map((item) => (
+                              <Link 
+                                key={item.path}
+                                href={item.path}
+                                className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {item.name}
+                                {item.icon && (
+                                  <span className="icon ml-2">
+                                    <Image 
+                                      src={item.icon} 
+                                      alt="" 
+                                      width={20} 
+                                      height={14}
+                                      className="object-contain"
+                                    />
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -468,3 +934,4 @@ export default function Navbar() {
     </>
   );
 }
+
