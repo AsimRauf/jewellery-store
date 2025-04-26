@@ -299,6 +299,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const accountDropdownRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
 
@@ -341,6 +342,10 @@ export default function Navbar() {
       setActiveMegaMenu(categoryName);
       menuButtonRefs.current[index]?.focus();
     }
+  };
+
+  const handleDropdownToggle = (categoryName: string) => {
+    setActiveDropdown(activeDropdown === categoryName ? null : categoryName);
   };
 
   console.log("Metal icons paths:", CATEGORIES[0].metals?.map(m => m.icon));
@@ -474,7 +479,12 @@ export default function Navbar() {
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
             {CATEGORIES.map((category) => (
-              <MenuCategory key={category.path} category={category} />
+              <MenuCategory 
+                key={category.path} 
+                category={category} 
+                isActive={activeMegaMenu === category.name}
+                onToggle={() => toggleMegaMenu(category.name, 0)}
+              />
             ))}
           </ul>
         </div>
@@ -720,18 +730,24 @@ export default function Navbar() {
   );
 }
 
-const MenuCategory = ({ category }: { category: Category }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const MenuCategory = ({ 
+  category, 
+  isActive, 
+  onToggle 
+}: { 
+  category: Category;
+  isActive: boolean;
+  onToggle: () => void;
+}) => {
   return (
     <li className="relative">
       <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`py-4 px-2 inline-block text-gray-700 hover:text-amber-500 transition-colors ${isOpen ? 'text-amber-500' : ''}`}
+        onClick={onToggle}
+        className="flex items-center w-full text-gray-600 hover:text-amber-500 py-4 px-2"
       >
         {category.name}
         <svg 
-          className={`inline-block ml-1 h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`ml-2 h-4 w-4 transition-transform duration-200 ${isActive ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -740,128 +756,122 @@ const MenuCategory = ({ category }: { category: Category }) => {
         </svg>
       </button>
 
-      {isOpen && (
-        <div
-          className="absolute left-0 mt-1 bg-white shadow-lg z-40 border-t border-gray-200 w-screen"
-          style={{ 
-            position: 'fixed',
-            top: 'auto',
-            left: 0,
-            right: 0,
-            width: '100%'
-          }}
+      {isActive && (
+        <div 
+          className="fixed left-0 right-0 w-full bg-white shadow-lg z-[100] border-t border-gray-200"
+          style={{ top: '100px' }}
         >
-          <div className="py-6 px-6 max-w-7xl mx-auto">
-            <div className="flex">
-              <div className="left_part flex-grow">
-                <div className="left_part_inner flex gap-8">
-                  {category.styles && (
-                    <div className="menu_column w-64">
-                      <h3 className="text-lg font-semibold mb-4">SHOP BY STYLE</h3>
-                      <ul className="space-y-3">
-                        {category.styles.map((style) => (
-                          <Link 
-                            key={style.path}
-                            href={style.path}
-                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {style.icon && (
-                              <span className="icon mr-2">
-                                <Image 
-                                  src={style.icon} 
-                                  alt="" 
-                                  width={25} 
-                                  height={16}
-                                  className="object-contain"
-                                />
-                              </span>
-                            )}
-                            <span>{style.name}</span>
-                          </Link>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {category.metals && (
-                    <div className="menu_column w-64">
-                      <h3 className="text-lg font-semibold mb-4">SHOP BY METAL</h3>
-                      <ul className="space-y-3">
-                        {category.metals.map((metal) => (
-                          <Link 
-                            key={metal.path}
-                            href={metal.path}
-                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {metal.icon && (
-                              <span className="icon mr-2">
-                                <Image 
-                                  src={metal.icon} 
-                                  alt="" 
-                                  width={18} 
-                                  height={19}
-                                  className="object-contain"
-                                />
-                              </span>
-                            )}
-                            <span>{metal.name}</span>
-                          </Link>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {(category.featured || category.bannerImage) && (
-                <div className="right_part w-64 ml-6 border-l border-gray-200 pl-6">
-                  {category.featured && (
-                    <div className="menu_column mb-6">
-                      <h3 className="text-lg font-semibold mb-4">FEATURED</h3>
-                      <ul className="space-y-3">
-                        {category.featured.map((item) => (
+          <div className="w-full mx-auto" style={{ maxWidth: '1440px' }}>
+            <div className="py-6 px-8">
+              <div className="flex justify-between">
+                <div className="flex-grow grid grid-cols-3 gap-8 max-w-4xl">
+                  {/* Main Categories Section */}
+                  {category.subcategories && category.subcategories.length > 0 && (
+                    <div className="col-span-1">
+                      <h3 className="text-lg font-semibold mb-4">Categories</h3>
+                      <div className="space-y-3">
+                        {category.subcategories.map((item) => (
                           <Link 
                             key={item.path}
                             href={item.path}
-                            className="text-gray-600 hover:text-amber-500 transition-colors flex items-center"
-                            onClick={() => setIsOpen(false)}
+                            className="flex items-center text-gray-600 hover:text-amber-500"
+                            onClick={onToggle}
                           >
                             {item.icon && (
-                              <span className="icon mr-2">
-                                <Image 
-                                  src={item.icon} 
-                                  alt="" 
-                                  width={25} 
-                                  height={16}
-                                  className="object-contain"
-                                />
-                              </span>
+                              <Image src={item.icon} alt="" width={20} height={20} className="mr-3" />
                             )}
                             <span>{item.name}</span>
                           </Link>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   )}
 
-                  {category.bannerImage && (
-                    <Link 
-                      href={category.bannerLink || category.path}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Image 
-                        src={category.bannerImage} 
-                        alt="" 
-                        width={332} 
-                        height={481}
-                        className="rounded-md object-cover"
-                      />
-                    </Link>
+                  {/* Styles Section */}
+                  {category.styles && category.styles.length > 0 && (
+                    <div className="col-span-1">
+                      <h3 className="text-lg font-semibold mb-4">Shop By Style</h3>
+                      <div className="space-y-3">
+                        {category.styles.map((style) => (
+                          <Link 
+                            key={style.path}
+                            href={style.path}
+                            className="flex items-center text-gray-600 hover:text-amber-500"
+                            onClick={onToggle}
+                          >
+                            {style.icon && (
+                              <Image src={style.icon} alt="" width={20} height={20} className="mr-3" />
+                            )}
+                            <span>{style.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metals Section */}
+                  {category.metals && category.metals.length > 0 && (
+                    <div className="col-span-1">
+                      <h3 className="text-lg font-semibold mb-4">Shop By Metal</h3>
+                      <div className="space-y-3">
+                        {category.metals.map((metal) => (
+                          <Link 
+                            key={metal.path}
+                            href={metal.path}
+                            className="flex items-center text-gray-600 hover:text-amber-500"
+                            onClick={onToggle}
+                          >
+                            {metal.icon && (
+                              <Image src={metal.icon} alt="" width={20} height={20} className="mr-3" />
+                            )}
+                            <span>{metal.name}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
+
+                {/* Featured Section with Banner */}
+                {(category.featured || category.bannerImage) && (
+                  <div className="w-64 pl-8 border-l border-gray-200">
+                    {category.featured && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold mb-4">Featured</h3>
+                        <div className="space-y-3">
+                          {category.featured.map((item) => (
+                            <Link 
+                              key={item.path}
+                              href={item.path}
+                              className="flex items-center text-gray-600 hover:text-amber-500"
+                              onClick={onToggle}
+                            >
+                              {item.icon && (
+                                <Image src={item.icon} alt="" width={20} height={20} className="mr-3" />
+                              )}
+                              <span>{item.name}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {category.bannerImage && (
+                      <Link 
+                        href={category.bannerLink || category.path}
+                        onClick={onToggle}
+                      >
+                        <Image 
+                          src={category.bannerImage} 
+                          alt="" 
+                          width={240}
+                          height={320}
+                          className="rounded-lg object-cover"
+                        />
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
