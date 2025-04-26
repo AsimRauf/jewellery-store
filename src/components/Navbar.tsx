@@ -299,7 +299,6 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const accountDropdownRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
 
@@ -344,10 +343,7 @@ export default function Navbar() {
     }
   };
 
-  const handleDropdownToggle = (categoryName: string) => {
-    setActiveDropdown(activeDropdown === categoryName ? null : categoryName);
-  };
-
+  
   console.log("Metal icons paths:", CATEGORIES[0].metals?.map(m => m.icon));
 
   return (
@@ -574,11 +570,13 @@ export default function Navbar() {
           <ul className="p-4">
             {CATEGORIES.map((category) => (
               <li key={category.path} className="border-b border-gray-100 last:border-none">
-                {category.subcategories.length > 0 ? (
+                {/* Change this condition to check for styles, metals, or featured items too */}
+                {(category.subcategories.length > 0 || category.styles?.length || category.metals?.length || category.featured?.length) ? (
                   <div className="py-4">
                     <div
                       className="flex justify-between items-center text-gray-700 hover:text-amber-500 transition-colors cursor-pointer"
-                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name, 0)}                    >
+                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name, 0)}
+                    >
                       <span>{category.name}</span>
                       <svg
                         className={`h-5 w-5 transition-transform ${activeMegaMenu === category.name ? 'rotate-180' : ''}`}
@@ -593,27 +591,32 @@ export default function Navbar() {
                     {/* Expandable subcategories for mobile */}
                     {activeMegaMenu === category.name && (
                       <div className="mt-2 ml-4 space-y-2">
-                        {category.subcategories.map((subcategory) => (
-                          <Link
-                            key={subcategory.path}
-                            href={subcategory.path}
-                            className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {subcategory.name}
-                            {subcategory.icon && (
-                              <span className="icon ml-2">
-                                <Image
-                                  src={subcategory.icon}
-                                  alt=""
-                                  width={20}
-                                  height={14}
-                                  className="object-contain"
-                                />
-                              </span>
-                            )}
-                          </Link>
-                        ))}
+                        {/* Show subcategories if available */}
+                        {category.subcategories.length > 0 && (
+                          <>
+                            {category.subcategories.map((subcategory) => (
+                              <Link
+                                key={subcategory.path}
+                                href={subcategory.path}
+                                className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {subcategory.name}
+                                {subcategory.icon && (
+                                  <span className="icon ml-2">
+                                    <Image
+                                      src={subcategory.icon}
+                                      alt=""
+                                      width={20}
+                                      height={14}
+                                      className="object-contain"
+                                    />
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </>
+                        )}
 
                         {/* Show styles in mobile menu if available */}
                         {category.styles && category.styles.length > 0 && (
