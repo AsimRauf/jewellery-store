@@ -9,7 +9,6 @@ interface EngagementQuery {
   'metalOptions.color'?: string | { $in: string[] };
 }
 
-// Completely rewritten handler with simplified parameter structure
 export function GET(request: NextRequest) {
   return handleRequest(request);
 }
@@ -23,6 +22,11 @@ async function handleRequest(request: NextRequest) {
     const category = pathParts[pathParts.length - 1];
     
     const searchParams = request.nextUrl.searchParams;
+    
+    // Pagination parameters
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const skip = (page - 1) * limit;
     
     // Base query with proper typing
     const query: EngagementQuery = { isActive: true };
@@ -76,12 +80,27 @@ async function handleRequest(request: NextRequest) {
         sortOptions = { basePrice: 1 };
     }
 
+    // Get total count for pagination info
+    const totalCount = await EngagementRing.countDocuments(query);
+
+    // Fetch products with pagination
     const products = await EngagementRing.find(query)
       .select('_id title SKU basePrice metalOptions media main_stone style type')
       .sort(sortOptions)
+      .skip(skip)
+      .limit(limit)
       .lean();
 
-    return NextResponse.json(products);
+    return NextResponse.json({
+      products,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        pages: Math.ceil(totalCount / limit),
+        hasMore: skip + products.length < totalCount
+      }
+    });
   } catch (error) {
     console.error('Error fetching engagement rings:', error);
     return NextResponse.json(
