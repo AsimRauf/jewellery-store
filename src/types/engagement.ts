@@ -39,6 +39,17 @@ export interface EngagementRing {
     total_carat_weight?: number;
     isDefault: boolean;
   }>;
+  metalColorImages: {
+    [color: string]: Array<{
+      url: string;
+      publicId: string;
+    }>;
+  };
+  sizes: Array<{
+    size: number;
+    isAvailable: boolean;
+    additionalPrice: number;
+  }>;
   main_stone?: {
     type: string;
     gemstone_type?: string;
