@@ -19,6 +19,10 @@ interface IEngagementRing {
     total_carat_weight?: number;
     isDefault: boolean;
   }>;
+  metalColorImages: Map<string, Array<{
+    url: string;
+    publicId: string;
+  }>>;
   sizes: Array<{
     size: number;
     isAvailable: boolean;
@@ -135,6 +139,10 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
     }],
     required: true,
     validate: [arrayMinLength, 'At least one metal option must be available']
+  },
+  metalColorImages: {
+    type: Object,  // Use Object instead of Map
+    default: {}
   },
   sizes: {
     type: [{

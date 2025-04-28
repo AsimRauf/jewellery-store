@@ -3,6 +3,14 @@ export interface MetalOption {
   color: string;
   price: number;
   isDefault: boolean;
+  description?: string;
+  finish_type?: string | null;
+  width_mm?: number;
+  total_carat_weight?: number;
+  images?: Array<{
+    url: string;
+    publicId: string;
+  }>;
 }
 
 export interface MediaImage {

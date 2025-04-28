@@ -6,6 +6,7 @@ import ImageUpload from '@/components/admin/ImageUpload';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
+import MetalOptionImageUpload from '@/components/admin/MetalOptionImageUpload';
 
 // Define type for condition function
 type ConditionFunction = (formData: FormDataType) => boolean;
@@ -70,7 +71,7 @@ type FormDataValue = string | number | boolean | string[] | MetalOption[] | Arra
   size: number;
   isAvailable: boolean;
   additionalPrice: number;
-}> | MainStone | SideStone | Media;
+}> | MainStone | SideStone | Media | Record<string, Array<{ url: string; publicId: string }>>;
 
 interface FormDataType {
   title: string;
@@ -80,6 +81,7 @@ interface FormDataType {
   SKU: string;
   basePrice: number;
   metalOptions: MetalOption[];
+  metalColorImages: Record<string, Array<{ url: string; publicId: string }>>;
   sizes: Array<{
     size: number;
     isAvailable: boolean;
@@ -296,10 +298,18 @@ function SizeMatrix({ sizes, onChange }: {
   );
 }
 
-function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
+function MetalOptionsMatrix({ 
+  metalOptions, 
+  onChange, 
+  basePrice,
+  metalColorImages = {},
+  onMetalColorImagesChange
+}: {
   metalOptions: MetalOption[];
   onChange: (metalOptions: MetalOption[]) => void;
   basePrice: number;
+  metalColorImages?: Record<string, Array<{ url: string; publicId: string }>>;
+  onMetalColorImagesChange?: (images: Record<string, File[]> | Record<string, Array<{ url: string; publicId: string }>>) => void;
 }) {
   const [newMetalOption, setNewMetalOption] = useState<MetalOption>({
     karat: '',
@@ -311,6 +321,9 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
     total_carat_weight: 0,
     isDefault: false
   });
+  
+  // State for temporary color images
+  const [temporaryColorImages, setTemporaryColorImages] = useState<Record<string, File[]>>({});
 
   // Update new metal option price when base price changes
   useEffect(() => {
@@ -319,6 +332,10 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
       price: basePrice
     }));
   }, [basePrice]);
+
+  // Get unique colors from metal options
+  const uniqueColors = Array.from(new Set(metalOptions.map(option => option.color)))
+    .filter(color => color); // Filter out empty strings
 
   const addMetalOption = () => {
     // Validate required fields
@@ -391,6 +408,29 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
     });
 
     onChange(updatedOptions);
+  };
+
+  // Handle metal color image selection
+  const handleMetalColorImageSelect = (color: string, files: File[]) => {
+    const newTemporaryImages = {
+      ...temporaryColorImages,
+      [color]: files
+    };
+    
+    setTemporaryColorImages(newTemporaryImages);
+    
+    if (onMetalColorImagesChange) {
+      onMetalColorImagesChange(newTemporaryImages);
+    }
+  };
+
+  // Handle removing saved color images
+  const handleRemoveSavedColorImage = (color: string, imageIndex: number) => {
+    if (onMetalColorImagesChange && metalColorImages[color]) {
+      const updatedImages = { ...metalColorImages };
+      updatedImages[color] = updatedImages[color].filter((_, idx) => idx !== imageIndex);
+      onMetalColorImagesChange(updatedImages);
+    }
   };
 
   return (
@@ -491,6 +531,33 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
               ))}
             </tbody>
           </table>
+          
+          {/* Metal Color Images Section */}
+          {uniqueColors.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <h3 className="text-lg font-medium text-gray-800">Metal Color Images</h3>
+              <p className="text-sm text-gray-600">
+                Upload images for each metal color. These will be shared across all karat options of the same color.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {uniqueColors.map(color => (
+                  <div key={`color-${color}`} className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-700 mb-2">{color}</h4>
+                    <MetalOptionImageUpload
+                      metalIndex={0} // Not used for color-based uploads
+                      colorKey={color}
+                      images={metalColorImages[color] || []}
+                      temporaryImages={temporaryColorImages[color] || []}
+                      onImagesSelect={(_, files) => handleMetalColorImageSelect(color, files)}
+                      onImageRemove={(_, imageIndex) => handleRemoveSavedColorImage(color, imageIndex)}
+                      maxImages={5}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -625,6 +692,7 @@ export default function AddEngagementRing() {
     SKU: '',
     basePrice: 0,
     metalOptions: [],
+    metalColorImages: {},
     sizes: [],
     main_stone: {
       type: '',
@@ -655,9 +723,11 @@ export default function AddEngagementRing() {
     isActive: true,
     isFeatured: false
   });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
   const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
+  const [temporaryColorImages, setTemporaryColorImages] = useState<Record<string, File[]>>({});
 
   useEffect(() => {
     // Check authentication and admin status
@@ -685,51 +755,49 @@ export default function AddEngagementRing() {
     return null;
   }
 
-  // In src/app/admin/rings/engagement/page.tsx
-const uploadImage = async (file: File, category: string) => {
-  try {
-    const base64 = await convertToBase64(file);
-    let response = await fetch('/api/upload/image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ file: base64, category })
-    });
-    
-    // If unauthorized, try refreshing token and retry once
-    if (response.status === 401) {
-      console.log('Token expired, refreshing...');
-      
-      // Manually refresh token
-      const refreshResponse = await fetch('/api/auth/refresh', {
-        method: 'GET',
-        credentials: 'include'
+  const uploadImage = async (file: File, category: string) => {
+    try {
+      const base64 = await convertToBase64(file);
+      let response = await fetch('/api/upload/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ file: base64, category })
       });
       
-      if (refreshResponse.ok) {
-        console.log('Token refreshed, retrying upload');
+      // If unauthorized, try refreshing token and retry once
+      if (response.status === 401) {
+        console.log('Token expired, refreshing...');
         
-        // Retry with fresh token
-        response = await fetch('/api/upload/image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ file: base64, category })
+        // Manually refresh token
+        const refreshResponse = await fetch('/api/auth/refresh', {
+          method: 'GET',
+          credentials: 'include'
         });
+        
+        if (refreshResponse.ok) {
+          console.log('Token refreshed, retrying upload');
+          
+          // Retry with fresh token
+          response = await fetch('/api/upload/image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ file: base64, category })
+          });
+        }
       }
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('Image upload error:', error);
+      throw error;
     }
-    
-    if (!response.ok) {
-      throw new Error('Failed to upload image');
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error('Image upload error:', error);
-    throw error;
-  }
-};
-
+  };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -756,10 +824,10 @@ const uploadImage = async (file: File, category: string) => {
 
       console.log("Validation passed, proceeding with submission");
 
-      // Upload images if any
+      // Upload main product images if any
       let uploadedImages: Array<{ url: string; publicId: string }> = [];
       if (temporaryImages.length > 0) {
-        toast.loading('Uploading images...', { id: 'uploadProgress' });
+        toast.loading('Uploading product images...', { id: 'uploadProgress' });
 
         uploadedImages = await Promise.all(
           temporaryImages.map(async (file) => {
@@ -767,7 +835,7 @@ const uploadImage = async (file: File, category: string) => {
           })
         );
 
-        toast.success('Images uploaded successfully', { id: 'uploadProgress' });
+        toast.success('Product images uploaded successfully', { id: 'uploadProgress' });
       }
 
       // Upload video if exists
@@ -793,17 +861,45 @@ const uploadImage = async (file: File, category: string) => {
         toast.success('Video uploaded successfully', { id: 'videoProgress' });
       }
 
+      // Upload metal color images
+      const uploadedColorImages: Record<string, Array<{ url: string; publicId: string }>> = { ...formData.metalColorImages };
+      
+      if (Object.keys(temporaryColorImages).length > 0) {
+        toast.loading('Uploading metal color images...', { id: 'metalImagesProgress' });
+        
+        for (const [color, files] of Object.entries(temporaryColorImages)) {
+          if (files.length > 0) {
+            const colorSlug = color.toLowerCase().replace(/\s+/g, '-');
+            const uploadedMetalImages = await Promise.all(
+              files.map(async (file) => {
+                return await uploadImage(file, `engagement/metal-colors/${colorSlug}`);
+              })
+            );
+            
+            // Combine existing saved images with newly uploaded ones
+            const existingImages = uploadedColorImages[color] || [];
+            uploadedColorImages[color] = [...existingImages, ...uploadedMetalImages];
+          }
+        }
+        
+        toast.success('Metal color images uploaded successfully', { id: 'metalImagesProgress' });
+      }
+
       // Prepare final data
       const finalData = {
         ...formData,
+        metalColorImages: uploadedColorImages,
         media: {
           images: uploadedImages,
           video: videoData
         }
       };
 
+      // After uploading metal color images
+      console.log("Uploaded color images:", uploadedColorImages);
+
       // Before API call
-      console.log("About to make API call with data:", finalData);
+      console.log("Final data metalColorImages:", finalData.metalColorImages);
 
       // Save ring data
       toast.loading('Saving ring details...', { id: 'saveProgress' });
@@ -842,6 +938,7 @@ const uploadImage = async (file: File, category: string) => {
       console.log("Form submission completed");
     }
   };
+
   // Helper function to convert File to base64
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -850,6 +947,22 @@ const uploadImage = async (file: File, category: string) => {
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = error => reject(error);
     });
+  };
+
+  // Handle metal color images change
+
+
+  const handleMetalColorImagesChange = (images: Record<string, File[]> | Record<string, Array<{ url: string; publicId: string }>>) => {
+    if (Object.values(images).some(arr => arr.length > 0 && 'name' in arr[0])) {
+      // It's a File[] record
+      setTemporaryColorImages(images as Record<string, File[]>);
+    } else {
+      // It's already processed images
+      setFormData(prev => ({
+        ...prev,
+        metalColorImages: images as Record<string, Array<{ url: string; publicId: string }>>
+      }));
+    }
   };
 
   // Type definitions for event handlers
@@ -991,6 +1104,8 @@ const uploadImage = async (file: File, category: string) => {
           metalOptions={formData.metalOptions}
           onChange={(newValue) => handleFieldChange('metalOptions', newValue)}
           basePrice={formData.basePrice}
+          metalColorImages={formData.metalColorImages}
+          onMetalColorImagesChange={handleMetalColorImagesChange}
         />
       );
     }
@@ -1065,7 +1180,7 @@ const uploadImage = async (file: File, category: string) => {
         <section className="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
           <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
             <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-            Images
+            Product Images
           </h2>
           <ImageUpload
             onImagesSelect={setTemporaryImages}
@@ -1129,3 +1244,4 @@ const uploadImage = async (file: File, category: string) => {
     </div>
   );
 }
+
