@@ -1,7 +1,9 @@
 import "./globals.css";
 import { raleway } from '@/utils/fonts';
 import { UserProvider } from "../context/UserContext";
+import { CartProvider } from "../context/CartContext";
 import ClientLayout from "@/components/ClientLayout";
+import { Toaster } from 'react-hot-toast';
 
 // Root layout component
 export default function RootLayout({
@@ -16,7 +18,10 @@ export default function RootLayout({
       </head>
       <body className="font-raleway">
         <UserProvider>
-          <ClientLayout>{children}</ClientLayout>
+          <CartProvider>
+            <ClientLayout>{children}</ClientLayout>
+            <Toaster />
+          </CartProvider>
         </UserProvider>
       </body>
     </html>

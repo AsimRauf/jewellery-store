@@ -55,6 +55,9 @@ interface IEngagementRing {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
+  isNew?: boolean;
+  onSale?: boolean;
+  originalPrice?: number;
 }
 
 // Define interface for EngagementRing methods
@@ -254,6 +257,17 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
   isFeatured: { 
     type: Boolean, 
     default: false 
+  },
+  isNew: {
+    type: Boolean,
+    default: false
+  },
+  onSale: {
+    type: Boolean,
+    default: false
+  },
+  originalPrice: {
+    type: Number
   }
 }, {
   timestamps: true

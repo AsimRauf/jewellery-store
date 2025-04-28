@@ -115,3 +115,36 @@ body {
   background-color: #f3f4f6;
   color: #1f2937;
 }
+
+/* Product card enhancements */
+.product-card-container {
+  transition: transform 0.3s ease;
+}
+
+.product-card-container:hover {
+  transform: translateY(-5px);
+}
+
+/* Add a subtle shine effect on hover */
+.product-card-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 0.75s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-card-container:hover::after {
+  left: 125%;
+  opacity: 0.5;
+}

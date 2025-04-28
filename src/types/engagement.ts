@@ -18,20 +18,42 @@ export interface EngagementRing {
   type: string[];
   SKU: string;
   basePrice: number;
-  metalOptions: MetalOption[];
+  originalPrice?: number;
+  isNew?: boolean;
+  onSale?: boolean;
+  metalOptions: Array<{
+    karat: string;
+    color: string;
+    price: number;
+    description?: string;
+    finish_type?: string | null;
+    width_mm?: number;
+    total_carat_weight?: number;
+    isDefault: boolean;
+  }>;
   main_stone?: {
     type: string;
     gemstone_type?: string;
+    number_of_stones: number;
     carat_weight: number;
+    shape: string;
+    color: string;
+    clarity: string;
+    hardness: number;
   };
   media: {
-    images: MediaImage[];
+    images: Array<{
+      url: string;
+      publicId: string;
+    }>;
     video: {
       url: string;
       publicId: string;
     };
   };
   description: string;
+  isActive: boolean;
+  isFeatured: boolean;
 }
 
 export interface FilterState {
