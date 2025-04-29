@@ -69,6 +69,14 @@ interface EngagementRingDetail {
   SKU: string;
   basePrice: number;
   metalOptions: MetalOption[];
+  // Add the metalColorImages property
+  metalColorImages: {
+    [color: string]: Array<{
+      url: string;
+      publicId: string;
+      _id?: string;
+    }>;
+  };
   sizes: Size[];
   main_stone: MainStone;
   side_stone: SideStone;
@@ -135,9 +143,20 @@ export default function ProductDetailPage() {
       
       if (matchedMetal) {
         setSelectedMetal(matchedMetal);
+        
+        // If this metal color has specific images, update the swiper to show them first
+        if (product.metalColorImages && 
+            product.metalColorImages[matchedMetal.color] && 
+            product.metalColorImages[matchedMetal.color].length > 0 &&
+            thumbsSwiper) {
+          // This will trigger after component is mounted and thumbsSwiper is available
+          setTimeout(() => {
+            thumbsSwiper.slideTo(0);
+          }, 100);
+        }
       }
     }
-  }, [searchParams, product]);
+  }, [searchParams, product, thumbsSwiper]);
   
   // Fetch product data
   useEffect(() => {
@@ -348,7 +367,26 @@ export default function ProductDetailPage() {
             pagination={{ clickable: true }}
             className="rounded-lg overflow-hidden aspect-square"
           >
-            {/* Show video as first slide if available */}
+            {/* Show metal color images first if a metal is selected and has images */}
+            {selectedMetal && product.metalColorImages && 
+             product.metalColorImages[selectedMetal.color] && 
+             product.metalColorImages[selectedMetal.color].length > 0 && 
+             product.metalColorImages[selectedMetal.color].map((image, index) => (
+              <SwiperSlide key={`metal-${selectedMetal.color}-${index}`}>
+                <div className="relative w-full h-full">
+                  <Image
+                    src={image.url}
+                    alt={`${product.title} - ${selectedMetal.karat} ${selectedMetal.color}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+            
+            {/* Show video as next slide if available */}
             {product.media.video && product.media.video.url && (
               <SwiperSlide>
                 <div className="relative w-full h-full">
@@ -361,7 +399,7 @@ export default function ProductDetailPage() {
               </SwiperSlide>
             )}
             
-            {/* Show all images */}
+            {/* Show all regular images */}
             {product.media.images.map((image) => (
               <SwiperSlide key={image._id}>
                 <div className="relative w-full h-full">
@@ -371,7 +409,7 @@ export default function ProductDetailPage() {
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
-                    priority
+                    priority={!selectedMetal || !product.metalColorImages || !product.metalColorImages[selectedMetal.color]}
                   />
                 </div>
               </SwiperSlide>
@@ -387,6 +425,24 @@ export default function ProductDetailPage() {
             spaceBetween={10}
             className="thumbs-swiper"
           >
+            {/* Metal color thumbnails if available */}
+            {selectedMetal && product.metalColorImages && 
+             product.metalColorImages[selectedMetal.color] && 
+             product.metalColorImages[selectedMetal.color].length > 0 && 
+             product.metalColorImages[selectedMetal.color].map((image: { url: string; publicId: string; _id?: string }, index: number) => (
+              <SwiperSlide key={`thumb-metal-${selectedMetal.color}-${index}`} className="cursor-pointer rounded-md overflow-hidden">
+                <div className="relative aspect-square">
+                  <Image
+                    src={image.url}
+                    alt={`${product.title} - ${selectedMetal.karat} ${selectedMetal.color}`}
+                    fill
+                    sizes="(max-width: 768px) 25vw, 10vw"
+                    className="object-cover"
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+            
             {/* Video thumbnail if available */}
             {product.media.video && product.media.video.url && (
               <SwiperSlide className="cursor-pointer rounded-md overflow-hidden">

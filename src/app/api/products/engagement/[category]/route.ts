@@ -83,9 +83,9 @@ async function handleRequest(request: NextRequest) {
     // Get total count for pagination info
     const totalCount = await EngagementRing.countDocuments(query);
 
-    // Fetch products with pagination
+    // Fetch products with pagination - include metalColorImages in the selection
     const products = await EngagementRing.find(query)
-      .select('_id title SKU basePrice metalOptions media main_stone style type')
+      .select('_id title SKU basePrice metalOptions metalColorImages media main_stone style type')
       .sort(sortOptions)
       .skip(skip)
       .limit(limit)

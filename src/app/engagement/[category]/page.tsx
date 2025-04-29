@@ -232,6 +232,17 @@ export default function EngagementCategoryPage() {
         return false;
       }
       
+      // Filter by metal colors
+      if (filters.metalColors.length > 0) {
+        const hasMatchingMetal = product.metalOptions.some(metal => 
+          filters.metalColors.includes(metal.color)
+        );
+        
+        if (!hasMatchingMetal) {
+          return false;
+        }
+      }
+      
       // Filter by price range
       if (filters.priceRange) {
         const productPrice = get14KGoldPrice(product);
@@ -445,10 +456,13 @@ export default function EngagementCategoryPage() {
       option => option.karat === '14K' && option.color === 'Yellow Gold'
     ) || product.metalOptions.find(
       option => option.karat === '14K'
+    ) || product.metalOptions.find(
+      option => option.isDefault
     );
     
     return gold14K ? gold14K.price : product.basePrice;
   };
+
 
   const getCategoryTitle = (): string => {
     if (!category) return 'All Engagement Rings';
@@ -554,6 +568,7 @@ export default function EngagementCategoryPage() {
         clearAllFilters={clearAllFilters}
         get14KGoldPrice={get14KGoldPrice}
         onLoadMore={loadMoreProducts}
+        activeMetalFilters={filters.metalColors}
       />
     </div>
   );

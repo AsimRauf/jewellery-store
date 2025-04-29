@@ -14,6 +14,7 @@ interface ProductGridProps {
   clearAllFilters: () => void;
   get14KGoldPrice: (product: EngagementRing) => number;
   onLoadMore: () => void;
+  activeMetalFilters: string[];
 }
 
 export default function ProductGrid({ 
@@ -23,16 +24,26 @@ export default function ProductGrid({
   hasMore,
   error, 
   clearAllFilters, 
-  get14KGoldPrice,
-  onLoadMore
+  onLoadMore,
+  activeMetalFilters
 }: ProductGridProps) {
   const { addItem } = useCart();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   
-  const getFirstImageUrl = (product: EngagementRing): string => {
+  // Function to get the image URL based on metal color
+  const getImageUrl = (product: EngagementRing, metalColor: string): string => {
+    // Check if product has metalColorImages for this color
+    if (product.metalColorImages && 
+        product.metalColorImages[metalColor] && 
+        product.metalColorImages[metalColor].length > 0) {
+      return product.metalColorImages[metalColor][0].url;
+    }
+    
+    // Fallback to regular media images
     if (product.media?.images?.length > 0 && product.media.images[0].url) {
       return product.media.images[0].url;
     }
+    
     return '/placeholder-ring.jpg';
   };
 
@@ -61,7 +72,7 @@ export default function ProductGrid({
     if (node) observer.current.observe(node);
   }, [loading, loadingMore, hasMore, onLoadMore]);
 
-  // Function to generate SEO-friendly URL
+  // Function to generate SEO-friendly URL with metal option
   const getProductUrl = (product: EngagementRing, metalOption?: {karat: string, color: string}): string => {
     // Create slug from product title
     const slug = product.title
@@ -81,8 +92,8 @@ export default function ProductGrid({
     return url;
   };
 
-  // SIMPLIFIED ADD TO CART FUNCTION
-  const handleAddToCart = (productId: string) => {
+  // Function to handle adding to cart
+  const handleAddToCart = (productId: string, metalOption: {karat: string, color: string}) => {
     console.log('=== ADD TO CART CLICKED ===');
     console.log('Product ID:', productId);
     
@@ -103,10 +114,16 @@ export default function ProductGrid({
     
     console.log('Found product:', product.title);
     
-    // Get the default metal option
-    const defaultMetal = product.metalOptions.find(option => 
-      option.karat === '14K' && option.color === 'Yellow Gold'
-    ) || product.metalOptions[0];
+    // Find the selected metal option
+    const selectedMetal = product.metalOptions.find(option => 
+      option.karat === metalOption.karat && option.color === metalOption.color
+    );
+    
+    if (!selectedMetal) {
+      console.log('Metal option not found');
+      setAddingProductId(null);
+      return;
+    }
     
     // Add a unique timestamp to the operation
     const operationId = Date.now();
@@ -116,17 +133,17 @@ export default function ProductGrid({
     addItem({
       _id: product._id,
       title: product.title,
-      price: get14KGoldPrice(product),
+      price: selectedMetal.price,
       quantity: 1,
-      image: getFirstImageUrl(product),
+      image: getImageUrl(product, metalOption.color),
       metalOption: {
-        karat: defaultMetal.karat,
-        color: defaultMetal.color
+        karat: metalOption.karat,
+        color: metalOption.color
       }
     });
     
     // Show a toast notification
-    toast.success(`Added ${product.title} to cart!`, {
+    toast.success(`Added ${product.title} (${metalOption.karat} ${metalOption.color}) to cart!`, {
       position: 'bottom-right',
       duration: 3000
     });
@@ -136,6 +153,87 @@ export default function ProductGrid({
       setAddingProductId(null);
     }, 500);
   };
+
+  // Function to expand products with their metal color variants
+  const expandProductsWithMetalColors = (
+    products: EngagementRing[], 
+    activeMetalFilters: string[]
+  ): Array<{
+    product: EngagementRing;
+    metalOption: {karat: string, color: string, price: number};
+    imageUrl: string;
+  }> => {
+    const expandedProducts: Array<{
+      product: EngagementRing;
+      metalOption: {karat: string, color: string, price: number};
+      imageUrl: string;
+    }> = [];
+    
+    products.forEach(product => {
+      // Check if product has metalColorImages
+      if (product.metalColorImages && Object.keys(product.metalColorImages).length > 0) {
+        // For each metal color that has images, create a variant
+        Object.keys(product.metalColorImages).forEach(color => {
+          // If there are active metal filters, only include matching colors
+          if (activeMetalFilters.length > 0 && !activeMetalFilters.includes(color)) {
+            return; // Skip this color if it doesn't match the active filters
+          }
+          
+          // Find the matching metal option
+          const metalOption = product.metalOptions.find(option => option.color === color);
+          
+          if (metalOption) {
+            expandedProducts.push({
+              product,
+              metalOption: {
+                karat: metalOption.karat,
+                color: metalOption.color,
+                price: metalOption.price
+              },
+              imageUrl: getImageUrl(product, color)
+            });
+          }
+        });
+        
+        // If no variants were added (because of filters) and there are no active metal filters,
+        // add the default variant
+        if (expandedProducts.filter(ep => ep.product._id === product._id).length === 0 && activeMetalFilters.length === 0) {
+          const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
+          
+          expandedProducts.push({
+            product,
+            metalOption: {
+              karat: defaultMetal.karat,
+              color: defaultMetal.color,
+              price: defaultMetal.price
+            },
+            imageUrl: getImageUrl(product, defaultMetal.color)
+          });
+        }
+      } else {
+        // If no metalColorImages, just use the default metal option
+        const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
+        
+        // Only add if there are no metal filters or if the default metal matches the filters
+        if (activeMetalFilters.length === 0 || activeMetalFilters.includes(defaultMetal.color)) {
+          expandedProducts.push({
+            product,
+            metalOption: {
+              karat: defaultMetal.karat,
+              color: defaultMetal.color,
+              price: defaultMetal.price
+            },
+            imageUrl: getImageUrl(product, defaultMetal.color)
+          });
+        }
+      }
+    });
+    
+    return expandedProducts;
+  };
+
+  // Expand products with their metal color variants
+  const expandedProducts = expandProductsWithMetalColors(products, activeMetalFilters);
 
   if (loading && products.length === 0) {
     return (
@@ -161,7 +259,7 @@ export default function ProductGrid({
     );
   }
 
-  if (products.length === 0) {
+  if (expandedProducts.length === 0) {
     return (
       <div className="text-center p-8 bg-gray-50 rounded-lg">
         <p className="text-gray-500 text-lg mb-4">No products match your selected filters.</p>
@@ -178,18 +276,18 @@ export default function ProductGrid({
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-        {products.map((product, index) => (
+        {expandedProducts.map((item, index) => (
           <div 
-            key={product._id}
-            ref={index === products.length - 1 ? lastProductRef : null}
+            key={`${item.product._id}-${item.metalOption.color}`}
+            ref={index === expandedProducts.length - 1 ? lastProductRef : null}
             className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
           >
             <div className="relative">
-              <Link href={getProductUrl(product)}>
+              <Link href={getProductUrl(item.product, item.metalOption)}>
                 <div className="aspect-square overflow-hidden">
                   <Image
-                    src={getFirstImageUrl(product)}
-                    alt={product.title}
+                    src={item.imageUrl}
+                    alt={`${item.product.title} - ${item.metalOption.karat} ${item.metalOption.color}`}
                     fill
                     sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                     className="object-cover transform hover:scale-110 transition-transform duration-500"
@@ -198,14 +296,14 @@ export default function ProductGrid({
                 </div>
               </Link>
               
-              {/* SINGLE ADD TO CART BUTTON - POSITIONED ABSOLUTELY */}
+              {/* ADD TO CART BUTTON */}
               <button 
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleAddToCart(product._id);
+                  handleAddToCart(item.product._id, item.metalOption);
                 }}
-                disabled={addingProductId === product._id}
+                disabled={addingProductId === item.product._id}
                 className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition-colors shadow-md"
                 aria-label="Add to cart"
               >
@@ -216,44 +314,48 @@ export default function ProductGrid({
             </div>
             
             <div className="p-4">
-              <Link href={getProductUrl(product)}>
+              <Link href={getProductUrl(item.product, item.metalOption)}>
                 <h3 className="font-cinzel text-base sm:text-lg mb-2 text-gray-800 line-clamp-2 hover:text-amber-500 transition-colors">
-                  {product.title}
+                  {item.product.title}
                 </h3>
               </Link>
               
               <div className="space-y-1">
                 <p className="text-amber-600 font-semibold text-lg sm:text-xl">
-                  {formatPrice(product.basePrice)}
+                  ${formatPrice(item.metalOption.price)}
                 </p>
-                <p className="text-gray-500 text-sm">Starting price</p>
+                <p className="text-gray-500 text-sm">{item.metalOption.karat} {item.metalOption.color}</p>
               </div>
               
-              {/* Metal Options - Now Clickable */}
+              {/* Metal Options */}
               <div className="mt-3 flex flex-wrap gap-1">
-                {product.metalOptions.slice(0, 3).map((metal) => (
+                {item.product.metalOptions.slice(0, 3).map((metal) => (
                   <Link 
                     key={`${metal.karat}-${metal.color}`}
-                    href={getProductUrl(product, {karat: metal.karat, color: metal.color})}
-                    className="text-xs px-2 py-1 bg-gray-50 rounded-full text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    href={getProductUrl(item.product, {karat: metal.karat, color: metal.color})}
+                    className={`text-xs px-2 py-1 rounded-full transition-colors ${
+                      metal.color === item.metalOption.color
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-gray-50 text-gray-600 hover:bg-amber-50 hover:text-amber-700'
+                    }`}
                   >
                     {metal.karat} {metal.color}
                   </Link>
                 ))}
-                {product.metalOptions.length > 3 && (
+                {item.product.metalOptions.length > 3 && (
                   <Link 
-                    href={getProductUrl(product)}
+                    href={getProductUrl(item.product, item.metalOption)}
                     className="text-xs px-2 py-1 bg-gray-50 rounded-full text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors"
                   >
-                    +{product.metalOptions.length - 3} more
+                    +{item.product.metalOptions.length - 3} more
                   </Link>
                 )}
               </div>
               
-              {product.main_stone && (
+              {item.product.main_stone && (
                 <div className="mt-2 text-sm text-gray-600">
                   <span className="inline-block">
-                    {product.main_stone.carat_weight}ct {product.main_stone.type}
+                    {item.product.main_stone.carat_weight}ct {item.product.main_stone.type}
                   </span>
                 </div>
               )}
