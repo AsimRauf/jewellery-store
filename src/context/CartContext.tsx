@@ -9,6 +9,7 @@ interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  cartItemId?: string;
   metalOption?: {
     karat: string;
     color: string;
@@ -109,7 +110,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
         } else {
           // Add new item if it doesn't exist
-          updatedItems = [...currentItems, newItem];
+          // Add a unique identifier to each cart item to prevent key conflicts
+          const uniqueItem = {
+            ...newItem,
+            cartItemId: `${newItem._id}-${newItem.metalOption?.karat}-${newItem.metalOption?.color}-${Date.now()}`
+          };
+          updatedItems = [...currentItems, uniqueItem];
         }
         
         // Log the before and after state for debugging

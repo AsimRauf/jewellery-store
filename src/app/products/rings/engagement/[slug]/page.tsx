@@ -201,12 +201,24 @@ export default function ProductDetailPage() {
     setTotalPrice(metalPrice + sizeAdditionalPrice);
   }, [product, selectedMetal, selectedSize]);
   
+  // Add a new state to track image loading
+  const [imageLoading, setImageLoading] = useState(false);
+
   const handleMetalChange = (metalId: string) => {
     if (!product) return;
+    
+    // Set loading state to true when changing metal
+    setImageLoading(true);
     
     const metal = product.metalOptions.find((m: MetalOption) => m._id === metalId);
     if (metal) {
       setSelectedMetal(metal);
+      
+      // Reset loading state after a short delay or when images are loaded
+      // Using setTimeout to ensure the UI updates even if images load very quickly
+      setTimeout(() => {
+        setImageLoading(false);
+      }, 500);
     }
   };
   
@@ -222,12 +234,31 @@ export default function ProductDetailPage() {
   const handleAddToCart = () => {
     if (!product || !selectedMetal || !selectedSize) return;
     
+    // Get the appropriate image URL based on the selected metal
+    let imageUrl = '';
+    
+    // First try to get the image from metalColorImages
+    if (product.metalColorImages && 
+        product.metalColorImages[selectedMetal.color] && 
+        product.metalColorImages[selectedMetal.color].length > 0) {
+      imageUrl = product.metalColorImages[selectedMetal.color][0].url;
+    } 
+    // If no metal color image, fall back to the first product image
+    else if (product.media.images && product.media.images.length > 0) {
+      imageUrl = product.media.images[0].url;
+    } 
+    // Last resort fallback
+    else {
+      imageUrl = '/placeholder-ring.jpg';
+    }
+    
+    // Now add the item with the correct image
     addItem({
       _id: product._id,
       title: product.title,
       price: totalPrice,
       quantity: 1,
-      image: product.media.images[0]?.url || '/placeholder-ring.jpg',
+      image: imageUrl, // Use the image URL we determined above
       metalOption: {
         karat: selectedMetal.karat,
         color: selectedMetal.color
