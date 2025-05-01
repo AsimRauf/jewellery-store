@@ -162,9 +162,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       return [];
     }
 
-    console.log(`Expanding ${products.length} products with metal colors`);
-    console.log('Active metal filters:', activeMetalFilters);
-
     products.forEach(product => {
       // Ensure product and metalOptions exist
       if (!product || !product.metalOptions || !Array.isArray(product.metalOptions)) {
@@ -172,29 +169,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         return;
       }
 
-      console.log(`Processing product: ${product.title}`);
-      console.log(`  Metal options: ${product.metalOptions.map(m => m.color).join(', ')}`);
-      console.log(`  Metal color images: ${product.metalColorImages ? Object.keys(product.metalColorImages).join(', ') : 'none'}`);
-
       // If we have metal color images, use them
       if (product.metalColorImages && Object.keys(product.metalColorImages).length > 0) {
         let addedAnyVariant = false;
         
         // For each metal color image, add a product variant if it matches the active filters
         Object.keys(product.metalColorImages).forEach(color => {
-          console.log(`  Checking color: ${color}, Active filters: ${activeMetalFilters.join(', ')}`);
           
           // If activeMetalFilters is empty, show all colors
           // Otherwise, only show colors that match the active filters
           if (activeMetalFilters.length > 0 && !activeMetalFilters.includes(color)) {
-            console.log(`    Skipping color ${color} - not in active filters`);
             return;
           }
           
           const metalOption = product.metalOptions.find(option => option.color === color);
           
           if (metalOption) {
-            console.log(`    Adding variant for color ${color}`);
             expandedProducts.push({
               product,
               metalOption: {
@@ -207,7 +197,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             });
             addedAnyVariant = true;
           } else {
-            console.log(`    No metal option found for color ${color}`);
           }
         });
         
@@ -216,7 +205,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
           
           if (defaultMetal) {
-            console.log(`  Adding default variant with color ${defaultMetal.color}`);
             expandedProducts.push({
               product,
               metalOption: {
@@ -228,7 +216,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               imageUrl: getImageUrl(product, defaultMetal.color)
             });
           } else {
-            console.log(`  No default metal option found`);
           }
         }
       } else {
@@ -236,7 +223,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
         
         if (defaultMetal) {
-          console.log(`  No metal color images, adding default variant with color ${defaultMetal.color}`);
           expandedProducts.push({
             product,
             metalOption: {
@@ -248,12 +234,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             imageUrl: getImageUrl(product, defaultMetal.color)
           });
         } else {
-          console.log(`  No default metal option found`);
         }
       }
     });
     
-    console.log(`Expanded ${products.length} products into ${expandedProducts.length} product variants`);
     return expandedProducts;
   };
 
@@ -297,6 +281,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       </div>
     );
   }
+
 
   return (
     <div className="space-y-8">

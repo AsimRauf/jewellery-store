@@ -529,21 +529,6 @@ export default function WeddingCategoryPage() {
           />
         </div>
         
-        {/* Add debug info */}
-        {process.env.NODE_ENV !== 'production' && (
-          <div className="mb-4 p-2 bg-gray-100 text-xs">
-            <p>Debug: {products.length} products to render</p>
-            <p>Active filters: {JSON.stringify({
-              styles: filters.styles,
-              types: filters.types,
-              subcategories: filters.subcategories,
-              metalColors: filters.metalColors,
-              priceRange: filters.priceRange,
-              finishTypes: filters.finishTypes
-            }, null, 2)}</p>
-          </div>
-        )}
-        
         <ProductGrid 
           products={products}
           loading={loading}
