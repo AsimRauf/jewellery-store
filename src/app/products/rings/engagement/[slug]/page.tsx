@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
   }, [product, selectedMetal, selectedSize]);
   
   // Add a new state to track image loading
-  const [imageLoading, setImageLoading] = useState(false);
+  const [, setImageLoading] = useState(false);
 
   const handleMetalChange = (metalId: string) => {
     if (!product) return;

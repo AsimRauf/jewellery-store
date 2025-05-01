@@ -6,6 +6,7 @@ import ImageUpload from '@/components/admin/ImageUpload';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
+import MetalOptionImageUpload from '@/components/admin/MetalOptionImageUpload';
 
 // Define type for condition function
 type ConditionFunction = (formData: FormDataType) => boolean;
@@ -37,17 +38,6 @@ interface MetalOption {
   isDefault: boolean;
 }
 
-interface MainStone {
-  type: string;
-  gemstone_type: string;
-  number_of_stones: number;
-  carat_weight: number;
-  shape: string;
-  color: string;
-  clarity: string;
-  hardness: number;
-}
-
 interface SideStone {
   type: string;
   number_of_stones: number;
@@ -66,11 +56,20 @@ interface Media {
 }
 
 // First, update the FormDataType interface to better handle nested properties
-type FormDataValue = string | number | boolean | string[] | MetalOption[] | Array<{
-  size: number;
-  isAvailable: boolean;
-  additionalPrice: number;
-}> | MainStone | SideStone | Media;
+type FormDataValue = 
+  | string 
+  | number 
+  | boolean 
+  | string[] 
+  | MetalOption[] 
+  | Array<{
+      size: number;
+      isAvailable: boolean;
+      additionalPrice: number;
+    }> 
+  | SideStone 
+  | Media
+  | Record<string, Array<{ url: string; publicId: string; }>>;
 
 interface FormDataType {
   title: string;
@@ -81,12 +80,12 @@ interface FormDataType {
   SKU: string;
   basePrice: number;
   metalOptions: MetalOption[];
+  metalColorImages: Record<string, Array<{ url: string; publicId: string; }>>;
   sizes: Array<{
     size: number;
     isAvailable: boolean;
     additionalPrice: number;
   }>;
-  main_stone: MainStone;
   side_stone: SideStone;
   media: Media;
   description: string;
@@ -103,8 +102,8 @@ const formSections: FormSection[] = [
       { name: "subcategory", label: "Subcategory", type: "select", required: true, options: RingEnums.SUBCATEGORIES },
       { name: "SKU", label: "SKU", type: "text", required: true },
       { name: "basePrice", label: "Base Price", type: "number", required: true, min: 0, step: 0.01 },
-      { name: "style", label: "Styles", type: "select", multiple: true, options: RingEnums.STYLES },
-      { name: "type", label: "Types", type: "select", multiple: true, options: RingEnums.TYPES }
+      { name: "style", label: "Styles", type: "checkbox", options: RingEnums.STYLES },
+      { name: "type", label: "Types", type: "checkbox", options: RingEnums.TYPES }
     ]
   },
   {
@@ -134,24 +133,6 @@ const formSections: FormSection[] = [
     ]
   },
   {
-    title: "Main Stone Details",
-    fields: [
-      { name: "main_stone.type", label: "Stone Type", type: "select", required: true, options: RingEnums.MAIN_STONE_TYPES },
-      { 
-        name: "main_stone.gemstone_type", 
-        label: "Gemstone Type", 
-        type: "select", 
-        options: RingEnums.GEMSTONE_TYPES,
-        condition: (formData) => formData.main_stone?.type === 'Gemstone'
-      },
-      { name: "main_stone.number_of_stones", label: "Number of Stones", type: "number", min: 0 },
-      { name: "main_stone.carat_weight", label: "Carat Weight", type: "number", min: 0, step: 0.01 },
-      { name: "main_stone.shape", label: "Stone Shape", type: "select", options: RingEnums.STONE_SHAPES },
-      { name: "main_stone.color", label: "Stone Color", type: "select", options: RingEnums.STONE_COLORS },
-      { name: "main_stone.clarity", label: "Stone Clarity", type: "select", options: RingEnums.STONE_CLARITIES }
-    ]
-  },
-  {
     title: "Side Stone Details",
     fields: [
       { name: "side_stone.type", label: "Stone Type", type: "select", options: RingEnums.SIDE_STONE_TYPES },
@@ -175,6 +156,7 @@ function SizeMatrix({ sizes, onChange }: {
   sizes: Array<{size: number; isAvailable: boolean; additionalPrice: number}>; 
   onChange: (sizes: Array<{size: number; isAvailable: boolean; additionalPrice: number}>) => void; 
 }) {
+  // SizeMatrix component implementation remains the same
   const [defaultAdditionalPrice, setDefaultAdditionalPrice] = useState(0);
 
   // Function to handle "Select All" with default price
@@ -298,8 +280,6 @@ function SizeMatrix({ sizes, onChange }: {
   );
 }
 
-// Update MetalOptionsMatrix type
-
 function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: { 
   metalOptions: MetalOption[]; 
   onChange: (metalOptions: MetalOption[]) => void;
@@ -315,7 +295,7 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
     total_carat_weight: 0,
     isDefault: false
   });
-
+  
   // Update new metal option price when base price changes
   useEffect(() => {
     setNewMetalOption(prev => ({
@@ -616,6 +596,56 @@ function MetalOptionsMatrix({ metalOptions, onChange, basePrice }: {
   );
 }
 
+// New component for checkbox group
+function CheckboxGroup({ 
+  options, 
+  value, 
+  onChange, 
+  name 
+}: { 
+  options: string[]; 
+  value: string[]; 
+  onChange: (value: string[]) => void;
+  name: string;
+}) {
+  const handleChange = (option: string) => {
+    const newValue = [...value];
+    const index = newValue.indexOf(option);
+    
+    if (index === -1) {
+      // Add the option if it's not already selected
+      newValue.push(option);
+    } else {
+      // Remove the option if it's already selected
+      newValue.splice(index, 1);
+    }
+    
+    onChange(newValue);
+  };
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      {options.map(option => (
+        <div key={`${name}-${option}`} className="flex items-center">
+          <input
+            type="checkbox"
+            id={`${name}-${option}`}
+            checked={value.includes(option)}
+            onChange={() => handleChange(option)}
+            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 mr-2"
+          />
+          <label 
+            htmlFor={`${name}-${option}`}
+            className="text-sm text-gray-700 cursor-pointer"
+          >
+            {option}
+          </label>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AddWeddingRing() {
   const { user, loading } = useUser();
   const router = useRouter();
@@ -630,17 +660,8 @@ export default function AddWeddingRing() {
     SKU: '',
     basePrice: 0,
     metalOptions: [],
+    metalColorImages: {},
     sizes: [],
-    main_stone: {
-      type: '',
-      gemstone_type: '',
-      number_of_stones: 0,
-      carat_weight: 0,
-      shape: '',
-      color: '',
-      clarity: '',
-      hardness: 0
-    },
     side_stone: {
       type: '',
       number_of_stones: 0,
@@ -663,6 +684,7 @@ export default function AddWeddingRing() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
   const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
+  const [metalColorTemporaryImages, setMetalColorTemporaryImages] = useState<Record<string, File[]>>({});
 
   useEffect(() => {
     // Check authentication and admin status
@@ -690,314 +712,430 @@ export default function AddWeddingRing() {
     return null;
   }
 
-  // Modify handleSubmit to better handle auth errors
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      let uploadedImages: Array<{ url: string; publicId: string }> = [];
-      if (temporaryImages.length > 0) {
-        toast.loading('Uploading images...', { id: 'uploadProgress' });
+    // Handle metal color images
+    const handleMetalColorImagesSelect = (color: string, files: File[]) => {
+      setMetalColorTemporaryImages(prev => ({
+        ...prev,
+        [color]: files
+      }));
+    };
+  
+    const handleMetalColorImageRemove = (color: string, index: number) => {
+      setMetalColorTemporaryImages(prev => {
+        const newImages = { ...prev };
+        if (newImages[color]) {
+          newImages[color] = newImages[color].filter((_, i) => i !== index);
+        }
+        return newImages;
+      });
+    };
+  
+    // Modify handleSubmit to better handle auth errors and upload metal color images
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+  
+      try {
+        // Upload main product images
+        let uploadedImages: Array<{ url: string; publicId: string }> = [];
+        if (temporaryImages.length > 0) {
+          toast.loading('Uploading product images...', { id: 'uploadProgress' });
+          
+          uploadedImages = await Promise.all(
+            temporaryImages.map(async (file) => {
+              const base64 = await convertToBase64(file);
+              const response = await fetch('/api/upload/image', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ 
+                  file: base64,
+                  category: 'wedding'
+                })
+              });
+              
+              if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to upload image');
+              }
+              
+              return response.json();
+            })
+          );
+  
+          toast.success('Product images uploaded successfully', { id: 'uploadProgress' });
+        }
+  
+        // Upload metal color images
+        const metalColorImages: Record<string, Array<{ url: string; publicId: string }>> = {};
         
-        uploadedImages = await Promise.all(
-          temporaryImages.map(async (file) => {
-            const base64 = await convertToBase64(file);
-            const response = await fetch('/api/upload/image', {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-              body: JSON.stringify({ 
-                file: base64,
-                category: 'wedding'
-              })
-            });
-            
-            if (!response.ok) {
-              const error = await response.json();
-              throw new Error(error.error || 'Failed to upload image');
+        if (Object.keys(metalColorTemporaryImages).length > 0) {
+          toast.loading('Uploading metal color images...', { id: 'metalColorProgress' });
+          
+          for (const [color, files] of Object.entries(metalColorTemporaryImages)) {
+            if (files.length > 0) {
+              const colorImages = await Promise.all(
+                files.map(async (file) => {
+                  const base64 = await convertToBase64(file);
+                  const response = await fetch('/api/upload/image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ 
+                      file: base64,
+                      category: `wedding/metal-colors/${color.toLowerCase()}`
+                    })
+                  });
+                  
+                  if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to upload metal color image');
+                  }
+                  
+                  return response.json();
+                })
+              );
+              
+              metalColorImages[color] = colorImages;
             }
-            
-            return response.json();
-          })
-        );
-
-        toast.success('Images uploaded successfully', { id: 'uploadProgress' });
-      }
-
-      // Upload video if exists
-      let videoData = { url: '', publicId: '' };
-      if (temporaryVideo) {
-        toast.loading('Uploading video...', { id: 'videoProgress' });
-        const base64 = await convertToBase64(temporaryVideo);
-        const response = await fetch('/api/upload/video', {
+          }
+          
+          toast.success('Metal color images uploaded successfully', { id: 'metalColorProgress' });
+        }
+  
+        // Upload video if exists
+        let videoData = { url: '', publicId: '' };
+        if (temporaryVideo) {
+          toast.loading('Uploading video...', { id: 'videoProgress' });
+          const base64 = await convertToBase64(temporaryVideo);
+          const response = await fetch('/api/upload/video', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+              file: base64,
+              category: 'wedding'
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to upload video');
+          }
+          const result = await response.json();
+          videoData = { url: result.url, publicId: result.publicId };
+          toast.success('Video uploaded successfully', { id: 'videoProgress' });
+        }
+  
+        // Prepare final data
+        const finalData = {
+          ...formData,
+          media: {
+            images: uploadedImages,
+            video: videoData
+          },
+          metalColorImages
+        };
+  
+        // Save ring data
+        toast.loading('Saving ring details...', { id: 'saveProgress' });
+        const response = await fetch('/api/admin/rings/wedding', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ 
-            file: base64,
-            category: 'wedding'
-          })
+          body: JSON.stringify(finalData)
         });
-        
+  
         if (!response.ok) {
-          throw new Error('Failed to upload video');
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create ring');
         }
-        const result = await response.json();
-        videoData = { url: result.url, publicId: result.publicId };
-        toast.success('Video uploaded successfully', { id: 'videoProgress' });
+  
+        toast.success('Ring created successfully', { id: 'saveProgress' });
+        router.push('/admin/rings/wedding/list');
+  
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'An error occurred';
+        toast.error(message);
+        
+        // Handle authentication errors
+        if (message.includes('Authentication') || message.includes('Admin')) {
+          router.push('/login');
+        }
+      } finally {
+        setIsSubmitting(false);
       }
-
-      // Prepare final data
-      const finalData = {
-        ...formData,
-        media: {
-          images: uploadedImages,
-          video: videoData
-        }
-      };
-
-      // Save ring data
-      toast.loading('Saving ring details...', { id: 'saveProgress' });
-      const response = await fetch('/api/admin/rings/wedding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(finalData)
+    };
+  
+    // Helper function to convert File to base64
+    const convertToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create ring');
-      }
-
-      toast.success('Ring created successfully', { id: 'saveProgress' });
-      router.push('/admin/rings/wedding/list');
-
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'An error occurred';
-      toast.error(message);
+    };
+  
+    // Type definitions for event handlers
+    interface NestedObject {
+      [key: string]: FormDataValue | NestedObject;
+    }
+  
+    // Update the handleFieldChange function
+    const handleFieldChange = (name: string, value: unknown) => {
+      const fields = name.split('.');
       
-      // Handle authentication errors
-      if (message.includes('Authentication') || message.includes('Admin')) {
-        router.push('/login');
+      if (fields.length === 1) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value as FormDataValue
+        }));
+      } else {
+        setFormData(prev => {
+          const result = { ...prev } as NestedObject;
+          let current = result;
+          
+          // Traverse the object until the second-to-last field
+          for (let i = 0; i < fields.length - 1; i++) {
+            current = current[fields[i]] as NestedObject;
+          }
+          
+          // Set the value on the last field
+          current[fields[fields.length - 1]] = value as FormDataValue;
+          return result as FormDataType;
+        });
       }
-    } finally {
-      setIsSubmitting(false);
+    };
+  
+    // Update the getFieldValue function
+    const getFieldValue = (field: string): FormDataValue | undefined => {
+      const fields = field.split('.');
+      if (fields.length === 1) {
+        return formData[field as keyof FormDataType];
+      }
+      
+      let current: NestedObject = formData as unknown as NestedObject;
+      for (const key of fields) {
+        if (current === undefined || current === null) return undefined;
+        current = current[key] as NestedObject;
+      }
+      
+      return current as unknown as FormDataValue;
+    };
+  
+    // Type the field parameter
+    interface FieldConfig {
+      name: string;
+      label: string;
+      type: string;
+      required?: boolean;
+      options?: Array<string | { size: number; label: string }>;
+      multiple?: boolean;
+      min?: number;
+      max?: number;
+      step?: number;
+      condition?: ConditionFunction;
     }
-  };
-
-  // Helper function to convert File to base64
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  };
-
-  // Type definitions for event handlers
-  interface NestedObject {
-    [key: string]: FormDataValue | NestedObject;
-  }
-
-  // Update the handleFieldChange function
-  const handleFieldChange = (name: string, value: unknown) => {
-    const fields = name.split('.');
-    
-    if (fields.length === 1) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value as FormDataValue
-      }));
-    } else {
-      setFormData(prev => {
-        const result = { ...prev } as NestedObject;
-        let current = result;
-        
-        // Traverse the object until the second-to-last field
-        for (let i = 0; i < fields.length - 1; i++) {
-          current = current[fields[i]] as NestedObject;
-        }
-        
-        // Set the value on the last field
-        current[fields[fields.length - 1]] = value as FormDataValue;
-        return result as FormDataType;
-      });
+  
+    interface SelectOption {
+      size?: number;
+      label: string;
+      value?: string;
     }
-  };
-
-  // Update the getFieldValue function
-  const getFieldValue = (field: string): FormDataValue | undefined => {
-    const fields = field.split('.');
-    if (fields.length === 1) {
-      return formData[field as keyof FormDataType];
-    }
-    
-    let current: NestedObject = formData as unknown as NestedObject;
-    for (const key of fields) {
-      if (current === undefined || current === null) return undefined;
-      current = current[key] as NestedObject;
-    }
-    
-    return current as unknown as FormDataValue;
-  };
-
-  // Type the field parameter
-  interface FieldConfig {
-    name: string;
-    label: string;
-    type: string;
-    required?: boolean;
-    options?: Array<string | { size: number; label: string }>;
-    multiple?: boolean;
-    min?: number;
-    max?: number;
-    step?: number;
-    condition?: ConditionFunction;
-  }
-
-  interface SelectOption {
-    size?: number;
-    label: string;
-    value?: string;
-  }
-
-  // Update the select rendering logic with better type handling
-  const renderSelect = (field: FieldConfig, value: FormDataValue | undefined): JSX.Element => {
-    const stringValue = field.multiple 
-      ? (Array.isArray(value) ? value.map(v => v?.toString() || '') : [])
-      : (value?.toString() || '');
-
-    return (
-      <div className="relative">
-        <select
-          value={stringValue}
-          onChange={(e) => handleFieldChange(
-            field.name,
-            field.multiple 
-              ? Array.from(e.target.selectedOptions, option => option.value)
-              : e.target.value
-          )}
-          multiple={field.multiple}
-          required={field.required}
-          className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 
-            focus:border-transparent transition-all duration-300 hover:border-purple-300
-            disabled:bg-gray-50 disabled:text-gray-500
-            ${field.multiple ? 'min-h-[120px] custom-multiselect' : 'appearance-none bg-white'}`}
-          size={field.multiple ? Math.min(7, field.options?.length || 4) : 1}
-        >
-          {!field.multiple && <option value="">Select {field.label}</option>}
-          {field.options?.map((option: SelectOption | string) => (
-            typeof option === 'string' ? (
-              <option 
-                key={option} 
-                value={option}
-                className="py-2 px-3 hover:bg-purple-50"
-              >
-                {option}
-              </option>
-            ) : (
-              <option 
-                key={option.size || option.label} 
-                value={option.size?.toString() || option.value || ''}
-                className="py-2 px-3 hover:bg-purple-50"
-              >
-                {option.label}
-              </option>
-            )
-          ))}
-        </select>
-      </div>
-    );
-  };
-
-  // Update renderField function with proper type handling
-  const renderField = (field: FieldConfig) => {
-    if (field.condition && !field.condition(formData)) {
-      return null;
-    }
-
-    const value = getFieldValue(field.name);
-
-    if (field.type === 'sizeMatrix') {
+  
+    // Update the select rendering logic with better type handling
+    const renderSelect = (field: FieldConfig, value: FormDataValue | undefined): JSX.Element => {
+      const stringValue = field.multiple 
+        ? (Array.isArray(value) ? value.map(v => v?.toString() || '') : [])
+        : (value?.toString() || '');
+  
       return (
-        <SizeMatrix
-          sizes={(Array.isArray(value) ? value : []) as Array<{size: number; isAvailable: boolean; additionalPrice: number}>}
+        <div className="relative">
+          <select
+            value={stringValue}
+            onChange={(e) => handleFieldChange(
+              field.name,
+              field.multiple 
+                ? Array.from(e.target.selectedOptions, option => option.value)
+                : e.target.value
+            )}
+            multiple={field.multiple}
+            required={field.required}
+            className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 
+              focus:border-transparent transition-all duration-300 hover:border-purple-300
+              disabled:bg-gray-50 disabled:text-gray-500
+              ${field.multiple ? 'min-h-[120px] custom-multiselect' : 'appearance-none bg-white'}`}
+            size={field.multiple ? Math.min(7, field.options?.length || 4) : 1}
+          >
+            {!field.multiple && <option value="">Select {field.label}</option>}
+            {field.options?.map((option: SelectOption | string) => (
+              typeof option === 'string' ? (
+                <option 
+                  key={option} 
+                  value={option}
+                  className="py-2 px-3 hover:bg-purple-50"
+                >
+                  {option}
+                </option>
+              ) : (
+                <option 
+                  key={option.size || option.label} 
+                  value={option.size?.toString() || option.value || ''}
+                  className="py-2 px-3 hover:bg-purple-50"
+                >
+                  {option.label}
+                </option>
+              )
+            ))}
+          </select>
+        </div>
+      );
+    };
+  
+    // Render checkbox group for styles and types
+    const renderCheckboxGroup = (field: FieldConfig, value: FormDataValue | undefined): JSX.Element => {
+      const arrayValue = Array.isArray(value) ? value : [];
+      
+      return (
+        <CheckboxGroup
+          name={field.name}
+          options={field.options as string[] || []}
+          value={arrayValue as string[]}
           onChange={(newValue) => handleFieldChange(field.name, newValue)}
         />
       );
-    }
-
-    if (field.type === 'metalOptionsMatrix') {
+    };
+  
+    // Update renderField function with proper type handling
+    const renderField = (field: FieldConfig) => {
+      if (field.condition && !field.condition(formData)) {
+        return null;
+      }
+  
+      const value = getFieldValue(field.name);
+  
+      if (field.type === 'sizeMatrix') {
+        return (
+          <SizeMatrix
+            sizes={(Array.isArray(value) ? value : []) as Array<{size: number; isAvailable: boolean; additionalPrice: number}>}
+            onChange={(newValue) => handleFieldChange(field.name, newValue)}
+          />
+        );
+      }
+  
+      if (field.type === 'metalOptionsMatrix') {
+        return (
+          <MetalOptionsMatrix
+            metalOptions={formData.metalOptions}
+            onChange={(newValue) => handleFieldChange('metalOptions', newValue)}
+            basePrice={formData.basePrice}
+          />
+        );
+      }
+  
+      if (field.type === 'select') {
+        return renderSelect(field, value);
+      }
+  
+      if (field.type === 'checkbox' && field.options) {
+        return renderCheckboxGroup(field, value);
+      }
+  
+      if (field.type === 'textarea') {
+        return (
+          <textarea
+            value={value?.toString() || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            required={field.required}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 
+            focus:border-transparent transition-all duration-300 hover:border-purple-300 min-h-[120px]"
+            placeholder={`Enter ${field.label.toLowerCase()}...`}
+          />
+        );
+      }
+  
       return (
-        <MetalOptionsMatrix
-          metalOptions={formData.metalOptions}
-          onChange={(newValue) => handleFieldChange('metalOptions', newValue)}
-          basePrice={formData.basePrice}
-        />
-      );
-    }
-
-    if (field.type === 'select') {
-      return renderSelect(field, value);
-    }
-
-    if (field.type === 'textarea') {
-      return (
-        <textarea
+        <input
+          type={field.type}
           value={value?.toString() || ''}
-          onChange={(e) => handleFieldChange(field.name, e.target.value)}
+          onChange={(e) => handleFieldChange(
+            field.name, 
+            field.type === 'number' ? parseFloat(e.target.value) : e.target.value
+          )}
           required={field.required}
+          min={field.min}
+          max={field.max}
+          step={field.step}
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 
-          focus:border-transparent transition-all duration-300 hover:border-purple-300 min-h-[120px]"
+          focus:border-transparent transition-all duration-300 hover:border-purple-300"
           placeholder={`Enter ${field.label.toLowerCase()}...`}
         />
       );
-    }
-
+    };
+  
+    // Render metal color image uploads
+    const renderMetalColorImageUploads = () => {
+      if (!formData.metalOptions || formData.metalOptions.length === 0) {
+        return (
+          <div className="text-gray-500 italic">
+            Add metal options first to upload color-specific images
+          </div>
+        );
+      }
+  
+      // Get unique colors from metal options
+      const uniqueColors = Array.from(
+        new Set(formData.metalOptions.map(option => option.color))
+      );
+  
+      return (
+        <div className="space-y-6">
+          {uniqueColors.map((color, index) => {
+            const existingImages = formData.metalColorImages[color] || [];
+            const tempImages = metalColorTemporaryImages[color] || [];
+            
+            return (
+              <div key={`color-${color}`} className="p-4 border border-gray-200 rounded-lg">
+                <h4 className="font-medium text-gray-800 mb-2">{color} Images</h4>
+                <MetalOptionImageUpload
+                  metalIndex={index}
+                  colorKey={color}
+                  images={existingImages}
+                  temporaryImages={tempImages}
+                  onImagesSelect={(_, files) => handleMetalColorImagesSelect(color, files)}
+                  onImageRemove={(_, imageIndex) => handleMetalColorImageRemove(color, imageIndex)}
+                  maxImages={5}
+                />
+              </div>
+            );
+          })}
+        </div>
+      );
+    };
+  
     return (
-      <input
-        type={field.type}
-        value={value?.toString() || ''}
-        onChange={(e) => handleFieldChange(
-          field.name, 
-          field.type === 'number' ? parseFloat(e.target.value) : e.target.value
-        )}
-        required={field.required}
-        min={field.min}
-        max={field.max}
-        step={field.step}
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 
-        focus:border-transparent transition-all duration-300 hover:border-purple-300"
-        placeholder={`Enter ${field.label.toLowerCase()}...`}
-      />
-    );
-  };
-
-  return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-6 text-white">
-        <h1 className="text-3xl font-bold">Add New Wedding Ring</h1>
-        <p className="mt-2 text-purple-100">Create a stunning new addition to your wedding collection</p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {formSections.map((section) => (
-          <section 
-            key={section.title} 
-            className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:border-purple-200 transition-all duration-300"
-          >
-            <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
-              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-              {section.title}
-            </h2>
-            <div className={`grid grid-cols-1 ${section.title === "Metal Options" ? "" : "md:grid-cols-2"} gap-6`}>
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-6 text-white">
+          <h1 className="text-3xl font-bold">Add New Wedding Ring</h1>
+          <p className="mt-2 text-purple-100">Create a stunning new addition to your wedding collection</p>
+        </div>
+  
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {formSections.map((section) => (
+            <section 
+              key={section.title} 
+              className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:border-purple-200 transition-all duration-300"
+            >
+              <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
+                <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                {section.title}
+              </h2>
+              
+              <div className={`grid grid-cols-1 ${section.title === "Metal Options" ? "" : "md:grid-cols-2"} gap-6`}>
               {section.fields.map((field) => (
-                <div key={field.name} className={`group ${field.type === 'sizeMatrix' || field.type === 'metalOptionsMatrix' ? 'col-span-full' : ''}`}>
+                <div key={field.name} className={`group ${field.type === 'sizeMatrix' || field.type === 'metalOptionsMatrix' || field.type === 'checkbox' ? 'col-span-full' : ''}`}>
                   <label className="block text-sm font-medium mb-2 text-gray-700">
                     {field.label}
                     {field.required && <span className="text-red-500 ml-1">*</span>}
@@ -1012,7 +1150,7 @@ export default function AddWeddingRing() {
         <section className="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
           <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
             <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-            Images
+            Product Images
           </h2>
           <ImageUpload
             onImagesSelect={setTemporaryImages}
@@ -1021,6 +1159,14 @@ export default function AddWeddingRing() {
             temporaryVideo={temporaryVideo}
             maxImages={10}
           />
+        </section>
+
+        <section className="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
+          <h2 className="text-xl font-semibold mb-6 text-gray-800 flex items-center">
+            <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+            Metal Color Images
+          </h2>
+          {renderMetalColorImageUploads()}
         </section>
 
         <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 bg-white p-6 rounded-lg shadow-lg sticky bottom-0">
@@ -1076,4 +1222,3 @@ export default function AddWeddingRing() {
     </div>
   );
 }
-

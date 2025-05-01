@@ -20,21 +20,15 @@ interface IWeddingRing {
     total_carat_weight?: number;
     isDefault: boolean;
   }>;
+  metalColorImages: Map<string, Array<{
+    url: string;
+    publicId: string;
+  }>>;
   sizes: Array<{
     size: number;
     isAvailable: boolean;
     additionalPrice: number;
   }>;
-  main_stone: {
-    type: string;
-    gemstone_type?: string;
-    number_of_stones: number;
-    carat_weight: number;
-    shape: string;
-    color: string;
-    clarity: string;
-    hardness: number;
-  };
   side_stone: {
     type: string;
     number_of_stones: number;
@@ -56,6 +50,9 @@ interface IWeddingRing {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
+  isNew?: boolean;
+  onSale?: boolean;
+  originalPrice?: number;
 }
 
 // Define interface for WeddingRing methods
@@ -65,7 +62,6 @@ interface IWeddingRingMethods {
 }
 
 // Define interface for WeddingRing model
-// Fix for line 68 - use 'object' instead of '{}'
 type WeddingRingModel = mongoose.Model<IWeddingRing, object, IWeddingRingMethods>;
 
 const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IWeddingRingMethods>({
@@ -122,7 +118,6 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
       finish_type: {
         type: Schema.Types.Mixed,
         validate: {
-          // Fix for line 124 - replace 'any' with a more specific type
           validator: function(value: string | null | undefined) {
             // Allow empty string, null, undefined, or valid enum value
             return !value || value === '' || RingEnums.FINISH_TYPES.includes(value);
@@ -140,6 +135,10 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
     }],
     required: true,
     validate: [arrayMinLength, 'At least one metal option must be available']
+  },
+  metalColorImages: {
+    type: Object,  // Use Object instead of Map
+    default: {}
   },
   sizes: {
     type: [{
@@ -159,48 +158,6 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
     }],
     required: true,
     validate: [arrayMinLength, 'At least one size must be available']
-  },
-  main_stone: {
-    type: {
-      type: String,
-      enum: [...RingEnums.MAIN_STONE_TYPES, ''], // Allow empty string
-      default: ''
-    },
-    gemstone_type: {
-      type: String,
-      enum: [...RingEnums.GEMSTONE_TYPES, ''], // Allow empty string
-      default: '',
-      required: function(this: IWeddingRing) {
-        return this.main_stone?.type === 'Gemstone';
-      }
-    },
-    number_of_stones: {
-      type: Number,
-      default: 0
-    },
-    carat_weight: {
-      type: Number,
-      default: 0
-    },
-    shape: {
-      type: String,
-      enum: [...RingEnums.STONE_SHAPES, ''], // Allow empty string
-      default: ''
-    },
-    color: {
-      type: String,
-      enum: [...RingEnums.STONE_COLORS, ''], // Allow empty string
-      default: ''
-    },
-    clarity: {
-      type: String,
-      enum: [...RingEnums.STONE_CLARITIES, ''], // Allow empty string
-      default: ''
-    },
-    hardness: {
-      type: Number,
-      default: 0
-    }
   },
   side_stone: {
     type: {
@@ -262,12 +219,22 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
   isFeatured: { 
     type: Boolean, 
     default: false 
+  },
+  isNew: {
+    type: Boolean,
+    default: false
+  },
+  onSale: {
+    type: Boolean,
+    default: false
+  },
+  originalPrice: {
+    type: Number
   }
 }, {
   timestamps: true
 });
 
-// Fix for line 268 - replace 'any[]' with a more specific type
 function arrayMinLength(val: unknown[]): boolean {
   return val.length > 0;
 }

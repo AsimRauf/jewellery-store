@@ -24,17 +24,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const ringData = await request.json();
-
-    // Add audit fields
-    const ring = new WeddingRing({
-      ...ringData,
+    const data = await request.json();
+    
+    // Log the received data for debugging
+    console.log("Received metalColorImages:", JSON.stringify(data.metalColorImages, null, 2));
+    
+    // Create a proper Mongoose Map for metalColorImages
+    const metalColorImagesMap = new Map();
+    
+    if (data.metalColorImages && typeof data.metalColorImages === 'object') {
+      Object.entries(data.metalColorImages).forEach(([color, images]) => {
+        metalColorImagesMap.set(color, images);
+      });
+    }
+    
+    // Create the transformed data with the Map
+    const transformedData = {
+      ...data,
+      metalColorImages: metalColorImagesMap,
       createdBy: decoded.userId,
       updatedBy: decoded.userId,
       createdAt: new Date(),
       updatedAt: new Date()
-    });
-
+    };
+    
+    // Create or update the ring
+    const ring = new WeddingRing(transformedData);
+    
+    // Debug
+    console.log("Ring object before save (metalColorImages):", 
+      ring.get('metalColorImages') instanceof Map ? "Is a Map" : "Not a Map");
+    
     await ring.save();
 
     return NextResponse.json({

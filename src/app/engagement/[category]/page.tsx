@@ -316,48 +316,63 @@ export default function EngagementCategoryPage() {
     setPage(1);
   }, [searchParams]);
 
+  // Add a state to track if initial filters have been set
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // Update the useEffect that sets initial filters based on category
   useEffect(() => {
-    if (category) {
-      if (category.startsWith('metal-')) {
-        // Special case for Two Tone Gold
-        if (category === 'metal-two-tone-gold') {
-          setFilters(prev => ({
-            ...prev,
-            metalColors: ['Two Tone Gold']
-          }));
-        } else {
-          const metalColor = category
-            .replace('metal-', '')
+    if (!initialLoadComplete && category) {
+      console.log('Setting initial filters based on category:', category);
+      
+      // Only set category-based filters if no URL params exist
+      const hasExistingFilters = Array.from(searchParams?.entries() || []).length > 0;
+      
+      if (!hasExistingFilters) {
+        let newFilters = {...filters};
+        
+        // Reset filters when category changes from URL
+        newFilters = {
+          styles: [],
+          types: [],
+          metalColors: [],
+          priceRange: null,
+          caratRange: null,
+          gemstoneTypes: [],
+          stoneTypes: []
+        };
+
+        // Set initial filters based on category
+        if (category.startsWith('metal-')) {
+          // Special case for Two Tone Gold
+          if (category === 'metal-two-tone-gold') {
+            newFilters.metalColors = ['Two Tone Gold'];
+          } else {
+            const metalColor = category
+              .replace('metal-', '')
+              .split('-')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+          
+            const fullColor = metalColor.includes('Gold') ? metalColor : `${metalColor} Gold`;
+          
+            newFilters.metalColors = [fullColor];
+          }
+        } else if (category.startsWith('style-')) {
+          const style = category
+            .replace('style-', '')
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-        
-          const fullColor = metalColor.includes('Gold') ? metalColor : `${metalColor} Gold`;
-        
-          setFilters(prev => ({
-            ...prev,
-            metalColors: [fullColor]
-          }));
+          
+          newFilters.styles = [style];
         }
-        setActiveFilterSection('metal');
-      } else if (category.startsWith('style-')) {
-        const style = category
-          .replace('style-', '')
-          .split('-')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
         
-        setFilters(prev => ({
-          ...prev,
-          styles: [style]
-        }));
-        setActiveFilterSection('style');
+        setFilters(newFilters);
       }
       
-      // Reset pagination when category changes
-      setPage(1);
+      setInitialLoadComplete(true);
     }
-  }, [category]);
+  }, [category, searchParams, initialLoadComplete, filters]);
 
   // Update query params when filters change
   useEffect(() => {
@@ -396,7 +411,7 @@ export default function EngagementCategoryPage() {
     setQueryParams(newParams);
   }, [filters, sortOption]);
 
-  // Fetch products with pagination
+  // Update the fetchProducts function to use the updated filters
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -413,11 +428,21 @@ export default function EngagementCategoryPage() {
         paginatedQueryParams.set('limit', PRODUCTS_PER_PAGE.toString());
         paginatedQueryParams.set('sort', sortOption);
         
+        console.log(`Fetching engagement products for category: ${category || 'all'}, page: ${page}, params:`, 
+          Object.fromEntries(paginatedQueryParams.entries()));
+        
         const response = await fetch(`/api/products/engagement/${category || 'all'}?${paginatedQueryParams.toString()}`);
         
         if (!response.ok) throw new Error('Failed to fetch products');
         
         const data = await response.json();
+        console.log(`Received ${data.products?.length || 0} products, total: ${data.pagination?.total || 0}`);
+        
+        // Add null checks for data.products and data.pagination
+        if (!data.products) {
+          console.error('No products array in API response:', data);
+          throw new Error('Invalid API response: missing products array');
+        }
         
         // If first page, replace products, otherwise append
         if (page === 1) {
@@ -426,9 +451,9 @@ export default function EngagementCategoryPage() {
           setProducts(prev => [...prev, ...data.products]);
         }
         
-        // Update pagination info
-        setTotalProducts(data.pagination.total);
-        setHasMore(data.pagination.hasMore);
+        // Update pagination info with null checks
+        setTotalProducts(data.pagination?.total || 0);
+        setHasMore(data.pagination?.hasMore || false);
         
         setAvailableFilters({
           styles: RingEnums.STYLES,
@@ -448,8 +473,10 @@ export default function EngagementCategoryPage() {
       }
     };
 
-    fetchProducts();
-  }, [category, queryParams, page, sortOption]);
+    if (initialLoadComplete) {
+      fetchProducts();
+    }
+  }, [category, queryParams, page, sortOption, initialLoadComplete]);
 
   const get14KGoldPrice = (product: EngagementRing): number => {
     const gold14K = product.metalOptions.find(
@@ -465,8 +492,59 @@ export default function EngagementCategoryPage() {
 
 
   const getCategoryTitle = (): string => {
-    if (!category) return 'All Engagement Rings';
+    if (!category || category === 'all') return 'All Engagement Rings';
     
+    // If multiple styles are selected, show a combined title
+    if (filters.styles.length > 1) {
+      return `${filters.styles.join(' & ')} Style Engagement Rings`;
+    }
+    
+    // If a single style is selected, show its title
+    if (filters.styles.length === 1) {
+      return `${filters.styles[0]} Style Engagement Rings`;
+    }
+    
+    // If multiple metal colors are selected, show a combined title
+    if (filters.metalColors.length > 1) {
+      return `${filters.metalColors.join(' & ')} Engagement Rings`;
+    }
+    
+    // If a single metal color is selected, show its title
+    if (filters.metalColors.length === 1) {
+      return `${filters.metalColors[0]} Engagement Rings`;
+    }
+    
+    // If multiple types are selected, show a combined title
+    if (filters.types.length > 1) {
+      return `${filters.types.join(' & ')} Engagement Rings`;
+    }
+    
+    // If a single type is selected, show its title
+    if (filters.types.length === 1) {
+      return `${filters.types[0]} Engagement Rings`;
+    }
+    
+    // If multiple stone types are selected, show a combined title
+    if (filters.stoneTypes.length > 1) {
+      return `${filters.stoneTypes.join(' & ')} Engagement Rings`;
+    }
+    
+    // If a single stone type is selected, show its title
+    if (filters.stoneTypes.length === 1) {
+      return `${filters.stoneTypes[0]} Engagement Rings`;
+    }
+    
+    // If multiple gemstone types are selected, show a combined title
+    if (filters.gemstoneTypes.length > 1) {
+      return `${filters.gemstoneTypes.join(' & ')} Engagement Rings`;
+    }
+    
+    // If a single gemstone type is selected, show its title
+    if (filters.gemstoneTypes.length === 1) {
+      return `${filters.gemstoneTypes[0]} Engagement Rings`;
+    }
+    
+    // Handle URL-based categories
     if (category.startsWith('metal-')) {
       const metalName = category.replace('metal-', '').split('-').map(
         word => word.charAt(0).toUpperCase() + word.slice(1)

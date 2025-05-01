@@ -114,47 +114,52 @@ const CATEGORIES: Category[] = [
         path: '/wedding/all',
         icon: '/icons/wedding/all-rings.svg'
       },
-      {
-        name: 'Women\'s Bands',
-        path: '/wedding/womens',
-        icon: '/icons/wedding/womens-bands.svg'
-      },
-      {
-        name: 'Men\'s Bands',
-        path: '/wedding/mens',
-        icon: '/icons/wedding/mens-bands.svg'
-      },
-      {
-        name: 'Eternity Bands',
-        path: '/wedding/eternity',
-        icon: '/icons/wedding/eternity-bands.svg'
-      },
-      {
-        name: 'Anniversary Bands',
-        path: '/wedding/anniversary',
-        icon: '/icons/wedding/anniversary-bands.svg'
-      },
+      // Map through RingEnums.SUBCATEGORIES to create menu items
+      ...RingEnums.SUBCATEGORIES.map(subcategory => {
+        // Convert subcategory name to URL-friendly format
+        const path = subcategory.toLowerCase().replace(/['&\s]+/g, '-');
+        // Determine icon based on subcategory name
+        let icon = '/icons/wedding/';
+        if (subcategory.includes("Women")) {
+          icon += 'womens-bands.svg';
+        } else if (subcategory.includes("Men")) {
+          icon += 'mens-bands.svg';
+        } else if (subcategory.includes("Anniversary")) {
+          icon += 'anniversary-bands.svg';
+        } else if (subcategory.includes("His & Her")) {
+          icon += 'matching-sets.svg';
+        } else {
+          icon += 'all-rings.svg';
+        }
+        
+        return {
+          name: subcategory,
+          path: `/wedding/${path}`,
+          icon: icon
+        };
+      })
     ],
     styles: RING_STYLES.map(style => ({
       ...style,
-      path: `/wedding${style.path}`
+      path: `/wedding/style-${style.name.toLowerCase().replace(/\s+/g, '-')}`
     })),
     metals: RingEnums.METAL_COLORS.map(color => {
       // Special case for Two Tone Gold
       if (color === "Two Tone Gold") {
         return {
           name: "Two Tone Gold",
-          path: `/wedding/metal/two-tone-gold`,
+          path: `/wedding/metal-two-tone-gold`,
           icon: "/icons/metals/two-tone.webp" // Hardcoded path
         };
       }
 
       // For other metals
       const baseName = color.toLowerCase().replace(' gold', '');
+      const urlPath = color.toLowerCase().replace(/\s+/g, '-');
 
       return {
         name: color,
-        path: `/wedding/metal-${color.toLowerCase().replace(/\s+/g, '-')}`,
+        path: `/wedding/metal-${urlPath}`,
         icon: `/icons/metals/${baseName}.webp`
       };
     }),
