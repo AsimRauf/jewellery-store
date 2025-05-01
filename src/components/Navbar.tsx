@@ -911,7 +911,19 @@ const MenuCategory = ({
           className="fixed left-0 right-0 w-full bg-white shadow-lg z-[100] border-t border-gray-200"
           style={{ top: '100px' }}
         >
-          <div className="w-full mx-auto" style={{ maxWidth: '1440px' }}>
+
+          <div className="w-full mx-auto relative" style={{ maxWidth: '1440px' }}>
+            {/* Add close button here */}
+            <button 
+              onClick={onToggle}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+              aria-label="Close menu"
+            >
+              <svg className="w-6 h-6 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
             <div className="py-6 px-8">
               <div className="flex justify-between">
                 <div className="flex-grow grid grid-cols-3 gap-8 max-w-4xl">
