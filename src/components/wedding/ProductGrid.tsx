@@ -126,7 +126,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       metalOption: {
         karat: metalOption.karat,
         color: metalOption.color
-      }
+      },
+      productType: 'wedding'
     });
     
     // Show a toast notification

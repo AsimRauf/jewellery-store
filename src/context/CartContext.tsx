@@ -2,27 +2,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
-// Define the cart item type
-interface CartItem {
-  _id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  image: string;
-  cartItemId?: string;
-  metalOption?: {
-    karat: string;
-    color: string;
-  };
-  size?: number;
-}
+import { CartItem } from '@/types/cart';
 
 // Define the cart context type
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, quantity: number, updatedItem?: Partial<CartItem>) => void;
+  updateItem: (id: string, updatedItem: Partial<CartItem>) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -34,6 +22,7 @@ const CartContext = createContext<CartContextType>({
   addItem: () => {},
   removeItem: () => {},
   updateQuantity: () => {},
+  updateItem: () => {}, // Add this line
   clearCart: () => {},
   itemCount: 0,
   subtotal: 0
@@ -90,13 +79,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Use a function to update items to ensure we're working with the latest state
     flushSync(() => {
       setItems(currentItems => {
-        // Check if item already exists in cart
-        const existingItemIndex = currentItems.findIndex(item => 
-          item._id === newItem._id && 
-          item.metalOption?.karat === newItem.metalOption?.karat && 
-          item.metalOption?.color === newItem.metalOption?.color &&
-          item.size === newItem.size
-        );
+        // Generate a unique identifier for comparison
+        const itemIdentifier = `${newItem._id}-${newItem.metalOption?.karat || ''}-${newItem.metalOption?.color || ''}-${newItem.size || ''}-${newItem.productType || ''}`;
+        
+        // Check if item already exists in cart using the identifier
+        const existingItemIndex = currentItems.findIndex(item => {
+          const currentIdentifier = `${item._id}-${item.metalOption?.karat || ''}-${item.metalOption?.color || ''}-${item.size || ''}-${item.productType || ''}`;
+          return currentIdentifier === itemIdentifier;
+        });
 
         // Create a new array to avoid mutation
         let updatedItems;
@@ -111,9 +101,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           // Add new item if it doesn't exist
           // Add a unique identifier to each cart item to prevent key conflicts
+          const cartItemId = `${itemIdentifier}-${Date.now()}`;
           const uniqueItem = {
             ...newItem,
-            cartItemId: `${newItem._id}-${newItem.metalOption?.karat}-${newItem.metalOption?.color}-${Date.now()}`
+            cartItemId
           };
           updatedItems = [...currentItems, uniqueItem];
         }
@@ -132,23 +123,32 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 500);
   };
 
-  // Remove an item from the cart
-  const removeItem = (id: string) => {
-    setItems(currentItems => currentItems.filter(item => item._id !== id));
+  // Remove an item from the cart using cartItemId instead of product _id
+  const removeItem = (cartItemId: string) => {
+    setItems(currentItems => currentItems.filter(item => item.cartItemId !== cartItemId));
   };
 
-  // Update item quantity
-  const updateQuantity = (id: string, quantity: number) => {
+  // Update an item in the cart with new properties
+  const updateItem = (cartItemId: string, updatedItem: Partial<CartItem>) => {
+    setItems(currentItems => 
+      currentItems.map(item => 
+        item.cartItemId === cartItemId ? { ...item, ...updatedItem } : item
+      )
+    );
+  };
+
+  // Update item quantity using cartItemId
+  const updateQuantity = (cartItemId: string, quantity: number, updatedItem?: Partial<CartItem>) => {
     if (quantity <= 0) {
-      removeItem(id);
+      removeItem(cartItemId);
       return;
     }
 
-    setItems(currentItems => 
-      currentItems.map(item => 
-        item._id === id ? { ...item, quantity } : item
-      )
-    );
+    if (updatedItem) {
+      updateItem(cartItemId, { ...updatedItem, quantity });
+    } else {
+      updateItem(cartItemId, { quantity });
+    }
   };
 
   // Clear the entire cart
@@ -163,6 +163,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addItem,
       removeItem,
       updateQuantity,
+      updateItem,
       clearCart,
       itemCount,
       subtotal

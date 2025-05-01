@@ -10,5 +10,6 @@ export interface CartItem {
     color: string;
   };
   size?: number;
-  productType?: string; // Add this line
+  productType?: string;
+  cartItemId?: string;
 }

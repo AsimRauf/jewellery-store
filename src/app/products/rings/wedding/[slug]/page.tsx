@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { WeddingRing } from '@/types/wedding';
@@ -14,6 +14,7 @@ import RelatedProducts from '@/components/wedding/RelatedProducts';
 import ProductDescription from '@/components/wedding/ProductDescription';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
+import { CartItem } from '@/types/cart';
 
 // Define types for metal options and sizes
 interface MetalOption {
@@ -30,24 +31,10 @@ interface SizeOption {
   additionalPrice: number;
 }
 
-// Define a type for cart items
-interface CartItem {
-  _id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  image: string;
-  metalOption: {
-    karat: string;
-    color: string;
-  };
-  size: number;
-  productType: string;
-}
-
 export default function WeddingRingDetailPage() {
   const params = useParams() as { slug: string } | null;
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { addItem } = useCart();
   
   // Extract product ID from slug with null check
@@ -62,6 +49,7 @@ export default function WeddingRingDetailPage() {
   const [selectedMetal, setSelectedMetal] = useState<MetalOption | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   
   // Fetch product data
@@ -150,6 +138,36 @@ export default function WeddingRingDetailPage() {
     return price * quantity;
   };
   
+  // Create cart item
+  const createCartItem = (): CartItem | null => {
+    if (!product || !selectedMetal || !selectedSize) {
+      return null;
+    }
+    
+    // Get the image URL for the selected metal color
+    let imageUrl = '';
+    if (product.metalColorImages && product.metalColorImages[selectedMetal.color]?.length > 0) {
+      imageUrl = product.metalColorImages[selectedMetal.color][0].url;
+    } else if (product.media.images.length > 0) {
+      imageUrl = product.media.images[0].url;
+    }
+    
+    // Create cart item
+    return {
+      _id: product._id,
+      title: product.title,
+      price: calculateTotalPrice(),
+      quantity: quantity,
+      image: imageUrl,
+      metalOption: {
+        karat: selectedMetal.karat,
+        color: selectedMetal.color
+      },
+      size: selectedSize,
+      productType: 'wedding'
+    };
+  };
+  
   // Handle add to cart
   const handleAddToCart = () => {
     if (!product || !selectedMetal || !selectedSize) {
@@ -160,37 +178,42 @@ export default function WeddingRingDetailPage() {
     setAddingToCart(true);
     
     try {
-      // Get the image URL for the selected metal color
-      let imageUrl = '';
-      if (product.metalColorImages && product.metalColorImages[selectedMetal.color]?.length > 0) {
-        imageUrl = product.metalColorImages[selectedMetal.color][0].url;
-      } else if (product.media.images.length > 0) {
-        imageUrl = product.media.images[0].url;
+      const cartItem = createCartItem();
+      if (cartItem) {
+        addItem(cartItem);
+        toast.success('Added to cart!');
       }
-      
-      // Add to cart with proper typing
-      const cartItem: CartItem = {
-        _id: product._id,
-        title: product.title,
-        price: calculateTotalPrice(),
-        quantity: quantity,
-        image: imageUrl,
-        metalOption: {
-          karat: selectedMetal.karat,
-          color: selectedMetal.color
-        },
-        size: selectedSize,
-        productType: 'wedding'
-      };
-      
-      addItem(cartItem);
-      
-      toast.success('Added to cart!');
     } catch (err) {
       console.error('Error adding to cart:', err);
       toast.error('Failed to add to cart. Please try again.');
     } finally {
       setAddingToCart(false);
+    }
+  };
+  
+  // Handle buy now
+  const handleBuyNow = () => {
+    if (!product || !selectedMetal || !selectedSize) {
+      toast.error('Please select a size and metal option');
+      return;
+    }
+    
+    setBuyingNow(true);
+    
+    try {
+      const cartItem = createCartItem();
+      if (cartItem) {
+        // Add to cart first
+        addItem(cartItem);
+        
+        // Then redirect to checkout
+        router.push('/checkout');
+      }
+    } catch (err) {
+      console.error('Error processing buy now:', err);
+      toast.error('Failed to process. Please try again.');
+    } finally {
+      setBuyingNow(false);
     }
   };
   
@@ -324,18 +347,34 @@ export default function WeddingRingDetailPage() {
             </div>
           </div>
           
-          {/* Add to Cart Button */}
-          <button 
-            onClick={handleAddToCart}
-            disabled={addingToCart || !selectedSize || !selectedMetal}
-            className={`w-full py-3 px-6 rounded-full font-medium text-white 
-              ${addingToCart || !selectedSize || !selectedMetal 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-amber-500 hover:bg-amber-600'} 
-              transition-colors mb-6`}
-          >
-            {addingToCart ? 'Adding...' : 'Add to Cart'}
-          </button>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Add to Cart Button */}
+            <button 
+              onClick={handleAddToCart}
+              disabled={addingToCart || buyingNow || !selectedSize || !selectedMetal}
+              className={`w-full py-3 px-6 rounded-full font-medium text-white 
+                ${addingToCart || buyingNow || !selectedSize || !selectedMetal 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-amber-500 hover:bg-amber-600'} 
+                transition-colors`}
+            >
+              {addingToCart ? 'Adding...' : 'Add to Cart'}
+            </button>
+            
+            {/* Buy Now Button */}
+            <button 
+              onClick={handleBuyNow}
+              disabled={addingToCart || buyingNow || !selectedSize || !selectedMetal}
+              className={`w-full py-3 px-6 rounded-full font-medium text-white 
+                ${addingToCart || buyingNow || !selectedSize || !selectedMetal 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-green-600 hover:bg-green-700'} 
+                transition-colors`}
+            >
+              {buyingNow ? 'Processing...' : 'Buy Now'}
+            </button>
+          </div>
           
           {/* Product Features */}
           <ProductFeatures product={product} selectedMetal={selectedMetal} />

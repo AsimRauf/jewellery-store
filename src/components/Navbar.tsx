@@ -792,7 +792,7 @@ export default function Navbar() {
             ) : (
               <div className="space-y-4">
                 {items.map((item) => (
-                  <div key={`${item._id}-${item.metalOption?.karat}-${item.metalOption?.color}`} className="flex border-b border-gray-100 pb-4">
+                  <div key={item.cartItemId || `${item._id}-${Date.now()}-${Math.random()}`} className="flex border-b border-gray-100 pb-4">
                     <div className="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
                       <Image 
                         src={item.image} 
@@ -806,7 +806,7 @@ export default function Navbar() {
                       <div className="flex justify-between">
                         <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
                         <button 
-                          onClick={() => removeItem(item._id)}
+                          onClick={() => removeItem(item.cartItemId || '')}
                           className="text-gray-400 hover:text-red-500"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -822,14 +822,14 @@ export default function Navbar() {
                       <div className="mt-2 flex justify-between items-center">
                         <div className="flex items-center border rounded-full">
                           <button 
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.cartItemId || '', item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-amber-500"
                           >
                             -
                           </button>
                           <span className="w-8 text-center">{item.quantity}</span>
                           <button 
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.cartItemId || '', item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-amber-500"
                           >
                             +
