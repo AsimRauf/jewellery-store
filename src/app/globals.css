@@ -148,3 +148,54 @@ body {
   left: 125%;
   opacity: 0.5;
 }
+
+/* Mega menu styling */
+.mega-menu-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mega-menu-content {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+/* Ensure the grid layout works properly */
+.mega-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  width: 100%;
+}
+
+/* For the featured section */
+.mega-menu-featured {
+  width: 250px;
+  padding-left: 2rem;
+  border-left: 1px solid #e5e7eb;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 1023px) {
+  .mega-menu-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .mega-menu-featured {
+    width: 100%;
+    padding-left: 0;
+    border-left: none;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+}

@@ -285,8 +285,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
         {expandedProducts.map((item, index) => (
           <div 
             key={`${item.product._id}-${item.metalOption.color}`}
@@ -324,22 +324,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               </button>
             </div>
             
-            <div className="p-4">
+            <div className="p-2 sm:p-4">
               <Link href={getProductUrl(item.product, item.metalOption)}>
-                <h3 className="font-cinzel text-base sm:text-lg mb-2 text-gray-800 line-clamp-2 hover:text-amber-500 transition-colors">
+                <h3 className="font-cinzel text-sm sm:text-lg mb-1 sm:mb-2 text-gray-800 line-clamp-2 hover:text-amber-500 transition-colors">
                   {item.product.title}
                 </h3>
               </Link>
               
               <div className="space-y-1">
-                <p className="text-amber-600 font-semibold text-lg sm:text-xl">
+                <p className="text-amber-600 font-semibold text-base sm:text-xl">
                   ${formatPrice(item.metalOption.price)}
                 </p>
-                <p className="text-gray-500 text-sm">{item.metalOption.karat} {item.metalOption.color}</p>
+                <p className="text-gray-500 text-xs sm:text-sm">{item.metalOption.karat} {item.metalOption.color}</p>
               </div>
               
               {/* Metal Options */}
-              <div className="mt-3 flex flex-wrap gap-1">
+              <div className="mt-2 sm:mt-3 flex flex-wrap gap-1">
                 {item.product.metalOptions.slice(0, 3).map((metal) => (
                   <Link 
                     key={`${metal.karat}-${metal.color}`}

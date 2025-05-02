@@ -461,22 +461,22 @@ export default function WeddingCategoryPage() {
     };
   
     return (
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-        <h1 className="text-2xl sm:text-3xl font-cinzel text-center mb-4 sm:mb-8">{getCategoryTitle()}</h1>
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <h1 className="text-xl sm:text-3xl font-cinzel text-center mb-6 sm:mb-8">{getCategoryTitle()}</h1>
         
         {/* Mobile Filter Button */}
-        <div className="lg:hidden mb-4">
+        <div className="lg:hidden mb-6">
           <button 
             onClick={() => setActiveFilterSection(activeFilterSection ? null : 'mobile-filters')}
-            className="w-full py-3 px-4 bg-white shadow rounded-lg flex items-center justify-between"
+            className="w-full py-2.5 px-4 bg-white shadow rounded-lg flex items-center justify-between"
           >
-            <span className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="flex items-center text-sm">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
               Filters
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-xs text-gray-500">
               {Object.values(filters).flat().filter(Boolean).length} Selected
             </span>
           </button>

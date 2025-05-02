@@ -7,7 +7,15 @@ import { sendVerificationEmail } from '@/utils/email';
 export async function POST(request: Request) {
   await connectDB();
   
-  const { firstName, lastName, email, password, phoneNumber } = await request.json();
+  const { firstName, lastName, email, password, phoneNumber, role } = await request.json();
+
+  // Prevent admin registration through regular route
+  if (role === 'admin') {
+    return NextResponse.json(
+      { error: 'Unauthorized registration attempt' }, 
+      { status: 403 }
+    );
+  }
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -22,6 +30,7 @@ export async function POST(request: Request) {
     email,
     password,
     phoneNumber,
+    role: 'user', // Force role to be 'user'
     verificationToken,
     isVerified: false
   });
@@ -34,7 +43,8 @@ export async function POST(request: Request) {
       id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email
+      email: user.email,
+      role: user.role
     }
   }, { status: 201 });
 }

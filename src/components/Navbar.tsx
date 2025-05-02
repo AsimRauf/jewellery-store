@@ -889,8 +889,22 @@ const MenuCategory = ({
   isActive: boolean;
   onToggle: () => void;
 }) => {
+  // Create a ref for the menu item
+  const menuItemRef = useRef<HTMLLIElement>(null);
+  
+  // Calculate the left offset when the menu becomes active
+  useEffect(() => {
+    if (isActive && menuItemRef.current) {
+      const rect = menuItemRef.current.getBoundingClientRect();
+      const leftOffset = rect.left;
+      
+      // Set a CSS custom property for the left offset
+      document.documentElement.style.setProperty('--menu-left-offset', `${leftOffset}px`);
+    }
+  }, [isActive]);
+
   return (
-    <li className="relative">
+    <li className="relative" ref={menuItemRef}>
       <button 
         onClick={onToggle}
         className="flex items-center w-full text-gray-600 hover:text-amber-500 py-4 px-2"
@@ -907,13 +921,9 @@ const MenuCategory = ({
       </button>
 
       {isActive && (
-        <div 
-          className="fixed left-0 right-0 w-full bg-white shadow-lg z-[100] border-t border-gray-200"
-          style={{ top: '100px' }}
-        >
-
-          <div className="w-full mx-auto relative" style={{ maxWidth: '1440px' }}>
-            {/* Add close button here */}
+        <div className="absolute top-full left-0 w-screen -translate-x-[var(--menu-left-offset)] bg-white shadow-lg z-[100] border-t border-gray-200">
+          <div className="container mx-auto px-4 py-6">
+            {/* Close button */}
             <button 
               onClick={onToggle}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
@@ -924,15 +934,81 @@ const MenuCategory = ({
               </svg>
             </button>
             
-            <div className="py-6 px-8">
-              <div className="flex justify-between">
-                <div className="flex-grow grid grid-cols-3 gap-8 max-w-4xl">
-                  {/* Main Categories Section */}
-                  {category.subcategories && category.subcategories.length > 0 && (
-                    <div className="col-span-1">
-                      <h3 className="text-lg font-semibold mb-4">Categories</h3>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Main Categories Section */}
+              {category.subcategories && category.subcategories.length > 0 && (
+                <div className="col-span-1">
+                  <h3 className="text-lg font-semibold mb-4">Categories</h3>
+                  <div className="space-y-3">
+                    {category.subcategories.map((item) => (
+                      <Link 
+                        key={item.path}
+                        href={item.path}
+                        className="flex items-center text-gray-600 hover:text-amber-500"
+                        onClick={onToggle}
+                      >
+                        {item.icon && (
+                          <Image src={item.icon} alt="" width={20} height={20} className="mr-3" />
+                        )}
+                        <span>{item.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Styles Section */}
+              {category.styles && category.styles.length > 0 && (
+                <div className="col-span-1">
+                  <h3 className="text-lg font-semibold mb-4">Shop By Style</h3>
+                  <div className="space-y-3">
+                    {category.styles.map((style) => (
+                      <Link 
+                        key={style.path}
+                        href={style.path}
+                        className="flex items-center text-gray-600 hover:text-amber-500"
+                        onClick={onToggle}
+                      >
+                        {style.icon && (
+                          <Image src={style.icon} alt="" width={20} height={20} className="mr-3" />
+                        )}
+                        <span>{style.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Metals Section */}
+              {category.metals && category.metals.length > 0 && (
+                <div className="col-span-1">
+                  <h3 className="text-lg font-semibold mb-4">Shop By Metal</h3>
+                  <div className="space-y-3">
+                    {category.metals.map((metal) => (
+                      <Link 
+                        key={metal.path}
+                        href={metal.path}
+                        className="flex items-center text-gray-600 hover:text-amber-500"
+                        onClick={onToggle}
+                      >
+                        {metal.icon && (
+                          <Image src={metal.icon} alt="" width={20} height={20} className="mr-3" />
+                        )}
+                        <span>{metal.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Featured Section with Banner */}
+              {(category.featured || category.bannerImage) && (
+                <div className="col-span-1 border-l border-gray-200 pl-6">
+                  {category.featured && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-4">Featured</h3>
                       <div className="space-y-3">
-                        {category.subcategories.map((item) => (
+                        {category.featured.map((item) => (
                           <Link 
                             key={item.path}
                             href={item.path}
@@ -948,92 +1024,22 @@ const MenuCategory = ({
                       </div>
                     </div>
                   )}
-
-                  {/* Styles Section */}
-                  {category.styles && category.styles.length > 0 && (
-                    <div className="col-span-1">
-                      <h3 className="text-lg font-semibold mb-4">Shop By Style</h3>
-                      <div className="space-y-3">
-                        {category.styles.map((style) => (
-                          <Link 
-                            key={style.path}
-                            href={style.path}
-                            className="flex items-center text-gray-600 hover:text-amber-500"
-                            onClick={onToggle}
-                          >
-                            {style.icon && (
-                              <Image src={style.icon} alt="" width={20} height={20} className="mr-3" />
-                            )}
-                            <span>{style.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Metals Section */}
-                  {category.metals && category.metals.length > 0 && (
-                    <div className="col-span-1">
-                      <h3 className="text-lg font-semibold mb-4">Shop By Metal</h3>
-                      <div className="space-y-3">
-                        {category.metals.map((metal) => (
-                          <Link 
-                            key={metal.path}
-                            href={metal.path}
-                            className="flex items-center text-gray-600 hover:text-amber-500"
-                            onClick={onToggle}
-                          >
-                            {metal.icon && (
-                              <Image src={metal.icon} alt="" width={20} height={20} className="mr-3" />
-                            )}
-                            <span>{metal.name}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
+                  {category.bannerImage && (
+                    <Link 
+                      href={category.bannerLink || category.path}
+                      onClick={onToggle}
+                    >
+                      <Image 
+                        src={category.bannerImage} 
+                        alt="" 
+                        width={240}
+                        height={320}
+                        className="rounded-lg object-cover"
+                      />
+                    </Link>
                   )}
                 </div>
-
-                {/* Featured Section with Banner */}
-                {(category.featured || category.bannerImage) && (
-                  <div className="w-64 pl-8 border-l border-gray-200">
-                    {category.featured && (
-                      <div className="mb-6">
-                        <h3 className="text-lg font-semibold mb-4">Featured</h3>
-                        <div className="space-y-3">
-                          {category.featured.map((item) => (
-                            <Link 
-                              key={item.path}
-                              href={item.path}
-                              className="flex items-center text-gray-600 hover:text-amber-500"
-                              onClick={onToggle}
-                            >
-                              {item.icon && (
-                                <Image src={item.icon} alt="" width={20} height={20} className="mr-3" />
-                              )}
-                              <span>{item.name}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {category.bannerImage && (
-                      <Link 
-                        href={category.bannerLink || category.path}
-                        onClick={onToggle}
-                      >
-                        <Image 
-                          src={category.bannerImage} 
-                          alt="" 
-                          width={240}
-                          height={320}
-                          className="rounded-lg object-cover"
-                        />
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
