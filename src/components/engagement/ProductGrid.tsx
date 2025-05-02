@@ -30,20 +30,25 @@ export default function ProductGrid({
   const { addItem } = useCart();
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   
-  // Function to get the image URL based on metal color
+  // Function to get the image URL based on metal color with better fallback handling
   const getImageUrl = (product: EngagementRing, metalColor: string): string => {
-    // Check if product has metalColorImages for this color
-    if (product.metalColorImages && 
-        product.metalColorImages[metalColor] && 
-        product.metalColorImages[metalColor].length > 0) {
-      return product.metalColorImages[metalColor][0].url;
+    try {
+      // Check if product has metalColorImages for this color
+      if (product.metalColorImages && 
+          product.metalColorImages[metalColor] && 
+          product.metalColorImages[metalColor].length > 0) {
+        return product.metalColorImages[metalColor][0].url;
+      }
+      
+      // Fallback to regular media images
+      if (product.media?.images?.length > 0 && product.media.images[0].url) {
+        return product.media.images[0].url;
+      }
+    } catch (error) {
+      console.error('Error getting image URL:', error);
     }
     
-    // Fallback to regular media images
-    if (product.media?.images?.length > 0 && product.media.images[0].url) {
-      return product.media.images[0].url;
-    }
-    
+    // Final fallback to placeholder
     return '/placeholder-ring.jpg';
   };
 
@@ -293,6 +298,12 @@ export default function ProductGrid({
                     sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                     className="object-cover transform hover:scale-110 transition-transform duration-500"
                     priority={index < 4}
+                    placeholder="blur"
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAEtAJJXIDTjwAAAABJRU5ErkJggg=="
+                    onError={(e) => {
+                      // If image fails to load, replace with placeholder
+                      (e.target as HTMLImageElement).src = '/placeholder-ring.jpg';
+                    }}
                   />
                 </div>
               </Link>
