@@ -1,8 +1,21 @@
-import { WeddingRing } from '@/types/wedding';
 import React from 'react';
 
 interface ProductFeaturesProps {
-  product: WeddingRing;
+  product: {
+    _id: string;
+    title: string;
+    subcategory?: string;
+    style: string[];
+    type: string[];
+    side_stone?: {
+      type: string;
+      number_of_stones: number;
+      total_carat: number;
+      shape: string;
+      color: string;
+      clarity: string;
+    };
+  };
   selectedMetal: {
     karat: string;
     color: string;

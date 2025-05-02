@@ -139,7 +139,8 @@ export default function ProductGrid({
       metalOption: {
         karat: metalOption.karat,
         color: metalOption.color
-      }
+      },
+      productType: 'engagement'
     });
     
     // Show a toast notification

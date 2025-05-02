@@ -3,16 +3,21 @@ interface ProductDescriptionProps {
 }
 
 export default function ProductDescription({ description }: ProductDescriptionProps) {
-  if (!description) return null;
+  if (!description) {
+    return (
+      <div className="text-gray-500 italic text-center py-4">
+        No product description available.
+      </div>
+    );
+  }
   
   return (
-    <div className="mb-12">
-      <h2 className="text-2xl font-cinzel mb-4">Product Description</h2>
-      <div className="prose max-w-none">
-        {description.split('\n').map((paragraph, index) => (
-          <p key={index} className="mb-4">{paragraph}</p>
-        ))}
-      </div>
+    <div className="prose prose-amber max-w-none">
+      {description.split('\n').map((paragraph, index) => (
+        <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+          {paragraph}
+        </p>
+      ))}
     </div>
   );
 }

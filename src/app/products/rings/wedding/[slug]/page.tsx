@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { WeddingRing } from '@/types/wedding';
@@ -10,7 +10,7 @@ import ProductImageGallery from '@/components/wedding/ProductImageGallery';
 import SizeSelector from '@/components/wedding/SizeSelector';
 import MetalSelector from '@/components/wedding/MetalSelector';
 import ProductFeatures from '@/components/wedding/ProductFeatures';
-import RelatedProducts from '@/components/wedding/RelatedProducts';
+import RelatedProducts from '@/components/shared/RelatedProducts';
 import ProductDescription from '@/components/wedding/ProductDescription';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
@@ -34,7 +34,6 @@ interface SizeOption {
 export default function WeddingRingDetailPage() {
   const params = useParams() as { slug: string } | null;
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { addItem } = useCart();
   
   // Extract product ID from slug with null check
@@ -49,8 +48,18 @@ export default function WeddingRingDetailPage() {
   const [selectedMetal, setSelectedMetal] = useState<MetalOption | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [buyingNow, setBuyingNow] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  
+  // Add states for inquiry form
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   
   // Fetch product data
   useEffect(() => {
@@ -191,29 +200,67 @@ export default function WeddingRingDetailPage() {
     }
   };
   
-  // Handle buy now
-  const handleBuyNow = () => {
-    if (!product || !selectedMetal || !selectedSize) {
-      toast.error('Please select a size and metal option');
-      return;
-    }
+  // Handle inquiry form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setInquiryForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Handle inquiry form submission
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setBuyingNow(true);
+    if (!product || !selectedMetal || !selectedSize) return;
+    
+    setSubmitting(true);
+    setFormError(null);
     
     try {
-      const cartItem = createCartItem();
-      if (cartItem) {
-        // Add to cart first
-        addItem(cartItem);
-        
-        // Then redirect to checkout
-        router.push('/checkout');
+      const response = await fetch('/api/inquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          product: {
+            id: product._id,
+            title: product.title,
+            sku: product.SKU,
+            metal: `${selectedMetal.karat} ${selectedMetal.color}`,
+            size: selectedSize,
+            price: calculateTotalPrice()
+          },
+          customer: inquiryForm
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit inquiry');
       }
+      
+      // Reset form
+      setInquiryForm({
+        name: '',
+        email: '',
+        phone: '',
+        message: ''
+      });
+      
+      // Hide form
+      setShowInquiryForm(false);
+      
+      // Show success message
+      toast.success('Your inquiry has been submitted. We will contact you soon!', {
+        duration: 5000
+      });
     } catch (err) {
-      console.error('Error processing buy now:', err);
-      toast.error('Failed to process. Please try again.');
+      console.error('Error submitting inquiry:', err);
+      setFormError('Failed to submit inquiry. Please try again.');
     } finally {
-      setBuyingNow(false);
+      setSubmitting(false);
     }
   };
   
@@ -247,9 +294,9 @@ export default function WeddingRingDetailPage() {
   }
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumbs */}
-      <nav className="mb-6 text-sm">
+    <div className="container mx-auto px-4 py-8 relative">
+      {/* Sticky Breadcrumbs */}
+      <nav className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm py-4 mb-6">
         <ol className="flex items-center space-x-2">
           <li>
             <Link href="/" className="text-gray-500 hover:text-amber-500">Home</Link>
@@ -271,22 +318,35 @@ export default function WeddingRingDetailPage() {
           <li className="text-amber-600 font-medium truncate max-w-[200px]">{product.title}</li>
         </ol>
       </nav>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        {/* Product Images */}
-        <div>
-          <ProductImageGallery 
-            images={getImagesForSelectedMetal()} 
-            video={product.media.video}
-            activeIndex={activeImageIndex}
-            onImageChange={setActiveImageIndex}
-          />
+  
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 relative">
+        {/* Left Column: Product Images and Description - Made Sticky */}
+        <div className="lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent pb-8">
+          <div className="space-y-8">
+            {/* Product Images */}
+            <ProductImageGallery
+              images={getImagesForSelectedMetal()}
+              video={product.media.video}
+              activeIndex={activeImageIndex}
+              onImageChange={setActiveImageIndex}
+            />
+  
+            {/* Product Description */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-4 bg-amber-50 border-b border-amber-100">
+                <h2 className="text-xl font-cinzel text-amber-800">Product Description</h2>
+              </div>
+              <div className="p-6">
+                <ProductDescription description={product.description} />
+              </div>
+            </div>
+          </div>
         </div>
-        
-        {/* Product Details */}
+  
+        {/* Right Column: Product Details */}
         <div>
           <h1 className="text-3xl font-cinzel mb-2">{product.title}</h1>
-          
+  
           <div className="mb-4">
             <p className="text-2xl text-amber-600 font-semibold">
               ${calculateTotalPrice().toLocaleString()}
@@ -297,48 +357,48 @@ export default function WeddingRingDetailPage() {
               </p>
             )}
           </div>
-          
+  
           {/* SKU */}
           <p className="text-gray-500 text-sm mb-6">SKU: {product.SKU}</p>
-          
+  
           {/* Metal Options */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-2">Metal Options</h2>
-            <MetalSelector 
-              options={product.metalOptions} 
-              selectedMetal={selectedMetal} 
-              onChange={handleMetalChange} 
+            <MetalSelector
+              options={product.metalOptions}
+              selectedMetal={selectedMetal}
+              onChange={handleMetalChange}
             />
           </div>
-          
+  
           {/* Size Options */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-2">Ring Size</h2>
-            <SizeSelector 
-              sizes={product.sizes} 
-              selectedSize={selectedSize} 
-              onChange={handleSizeChange} 
+            <SizeSelector
+              sizes={product.sizes}
+              selectedSize={selectedSize}
+              onChange={handleSizeChange}
             />
           </div>
-          
+  
           {/* Quantity */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold mb-2">Quantity</h2>
             <div className="flex items-center">
-              <button 
+              <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 className="w-10 h-10 border border-gray-300 flex items-center justify-center rounded-l-md"
               >
                 -
               </button>
-              <input 
-                type="number" 
-                min="1" 
-                value={quantity} 
+              <input
+                type="number"
+                min="1"
+                value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 className="w-16 h-10 border-t border-b border-gray-300 text-center"
               />
-              <button 
+              <button
                 onClick={() => setQuantity(quantity + 1)}
                 className="w-10 h-10 border border-gray-300 flex items-center justify-center rounded-r-md"
               >
@@ -346,50 +406,160 @@ export default function WeddingRingDetailPage() {
               </button>
             </div>
           </div>
-          
+  
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Add to Cart Button */}
-            <button 
+            <button
               onClick={handleAddToCart}
-              disabled={addingToCart || buyingNow || !selectedSize || !selectedMetal}
+              disabled={addingToCart || !selectedSize || !selectedMetal}
               className={`w-full py-3 px-6 rounded-full font-medium text-white 
-                ${addingToCart || buyingNow || !selectedSize || !selectedMetal 
-                  ? 'bg-gray-400 cursor-not-allowed' 
+                ${addingToCart || !selectedSize || !selectedMetal
+                  ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-amber-500 hover:bg-amber-600'} 
                 transition-colors`}
             >
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
-            
-            {/* Buy Now Button */}
-            <button 
-              onClick={handleBuyNow}
-              disabled={addingToCart || buyingNow || !selectedSize || !selectedMetal}
+  
+            {/* Request Information Button */}
+            <button
+              onClick={() => setShowInquiryForm(true)}
+              disabled={addingToCart || !selectedSize || !selectedMetal}
               className={`w-full py-3 px-6 rounded-full font-medium text-white 
-                ${addingToCart || buyingNow || !selectedSize || !selectedMetal 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-green-600 hover:bg-green-700'} 
-                transition-colors`}
+                ${addingToCart || !selectedSize || !selectedMetal
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#8B0000] hover:bg-[#6B0000]'} 
+                transition-colors flex items-center justify-center`}
             >
-              {buyingNow ? 'Processing...' : 'Buy Now'}
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Request Information
             </button>
           </div>
-          
+  
           {/* Product Features */}
           <ProductFeatures product={product} selectedMetal={selectedMetal} />
         </div>
       </div>
-      
-      {/* Product Description */}
-      <ProductDescription description={product.description} />
-      
+  
       {/* Related Products */}
-      <RelatedProducts 
-        currentProductId={product._id} 
+      <RelatedProducts
+        currentProductId={product._id}
+        productType="wedding"
         subcategory={product.subcategory}
         style={product.style[0]}
       />
+  
+      {/* Rest of the code (Inquiry Form Modal) remains unchanged */}
+      {showInquiryForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-cinzel text-xl">Request Information</h3>
+                <button 
+                  onClick={() => setShowInquiryForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4 p-3 bg-amber-50 rounded-md">
+                <h4 className="font-medium text-amber-800 mb-1">Product Details</h4>
+                <p className="text-sm text-gray-700">{product.title}</p>
+                <p className="text-sm text-gray-700">
+                  {selectedMetal ? `${selectedMetal.karat} ${selectedMetal.color}` : ''} - 
+                  Size {selectedSize} - 
+                  ${calculateTotalPrice().toLocaleString()}
+                </p>
+              </div>
+              
+              {formError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                  {formError}
+                </div>
+              )}
+              
+              <form onSubmit={handleInquirySubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={inquiryForm.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={inquiryForm.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={inquiryForm.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      Your Message *
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={inquiryForm.message}
+                      onChange={handleInputChange}
+                      required
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="Please let us know if you have any questions about this product..."
+                    ></textarea>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full px-6 py-3 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors disabled:bg-amber-300"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Inquiry'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

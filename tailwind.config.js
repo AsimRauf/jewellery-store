@@ -15,5 +15,8 @@ module.exports = {
       },
     },
   },
-  plugins: [heroui()],
+  plugins: [
+    heroui(),
+    require('tailwind-scrollbar'), // Add this plugin
+  ],
 };
