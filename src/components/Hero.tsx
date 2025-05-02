@@ -87,19 +87,19 @@ export default function Hero() {
           <div 
             className="w-full lg:w-1/2 
                       relative lg:relative 
-                      mt-20 lg:mt-0
+                      mt-10 lg:mt-0
                       flex justify-center lg:justify-end 
-                      lg:items-end"
+                      items-end lg:items-end"
             style={{ marginTop }}
           >
-            <div className="h-[40vh] sm:h-[50vh] md:h-[55vh] lg:h-[75vh] xl:h-[80vh]
-                            flex items-end">
+            <div className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[75vh] xl:h-[80vh]
+                           w-full flex items-end justify-center lg:justify-end">
               <Image
                 src="/hero.png"
                 alt="Elegant Jewelry Model"
                 width={771}
                 height={1066}
-                className="h-auto w-auto max-h-full object-contain object-bottom"
+                className="h-full w-auto max-h-full object-contain object-bottom"
                 priority
               />
             </div>

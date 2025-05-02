@@ -1,11 +1,17 @@
 'use client';
 
+import React from 'react';
 import { useUser } from "@/context/UserContext";
 import HeadlineBanner from "./HeadlineBanner";
 import Navbar from "./Navbar";
 import { usePathname } from 'next/navigation';
+import Footer from './layout/Footer';
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+interface ClientLayoutProps {
+  children: React.ReactNode;
+}
+
+const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const { user } = useUser();
   const pathname = usePathname();
   
@@ -22,7 +28,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <main className="flex-grow">
         {children}
       </main>
-      {/* Footer would go here */}
+      <Footer />
     </div>
   );
-}
+};
+
+export default ClientLayout;
