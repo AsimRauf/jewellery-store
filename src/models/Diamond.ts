@@ -87,6 +87,20 @@ export enum CertificateLab {
   GCAL = 'GCAL'
 }
 
+// Add this enum for fancy colors
+export enum DiamondFancyColor {
+  YELLOW = 'Yellow',
+  PINK = 'Pink',
+  BLUE = 'Blue',
+  GREEN = 'Green',
+  ORANGE = 'Orange',
+  PURPLE = 'Purple',
+  BROWN = 'Brown',
+  BLACK = 'Black',
+  RED = 'Red',
+  GRAY = 'Gray'
+}
+
 export interface IDiamond extends Document {
   sku: string;
   productNumber: string;
@@ -94,7 +108,7 @@ export interface IDiamond extends Document {
   carat: number;
   shape: DiamondShape;
   color: DiamondColor | string; // Allow string for fancy colors
-  fancyColor?: string;
+  fancyColor?: DiamondFancyColor | string;
   clarity: DiamondClarity;
   cut?: DiamondCut;
   polish?: DiamondPolish;
@@ -146,7 +160,11 @@ const DiamondSchema: Schema = new Schema(
       required: true 
     },
     color: { type: String, required: true },
-    fancyColor: { type: String },
+    fancyColor: { 
+      type: String, 
+      enum: Object.values(DiamondFancyColor),
+      default: null
+    },
     clarity: { 
       type: String, 
       enum: Object.values(DiamondClarity), 

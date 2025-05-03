@@ -7,7 +7,7 @@ import {
   HiCog, 
   HiChartBar 
 } from "react-icons/hi";
-import { GiRing, GiDiamonds } from "react-icons/gi";
+import { GiRing, GiDiamonds, GiCrystalGrowth } from "react-icons/gi";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -38,6 +38,17 @@ const Sidebar = () => {
         { title: "Add Diamond", href: "/admin/diamonds" },
         { title: "Lab Diamonds", href: "/admin/diamonds?type=lab" },
         { title: "Natural Diamonds", href: "/admin/diamonds?type=natural" },
+      ]
+    },
+    {
+      title: "Gemstones",
+      icon: <GiCrystalGrowth className="w-6 h-6" />,
+      href: "/admin/gemstones",
+      submenu: [
+        { title: "All Gemstones", href: "/admin/gemstones/list" },
+        { title: "Add Gemstone", href: "/admin/gemstones" },
+        { title: "Lab Gemstones", href: "/admin/gemstones/list?source=lab" },
+        { title: "Natural Gemstones", href: "/admin/gemstones/list?source=natural" },
       ]
     },
     {
