@@ -26,6 +26,7 @@ const Sidebar = () => {
         { title: "Wedding Rings", href: "/admin/rings/wedding" },
         { title: "Engagement Rings", href: "/admin/rings/engagement" },
         { title: "Eternity Rings", href: "/admin/rings/eternity" },
+        { title: "Ring Settings", href: "/admin/rings/settings" },
       ]
     },
     {

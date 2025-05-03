@@ -33,8 +33,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Determine the folder path based on category
+    let folderPath = `jewelry-store/rings/${category}/videos`;
+    
+    // If the category is 'settings', use a dedicated folder
+    if (category === 'settings') {
+      folderPath = 'jewelry-store/rings/settings/videos';
+    }
+
     const result = await cloudinary.uploader.upload(file, {
-      folder: `jewelry-store/rings/${category}/videos`,
+      folder: folderPath,
       resource_type: 'video',
       allowed_formats: ['mp4', 'mov', 'webm'],
       chunk_size: 6000000,
