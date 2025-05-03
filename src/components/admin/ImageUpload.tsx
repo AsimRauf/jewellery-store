@@ -10,6 +10,7 @@ interface MediaUploadProps {
   temporaryVideo: File | null;
   maxImages?: number;
   previewUrls?: string[];
+  label?: string;
 }
 
 export default function MediaUpload({ 

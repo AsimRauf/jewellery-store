@@ -7,7 +7,7 @@ import {
   HiCog, 
   HiChartBar 
 } from "react-icons/hi";
-import { GiRing } from "react-icons/gi";
+import { GiRing, GiDiamonds } from "react-icons/gi";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -26,6 +26,17 @@ const Sidebar = () => {
         { title: "Wedding Rings", href: "/admin/rings/wedding" },
         { title: "Engagement Rings", href: "/admin/rings/engagement" },
         { title: "Eternity Rings", href: "/admin/rings/eternity" },
+      ]
+    },
+    {
+      title: "Diamonds",
+      icon: <GiDiamonds className="w-6 h-6" />,
+      href: "/admin/diamonds",
+      submenu: [
+        { title: "All Diamonds", href: "/admin/diamonds/list" },
+        { title: "Add Diamond", href: "/admin/diamonds" },
+        { title: "Lab Diamonds", href: "/admin/diamonds?type=lab" },
+        { title: "Natural Diamonds", href: "/admin/diamonds?type=natural" },
       ]
     },
     {

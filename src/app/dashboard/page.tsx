@@ -43,7 +43,7 @@ export default function Dashboard() {
           </h2>
           <p className="text-gray-600">You are now logged in to your account.</p>
         </div>
-        
+      
         {/* Add your dashboard content here */}
       </div>
     </div>
