@@ -1,4 +1,3 @@
-
 interface FilterBarProps {
   filters: {
     shapes: string[];
@@ -79,7 +78,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <div className="bg-white shadow-sm rounded-lg border border-gray-200">
       {/* Filter Sections Tabs */}
-      <div className="flex flex-wrap gap-2 p-4 border-b border-gray-200">
+      <div className="flex flex-wrap justify-center gap-2 p-4 border-b border-gray-200">
         <button 
           onClick={() => toggleFilterSection('shape')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -177,7 +176,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           {activeFilterSection === 'shape' && (
             <div>
               <h3 className="font-medium text-gray-800 mb-3">Diamond Shape</h3>
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-5 gap-3 justify-items-center">
                 {availableFilters.shapes.map((shape) => (
                   <button
                     key={shape}
