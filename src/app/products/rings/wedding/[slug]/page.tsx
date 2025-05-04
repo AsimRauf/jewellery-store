@@ -344,7 +344,7 @@ export default function WeddingRingDetailPage() {
         </div>
   
         {/* Right Column: Product Details */}
-        <div>
+        <div className="relative">
           <h1 className="text-3xl font-cinzel mb-2">{product.title}</h1>
   
           <div className="mb-4">
@@ -372,7 +372,7 @@ export default function WeddingRingDetailPage() {
           </div>
   
           {/* Size Options */}
-          <div className="mb-6">
+          <div className="mb-6 relative z-20">
             <h2 className="text-lg font-semibold mb-2">Ring Size</h2>
             <SizeSelector
               sizes={product.sizes}
