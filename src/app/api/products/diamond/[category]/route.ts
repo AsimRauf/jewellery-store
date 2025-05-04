@@ -202,7 +202,7 @@ async function handleRequest(request: NextRequest) {
                 symmetry: 1,
                 fluorescence: 1,
                 type: 1,
-                media: 1,
+                images: 1,
                 certificate: 1
               }
             }
