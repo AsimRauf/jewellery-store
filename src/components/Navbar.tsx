@@ -106,6 +106,70 @@ const CATEGORIES: Category[] = [
     bannerLink: '/customize'
   },
   {
+    name: 'Settings',
+    path: '/settings',
+    subcategories: [
+      {
+        name: 'All Settings',
+        path: '/settings/all',
+        icon: '/icons/settings/all-settings.svg'
+      },
+      {
+        name: 'Solitaire',
+        path: '/settings/type-solitaire',
+        icon: '/icons/settings/solitaire.svg'
+      },
+      {
+        name: 'Halo',
+        path: '/settings/type-halo',
+        icon: '/icons/settings/halo.svg'
+      },
+      {
+        name: 'Three Stone',
+        path: '/settings/type-three-stone',
+        icon: '/icons/settings/three-stone.svg'
+      },
+      {
+        name: 'Side Stone',
+        path: '/settings/type-side-stone',
+        icon: '/icons/settings/side-stone.svg'
+      }
+    ],
+    styles: RING_STYLES.map(style => ({
+      ...style,
+      path: `/settings/style-${style.name.toLowerCase().replace(/\s+/g, '-')}`
+    })),
+    metals: RingEnums.METAL_COLORS.map(color => {
+      if (color === "Two Tone Gold") {
+        return {
+          name: "Two Tone Gold",
+          path: `/settings/metal-two-tone-gold`,
+          icon: "/placeholder-image.jpg"
+        };
+      }
+      const baseName = color.toLowerCase().replace(' gold', '');
+      return {
+        name: color,
+        path: `/settings/metal-${baseName}`,
+        icon: `/placeholder-image.jpg`
+      };
+    }),
+    featured: [
+      {
+        name: 'Under $1500',
+        path: '/settings/price/under-1500',
+        icon: '/placeholder-image.jpg'
+      },
+      {
+        name: 'New Arrivals',
+        path: '/settings/new-arrivals',
+        icon: '/placeholder-image.jpg'
+      }
+    ],
+    bannerImage: '/placeholder-image.jpg',
+    bannerLink: '/settings/custom'
+  },
+  {
     name: 'Wedding',
     path: '/wedding',
     subcategories: [
