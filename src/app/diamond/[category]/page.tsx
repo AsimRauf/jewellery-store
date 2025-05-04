@@ -6,6 +6,7 @@ import FilterBar from '@/components/diamond/FilterBar';
 import MobileFilters from '@/components/diamond/MobileFilters';
 import SortingOptions from '@/components/diamond/SortingOptions';
 import ProductGrid from '@/components/diamond/ProductGrid';
+import { Diamond } from '@/types/diamond';
 
 // Define available filter options
 const availableFilters = {
@@ -55,7 +56,7 @@ export default function DiamondCategoryPage() {
   const [sortOption, setSortOption] = useState('price-asc');
   
   // State for products
-  const [products, setProducts] = useState<Array<any>>([]);
+  const [products, setProducts] = useState<Diamond[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -250,7 +251,7 @@ export default function DiamondCategoryPage() {
       }
       
       const data = await response.json();
-      setProducts((prev: any[]) => [...prev, ...data.products]);
+      setProducts((prev: Diamond[]) => [...prev, ...data.products]);
       setPage(nextPage);
       setHasMore(data.page < data.totalPages);
       

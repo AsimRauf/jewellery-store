@@ -90,7 +90,6 @@ const MobileFilters: React.FC<MobileFiltersProps> = ({
             <div className="border-b pb-6">
               <h3 className="font-medium mb-4">Diamond Type</h3>
               <div className="space-y-2">
-              // Continuing from where we left off...
                 {availableFilters.types.map((type) => (
                   <div key={type} className="flex items-center">
                     <input

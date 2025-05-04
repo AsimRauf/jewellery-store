@@ -1,23 +1,7 @@
-import { useRouter } from 'next/navigation';
+import { Diamond } from '@/types/diamond';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-
-interface Diamond {
-  _id: string;
-  sku: string;
-  type: string;
-  carat: number;
-  shape: string;
-  color: string;
-  clarity: string;
-  cut: string;
-  price: number;
-  salePrice?: number;
-  images: Array<{ url: string; publicId: string }>;
-  measurements: string;
-  certificateLab: string;
-}
 
 interface ProductGridProps {
   products: Diamond[];
@@ -38,8 +22,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   clearAllFilters, 
   onLoadMore
 }) => {
-  const router = useRouter();
-  
   // Helper function to get the image URL for a product
   const getImageUrl = (product: Diamond): string => {
     // Use the first image from the product's media
@@ -117,7 +99,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-4">No diamonds found</h3>
         <p className="text-gray-600 mb-6">
-          We couldn't find any diamonds matching your criteria. Try adjusting your filters.
+          We couldn&apos;t find any diamonds matching your criteria. Try adjusting your filters.
         </p>
         <button
           onClick={clearAllFilters}
