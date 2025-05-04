@@ -22,10 +22,10 @@ export default function SettingsCategoryPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // Ensure category is a string, defaulting to 'all' if undefined
   const category = params?.category ? String(params.category) : 'all';
-  
+
   // State for filters
   const [filters, setFilters] = useState({
     styles: [] as string[],
@@ -34,16 +34,16 @@ export default function SettingsCategoryPage() {
     priceRange: null as [number, number] | null,
     stoneShapes: [] as string[]
   });
-  
+
   // State for active filter section
   const [activeFilterSection, setActiveFilterSection] = useState<string | null>(null);
-  
+
   // State for mobile filters visibility
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
+
   // State for sorting
   const [sortOption, setSortOption] = useState('price-asc');
-  
+
   // State for products
   const [products, setProducts] = useState<Setting[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ export default function SettingsCategoryPage() {
   const [hasMore, setHasMore] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [activeMetalFilters, setActiveMetalFilters] = useState<string[]>([]);
-  
+
   // Add a state to track if initial filters have been set
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [queryParams, setQueryParams] = useState(new URLSearchParams());
@@ -68,24 +68,24 @@ export default function SettingsCategoryPage() {
     const maxPriceParam = searchParams.get('maxPrice');
     const stoneShapesParam = searchParams.get('stoneShapes');
     const sortParam = searchParams.get('sort');
-    
+
     const newFilters = {
       styles: stylesParam ? stylesParam.split(',') : [],
       types: typesParam ? typesParam.split(',') : [],
       metalColors: metalColorsParam ? metalColorsParam.split(',') : [],
-      priceRange: (minPriceParam && maxPriceParam) 
+      priceRange: (minPriceParam && maxPriceParam)
         ? [parseInt(minPriceParam), parseInt(maxPriceParam)] as [number, number]
         : null,
       stoneShapes: stoneShapesParam ? stoneShapesParam.split(',') : []
     };
-    
+
     setFilters(newFilters);
     setActiveMetalFilters(newFilters.metalColors);
-    
+
     if (sortParam) {
       setSortOption(sortParam);
     }
-    
+
     // Reset pagination when URL params change
     setPage(1);
   }, [searchParams]);
@@ -94,13 +94,13 @@ export default function SettingsCategoryPage() {
   useEffect(() => {
     if (!initialLoadComplete && category) {
       console.log('Setting initial filters based on category:', category);
-      
+
       // Only set category-based filters if no URL params exist
       const hasExistingFilters = Array.from(searchParams?.entries() || []).length > 0;
-      
+
       if (!hasExistingFilters) {
-        let newFilters = {...filters};
-        
+        let newFilters = { ...filters };
+
         // Reset filters when category changes from URL
         newFilters = {
           styles: [],
@@ -122,9 +122,9 @@ export default function SettingsCategoryPage() {
               .split('-')
               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ');
-          
+
             const fullColor = metalColor.includes('Gold') ? metalColor : `${metalColor} Gold`;
-          
+
             newFilters.metalColors = [fullColor];
             setActiveMetalFilters([fullColor]);
           }
@@ -134,7 +134,7 @@ export default function SettingsCategoryPage() {
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-          
+
           newFilters.styles = [style];
         } else if (category.startsWith('type-')) {
           const type = category
@@ -142,7 +142,7 @@ export default function SettingsCategoryPage() {
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-          
+
           newFilters.types = [type];
         } else if (category.startsWith('stone-shape-')) {
           const shape = category
@@ -150,13 +150,13 @@ export default function SettingsCategoryPage() {
             .split('-')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-          
+
           newFilters.stoneShapes = [shape];
         }
-        
+
         setFilters(newFilters);
       }
-      
+
       setInitialLoadComplete(true);
     }
   }, [category, searchParams, initialLoadComplete, filters]);
@@ -164,7 +164,7 @@ export default function SettingsCategoryPage() {
   // Update query params when filters change
   useEffect(() => {
     const newParams = new URLSearchParams();
-    
+
     if (filters.styles.length) {
       newParams.set('styles', filters.styles.join(','));
     }
@@ -181,7 +181,7 @@ export default function SettingsCategoryPage() {
     if (filters.stoneShapes.length > 0) {
       newParams.set('stoneShapes', filters.stoneShapes.join(','));
     }
-    
+
     // Add sort option to query params
     newParams.set('sort', sortOption);
 
@@ -198,36 +198,36 @@ export default function SettingsCategoryPage() {
         } else {
           setLoadingMore(true);
         }
-        
+
         // Add page, limit and sort parameters to the query
         const paginatedQueryParams = new URLSearchParams(queryParams.toString());
         paginatedQueryParams.set('page', page.toString());
         paginatedQueryParams.set('limit', '12');
         paginatedQueryParams.set('sort', sortOption);
-        
-        console.log(`Fetching settings products for category: ${category || 'all'}, page: ${page}, params:`, 
+
+        console.log(`Fetching settings products for category: ${category || 'all'}, page: ${page}, params:`,
           Object.fromEntries(paginatedQueryParams.entries()));
-        
+
         const response = await fetch(`/api/products/settings/${category || 'all'}?${paginatedQueryParams.toString()}`);
-        
+
         if (!response.ok) throw new Error('Failed to fetch products');
-        
+
         const data = await response.json();
         console.log(`Received ${data.products?.length || 0} products, total: ${data.pagination?.total || 0}`);
-        
+
         // Add null checks for data.products and data.pagination
         if (!data.products) {
           console.error('No products array in API response:', data);
           throw new Error('Invalid API response: missing products array');
         }
-        
+
         // If first page, replace products, otherwise append
         if (page === 1) {
           setProducts(data.products);
         } else {
           setProducts(prev => [...prev, ...data.products]);
         }
-        
+
         // Update pagination info with null checks
         setTotalProducts(data.pagination?.total || 0);
         setHasMore(data.pagination?.hasMore || false);
@@ -249,21 +249,21 @@ export default function SettingsCategoryPage() {
   const applyFilters = () => {
     if (!searchParams) return;
     const queryParams = new URLSearchParams(searchParams.toString());
-    
+
     // Add styles to query
     if (filters.styles.length > 0) {
       queryParams.set('styles', filters.styles.join(','));
     } else {
       queryParams.delete('styles');
     }
-    
+
     // Add types to query
     if (filters.types.length > 0) {
       queryParams.set('types', filters.types.join(','));
     } else {
       queryParams.delete('types');
     }
-    
+
     // Add price range to query
     if (filters.priceRange) {
       queryParams.set('minPrice', filters.priceRange[0].toString());
@@ -272,27 +272,27 @@ export default function SettingsCategoryPage() {
       queryParams.delete('minPrice');
       queryParams.delete('maxPrice');
     }
-    
+
     // Add metal colors to query
     if (filters.metalColors.length > 0) {
       queryParams.set('metalColors', filters.metalColors.join(','));
     } else {
       queryParams.delete('metalColors');
     }
-    
+
     // Add stone shapes to query
     if (filters.stoneShapes.length > 0) {
       queryParams.set('stoneShapes', filters.stoneShapes.join(','));
     } else {
       queryParams.delete('stoneShapes');
     }
-    
+
     // Add sort option to query
     queryParams.set('sort', sortOption);
-    
+
     // Reset pagination when applying new filters
     setPage(1);
-    
+
     // Update URL with new query params
     const newUrl = `${window.location.pathname}?${queryParams.toString()}`;
     router.push(newUrl);
@@ -332,10 +332,10 @@ export default function SettingsCategoryPage() {
       const newMetalColors = prev.metalColors.includes(color)
         ? prev.metalColors.filter(c => c !== color)
         : [...prev.metalColors, color];
-      
+
       // Also update activeMetalFilters
       setActiveMetalFilters(newMetalColors);
-      
+
       return { ...prev, metalColors: newMetalColors };
     });
   };
@@ -391,173 +391,172 @@ export default function SettingsCategoryPage() {
   // Function to get category title
   const getCategoryTitle = (): string => {
     if (!category || category === 'all') return 'All Ring Settings';
-    
+
     // If multiple styles are selected, show a combined title
     if (filters.styles.length > 1) {
       return `${filters.styles.join(' & ')} Style Ring Settings`;
     }
-    
+
     // If a single style is selected, show its title
     if (filters.styles.length === 1) {
       return `${filters.styles[0]} Style Ring Settings`;
     }
-    
+
     // If multiple metal colors are selected, show a combined title
     if (filters.metalColors.length > 1) {
       return `${filters.metalColors.join(' & ')} Ring Settings`;
     }
-    
-        // If a single metal color is selected, show its title
-        if (filters.metalColors.length === 1) {
-            return `${filters.metalColors[0]} Ring Settings`;
-          }
-          
-          // If multiple types are selected, show a combined title
-          if (filters.types.length > 1) {
-            return `${filters.types.join(' & ')} Ring Settings`;
-          }
-          
-          // If a single type is selected, show its title
-          if (filters.types.length === 1) {
-            return `${filters.types[0]} Ring Settings`;
-          }
-          
-          // If multiple stone shapes are selected, show a combined title
-          if (filters.stoneShapes.length > 1) {
-            return `${filters.stoneShapes.join(' & ')} Diamond Ring Settings`;
-          }
-          
-          // If a single stone shape is selected, show its title
-          if (filters.stoneShapes.length === 1) {
-            return `${filters.stoneShapes[0]} Diamond Ring Settings`;
-          }
-          
-          // Handle URL category mapping
-          if (category.startsWith('style-')) {
-            const style = category
-              .replace('style-', '')
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            return `${style} Style Ring Settings`;
-          }
-          
-          if (category.startsWith('metal-')) {
-            // Special case for Two Tone Gold
-            if (category === 'metal-two-tone-gold') {
-              return 'Two Tone Gold Ring Settings';
-            }
-            
-            const metalColor = category
-              .replace('metal-', '')
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            const fullColor = metalColor.includes('Gold') ? metalColor : `${metalColor} Gold`;
-            return `${fullColor} Ring Settings`;
-          }
-          
-          if (category.startsWith('type-')) {
-            const type = category
-              .replace('type-', '')
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            return `${type} Ring Settings`;
-          }
-          
-          if (category.startsWith('stone-shape-')) {
-            const shape = category
-              .replace('stone-shape-', '')
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            return `${shape} Diamond Ring Settings`;
-          }
-          
-          return 'Ring Settings';
-        };
-        
-        return (
-          <div className="container mx-auto px-4 py-8">
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">{getCategoryTitle()}</h1>
-              <p className="text-gray-600 mt-2">
-                {totalProducts} {totalProducts === 1 ? 'setting' : 'settings'} available
-              </p>
-            </div>
-            
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden mb-4">
-              <button
-                onClick={() => setShowMobileFilters(true)}
-                className="w-full py-2 px-4 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700 hover:bg-gray-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
-                Filter & Sort
-              </button>
-            </div>
-            
-            {/* Desktop Filters */}
-            <div className="hidden lg:block mb-8">
-              <FilterBar
-                filters={filters}
-                availableFilters={availableFilters}
-                activeFilterSection={activeFilterSection}
-                toggleFilterSection={toggleFilterSection}
-                toggleStyle={toggleStyle}
-                toggleType={toggleType}
-                toggleStoneShape={toggleStoneShape}
-                toggleMetalColor={toggleMetalColor}
-                setPriceRange={setPriceRange}
-                clearAllFilters={clearAllFilters}
-                applyFilters={applyFilters}
-              />
-            </div>
-            
-            {/* Mobile Filters */}
-            {showMobileFilters && (
-              <MobileFilters
-                filters={filters}
-                availableFilters={availableFilters}
-                toggleStyle={toggleStyle}
-                toggleType={toggleType}
-                toggleStoneShape={toggleStoneShape}
-                toggleMetalColor={toggleMetalColor}
-                setPriceRange={setPriceRange}
-                clearAllFilters={clearAllFilters}
-                applyFilters={applyFilters}
-                closeFilters={() => setShowMobileFilters(false)}
-              />
-            )}
-            
-            {/* Sorting Options */}
-            <div className="flex justify-end mb-6">
-              <SortingOptions
-                onSortChange={handleSortChange}
-                currentSort={sortOption}
-              />
-            </div>
-            
-            {/* Products */}
-            <ProductGrid
-              products={products}
-              loading={loading}
-              loadingMore={loadingMore}
-              hasMore={hasMore}
-              error={error}
-              clearAllFilters={clearAllFilters}
-              onLoadMore={loadMoreProducts}
-              activeMetalFilters={activeMetalFilters}
-            />
-          </div>
-        );
+
+    // If a single metal color is selected, show its title
+    if (filters.metalColors.length === 1) {
+      return `${filters.metalColors[0]} Ring Settings`;
+    }
+
+    // If multiple types are selected, show a combined title
+    if (filters.types.length > 1) {
+      return `${filters.types.join(' & ')} Ring Settings`;
+    }
+
+    // If a single type is selected, show its title
+    if (filters.types.length === 1) {
+      return `${filters.types[0]} Ring Settings`;
+    }
+
+    // If multiple stone shapes are selected, show a combined title
+    if (filters.stoneShapes.length > 1) {
+      return `${filters.stoneShapes.join(' & ')} Diamond Ring Settings`;
+    }
+
+    // If a single stone shape is selected, show its title
+    if (filters.stoneShapes.length === 1) {
+      return `${filters.stoneShapes[0]} Diamond Ring Settings`;
+    }
+
+    // Handle URL category mapping
+    if (category.startsWith('style-')) {
+      const style = category
+        .replace('style-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      return `${style} Style Ring Settings`;
+    }
+
+    if (category.startsWith('metal-')) {
+      // Special case for Two Tone Gold
+      if (category === 'metal-two-tone-gold') {
+        return 'Two Tone Gold Ring Settings';
       }
-      
+
+      const metalColor = category
+        .replace('metal-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      const fullColor = metalColor.includes('Gold') ? metalColor : `${metalColor} Gold`;
+      return `${fullColor} Ring Settings`;
+    }
+
+    if (category.startsWith('type-')) {
+      const type = category
+        .replace('type-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      return `${type} Ring Settings`;
+    }
+
+    if (category.startsWith('stone-shape-')) {
+      const shape = category
+        .replace('stone-shape-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      return `${shape} Diamond Ring Settings`;
+    }
+
+    return 'Ring Settings';
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">{getCategoryTitle()}</h1>
+        <p className="text-gray-600 mt-2">
+          {totalProducts} {totalProducts === 1 ? 'setting' : 'settings'} available
+        </p>
+      </div>
+
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden mb-4">
+        <button
+          onClick={() => setShowMobileFilters(true)}
+          className="w-full py-2 px-4 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700 hover:bg-gray-200"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          Filter & Sort
+        </button>
+      </div>
+
+      {/* Desktop Filters */}
+      <div className="hidden lg:block mb-8">
+        <FilterBar
+          filters={filters}
+          availableFilters={availableFilters}
+          activeFilterSection={activeFilterSection}
+          toggleFilterSection={toggleFilterSection}
+          toggleStyle={toggleStyle}
+          toggleType={toggleType}
+          toggleStoneShape={toggleStoneShape}
+          toggleMetalColor={toggleMetalColor}
+          setPriceRange={setPriceRange}
+          clearAllFilters={clearAllFilters}
+          applyFilters={applyFilters}
+        />
+      </div>
+
+      {/* Mobile Filters */}
+      {showMobileFilters && (
+        <MobileFilters
+          filters={filters}
+          availableFilters={availableFilters}
+          toggleStyle={toggleStyle}
+          toggleType={toggleType}
+          toggleStoneShape={toggleStoneShape}
+          toggleMetalColor={toggleMetalColor}
+          setPriceRange={setPriceRange}
+          clearAllFilters={clearAllFilters}
+          applyFilters={applyFilters}
+          closeFilters={() => setShowMobileFilters(false)}
+        />
+      )}
+
+      {/* Sorting Options */}
+      <div className="flex justify-end mb-6">
+        <SortingOptions
+          onSortChange={handleSortChange}
+          currentSort={sortOption}
+        />
+      </div>
+
+      {/* Products */}
+      <ProductGrid
+        products={products}
+        loading={loading}
+        loadingMore={loadingMore}
+        hasMore={hasMore}
+        error={error}
+        clearAllFilters={clearAllFilters}
+        onLoadMore={loadMoreProducts}
+        activeMetalFilters={activeMetalFilters}
+      />
+    </div>
+  );
+}
