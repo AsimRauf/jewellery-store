@@ -55,7 +55,7 @@ export default function ProductGrid({
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="bg-amber-50 text-amber-700 p-6 rounded-lg max-w-md">
           <h3 className="font-medium text-lg mb-2">No settings found</h3>
-          <p className="text-sm">We couldn&apos;t find any settings matching your criteria.</p>
+          <p className="text-sm">We couldn't find any settings matching your criteria.</p>
         </div>
         <button 
           onClick={clearAllFilters}
@@ -111,7 +111,26 @@ export default function ProductGrid({
 
   // Function to generate SEO-friendly URL with metal option
   const getProductUrl = (product: Setting, metalColor: string): string => {
-    return `/products/rings/settings/${product._id}?metal=${encodeURIComponent(metalColor)}`;
+    // Create a slug from the product title
+    const titleSlug = product.title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-'); // Replace multiple hyphens with a single hyphen
+    
+    // Add style and metal color to the slug if available
+    const styleSlug = product.style && product.style.length > 0 
+      ? `-${product.style[0].toLowerCase().replace(/\s+/g, '-')}` 
+      : '';
+    
+    const metalSlug = metalColor
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+    
+    // Combine into a descriptive slug
+    const slug = `${titleSlug}${styleSlug}-${metalSlug}-ring-${product._id}`;
+    
+    return `/products/rings/settings/${slug}?metal=${encodeURIComponent(metalColor)}`;
   };
 
   

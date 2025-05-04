@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import Diamond from '@/models/Diamond';
 
-export function GET(request: NextRequest) {
-  return handleRequest(request);
-}
-
-async function handleRequest(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
     

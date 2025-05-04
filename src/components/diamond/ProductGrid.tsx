@@ -60,7 +60,17 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   // Function to generate SEO-friendly URL
   const getProductUrl = (product: Diamond): string => {
-    return `/diamond/detail/${product._id}`;
+    // Create a slug from the diamond's properties
+    const shape = product.shape.toLowerCase();
+    const carat = product.carat.toString().replace('.', '-');
+    const color = product.color.toLowerCase();
+    const clarity = product.clarity.toLowerCase();
+    const type = product.type === 'lab' ? 'lab-grown' : 'natural';
+    
+    // Combine properties into a descriptive slug
+    const slug = `${shape}-${carat}-carat-${color}-${clarity}-${type}-diamond-${product._id}`;
+    
+    return `/diamond/detail/${slug}`;
   };
 
   // Loading state
@@ -99,7 +109,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       <div className="text-center py-12">
         <h3 className="text-xl font-medium mb-4">No diamonds found</h3>
         <p className="text-gray-600 mb-6">
-          We couldn&apos;t find any diamonds matching your criteria. Try adjusting your filters.
+          We couldn't find any diamonds matching your criteria. Try adjusting your filters.
         </p>
         <button
           onClick={clearAllFilters}
