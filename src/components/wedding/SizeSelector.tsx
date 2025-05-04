@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 interface SizeSelectorProps {
@@ -16,6 +16,8 @@ interface SizeSelectorProps {
 export default function SizeSelector({ sizes, selectedSize, onChange }: SizeSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Sort sizes numerically
   const sortedSizes = [...sizes].sort((a, b) => a.size - b.size);
@@ -28,6 +30,20 @@ export default function SizeSelector({ sizes, selectedSize, onChange }: SizeSele
     ? sortedSizes.find(s => s.size === selectedSize) 
     : null;
   
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden">
       {/* Accordion Header */}
@@ -66,39 +82,74 @@ export default function SizeSelector({ sizes, selectedSize, onChange }: SizeSele
           {/* Instructions */}
           <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mb-4">
             <p className="text-sm text-amber-700">
-              Select your ring size from the options below. 
+              Select your ring size from the dropdown below. 
               {hasSizesWithAdditionalPrice && 
-                " Some sizes may have an additional cost, indicated by a '+$' amount."}
+                " Some sizes may have an additional cost, indicated by a '+' amount."}
             </p>
           </div>
           
-          {/* Size Grid */}
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2">
-            {sortedSizes.map((sizeOption) => (
-              <button
-                key={sizeOption.size}
-                onClick={() => onChange(sizeOption.size)}
-                disabled={!sizeOption.isAvailable}
-                className={`
-                  w-full py-3 px-1 rounded-md text-sm font-medium transition-all
-                  ${selectedSize === sizeOption.size 
-                    ? 'bg-amber-500 text-white shadow-md' 
-                    : sizeOption.isAvailable 
-                      ? 'bg-white border border-gray-300 text-gray-700 hover:border-amber-500 hover:bg-amber-50' 
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                  }
-                `}
+          {/* Size Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDropdownOpen(!isDropdownOpen);
+              }}
+              className="w-full p-3 bg-white border border-gray-300 rounded-md flex justify-between items-center hover:border-amber-500 transition-colors"
+            >
+              <span className="text-gray-700">
+                {selectedSize !== null 
+                  ? `Size ${selectedSize.toFixed(2)}${selectedSizeDetails?.additionalPrice ? ` (+$${selectedSizeDetails.additionalPrice})` : ''}`
+                  : 'Select a size'}
+              </span>
+              <svg 
+                className={`w-5 h-5 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
               >
-                <div className="flex flex-col items-center">
-                  <span>{sizeOption.size.toFixed(2)}</span>
-                  {sizeOption.additionalPrice > 0 && (
-                    <span className="text-xs mt-1">
-                      +${sizeOption.additionalPrice}
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {isDropdownOpen && (
+              <div 
+                className=" mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50"
+                style={{
+                  width: dropdownRef.current ? dropdownRef.current.offsetWidth : 'auto',
+                  left: dropdownRef.current ? dropdownRef.current.getBoundingClientRect().left : 0,
+                  top: dropdownRef.current ? dropdownRef.current.getBoundingClientRect().bottom + window.scrollY : 0
+                }}
+              >
+                {sortedSizes.map((sizeOption) => (
+                  <button
+                    key={sizeOption.size}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (sizeOption.isAvailable) {
+                        onChange(sizeOption.size);
+                        setIsDropdownOpen(false);
+                      }
+                    }}
+                    disabled={!sizeOption.isAvailable}
+                    className={`
+                      w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors
+                      ${selectedSize === sizeOption.size ? 'bg-amber-50 text-amber-700' : 'text-gray-700'}
+                      ${!sizeOption.isAvailable ? 'opacity-50 cursor-not-allowed bg-gray-100' : ''}
+                    `}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span>{sizeOption.size.toFixed(2)}</span>
+                      {sizeOption.additionalPrice > 0 && (
+                        <span className="text-amber-600">
+                          +${sizeOption.additionalPrice}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           
           {/* Ring Size Guide Link */}
