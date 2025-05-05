@@ -173,7 +173,7 @@ export default function SettingDetailPage() {
     if (productId) {
       fetchProduct();
     }
-  }, [productId, searchParams]);
+  }, [slug, productId, searchParams]);
 
   // Handle metal selection
   const handleMetalChange = (metal: MetalOption) => {
@@ -306,23 +306,6 @@ export default function SettingDetailPage() {
     }
   };
 
-  const handleGoToComplete = () => {
-    if (!product || !selectedMetal || !selectedSize) {
-      toast.error('Please select a size and metal option');
-      return;
-    }
-
-    // Build URL with all necessary parameters
-    const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('settingId', product._id);
-    params.set('metal', selectedMetal.color);
-    params.set('size', selectedSize.toString());
-    params.set('complete', 'true');
-    
-    // Redirect to completion page
-    router.push(`/customize/complete?${params.toString()}`);
-  };
-
   // Get images for the selected metal color
   const getImagesForSelectedMetal = () => {
     if (!product || !selectedMetal) return [];
@@ -426,13 +409,13 @@ export default function SettingDetailPage() {
             <div className="mt-6">
               <h3 className="text-lg font-medium mb-2">Product Video</h3>
               <div className="relative aspect-video rounded-lg overflow-hidden">
-              // Continuing from where we left off
                 <video
                   src={product.media.video.url}
                   controls
                   className="w-full h-full"
                   poster={getImagesForSelectedMetal()[0]?.url}
                 />
+                {/* Continuing from where we left off */}
               </div>
             </div>
           )}

@@ -30,7 +30,6 @@ export default function ProductGrid({
   error,
   clearAllFilters,
   onLoadMore,
-  activeMetalFilters = [],
   onProductClick
 }: ProductGridProps) {
   // Create a ref for the observer
@@ -90,7 +89,7 @@ export default function ProductGrid({
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="bg-amber-50 text-amber-700 p-6 rounded-lg max-w-md">
           <h3 className="font-medium text-lg mb-2">No settings found</h3>
-          <p className="text-sm">We couldn't find any settings matching your criteria.</p>
+          <p className="text-sm">We couldn&apos;t find any settings matching your criteria.</p>
         </div>
         <button 
           onClick={clearAllFilters}

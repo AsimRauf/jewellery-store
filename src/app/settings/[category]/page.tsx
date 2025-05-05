@@ -28,7 +28,6 @@ export default function SettingsCategoryPage() {
   const isDiamondSelected = Boolean(searchParams?.get('diamondId'));
   const diamondId = searchParams?.get('diamondId');
   const startWith = searchParams?.get('start');
-  const endWith = searchParams?.get('end');
 
   // Ensure category is a string, defaulting to 'all' if undefined
   const category = params?.category ? String(params.category) : 'all';
@@ -488,10 +487,6 @@ export default function SettingsCategoryPage() {
 
     return 'Ring Settings';
   };
-
-  // Add these variables from URL params
-  const defaultSize = 6;
-  const defaultMetal = 'White Gold';
 
   // Modify handleSettingClick to always go to detail page
   const handleSettingClick = (setting: Setting) => {

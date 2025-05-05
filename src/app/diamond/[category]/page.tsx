@@ -516,7 +516,8 @@ export default function DiamondCategoryPage() {
             carat: diamond.carat,
             color: diamond.color,
             clarity: diamond.clarity,
-            cut: diamond.cut
+            cut: diamond.cut,
+            image: diamond.images?.[0]?.url || ''
           }
         }
       }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
@@ -38,7 +38,8 @@ interface Diamond {
   }>;
 }
 
-export default function CompletePage() {
+// Create a component that uses useSearchParams
+function CompletePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addItem } = useCart();
@@ -144,11 +145,12 @@ export default function CompletePage() {
             type: 'diamond',
             carat: diamond.carat,
             color: diamond.color,
-            clarity: diamond.clarity
+            clarity: diamond.clarity,
+            image: diamond.images?.[0]?.url || ''
           },
           setting: {
             style: setting.title,
-            metalType: metalOption.color,
+            metalType: `${metalOption.karat} ${metalOption.color}`,
             settingType: 'custom'
           }
         }
@@ -157,7 +159,7 @@ export default function CompletePage() {
 
     addItem(cartItem);
     toast.success('Custom ring added to cart!');
-    router.push('/cart');
+    router.push('/checkout');
   };
 
   const handleChangeSetting = () => {
@@ -292,7 +294,7 @@ export default function CompletePage() {
             onClick={handleAddToCart}
             className="px-8 py-3 bg-amber-500 text-white rounded-full hover:bg-amber-600 font-medium"
           >
-            Add to Cart
+            Add to Cart & Checkout
           </button>
           <button
             onClick={() => router.back()}
@@ -303,5 +305,20 @@ export default function CompletePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main component that wraps the content with Suspense
+export default function CompletePage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-amber-500"></div>
+        </div>
+      </div>
+    }>
+      <CompletePageContent />
+    </Suspense>
   );
 }

@@ -451,22 +451,40 @@ export default function CheckoutPage() {
             
             <div className="max-h-80 overflow-y-auto mb-4">
               {items.map((item) => {
-                // Find the size option with additional price if available
                 const sizeOption = item.size && availableSizes[item._id] 
                   ? availableSizes[item._id].find(s => s.size === item.size)
                   : null;
                 
                 return (
                   <div key={item.cartItemId || item._id} className="flex py-3 border-b border-gray-200 last:border-0">
-                    <div className="w-16 h-16 relative flex-shrink-0">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="64px"
-                        className="object-cover rounded-md"
-                      />
+                    <div className="flex space-x-4">
+                      {/* Primary Setting Image */}
+                      <div className="w-16 h-16 relative flex-shrink-0">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          sizes="64px"
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+
+                      {/* Diamond Image for Custom Rings */}
+                      {item.customization?.isCustomized && 
+                       item.customization.customizationType === 'setting-diamond' && 
+                       item.customization.customizationDetails?.stone?.image && (
+                        <div className="w-16 h-16 relative flex-shrink-0">
+                          <Image
+                            src={item.customization.customizationDetails.stone.image}
+                            alt={`${item.customization.customizationDetails.stone.carat}ct ${item.customization.customizationDetails.stone.cut} Diamond`}
+                            fill
+                            sizes="64px"
+                            className="object-cover rounded-md"
+                          />
+                        </div>
+                      )}
                     </div>
+
                     <div className="ml-3 flex-1">
                       <h3 className="text-sm font-medium">{item.title}</h3>
                       <p className="text-xs text-gray-500">
@@ -476,7 +494,14 @@ export default function CheckoutPage() {
                         {item.quantity > 1 && ` • Qty: ${item.quantity}`}
                       </p>
                       
-                      {/* Display customization details for the item */}
+                      {/* Display individual prices for custom rings */}
+                      {item.customization?.isCustomized && item.customization.componentPrices && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p>Setting: ${item.customization.componentPrices.setting?.toFixed(2)}</p>
+                          <p>Diamond: ${item.customization.componentPrices.stone?.toFixed(2)}</p>
+                        </div>
+                      )}
+                      
                       {renderCustomizationDetails(item)}
                       
                       <p className="text-sm font-medium mt-1">${(item.price * item.quantity).toFixed(2)}</p>

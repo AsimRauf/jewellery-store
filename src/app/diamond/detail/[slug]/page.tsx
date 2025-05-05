@@ -50,7 +50,6 @@ export default function DiamondDetailPage() {
   // Add customization flow parameters
   const startWith = searchParams?.get('start');
   const isCustomizationStart = startWith === 'diamond';
-  const isCustomizationEnd = searchParams?.get('end') === 'diamond';
   const settingId = searchParams?.get('settingId');
   const selectedMetal = searchParams?.get('metal');
   const selectedSize = searchParams?.get('size');
@@ -58,7 +57,6 @@ export default function DiamondDetailPage() {
   
   // Extract diamond ID from slug
   const slug = params?.slug as string;
-  const diamondId = slug.split('-').pop();
   
   // State variables
   const [diamond, setDiamond] = useState<DiamondDetail | null>(null);

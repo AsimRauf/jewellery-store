@@ -21,6 +21,10 @@ export interface CartItem {
     metalType?: string;
     size?: number;
     notes?: string;
+    componentPrices?: {
+      stone?: number;
+      setting?: number;
+    };
     // Added for admin panel visibility
     customizationDetails?: {
       stone?: {
@@ -29,11 +33,14 @@ export interface CartItem {
         color?: string;
         clarity?: string;
         cut?: string;
+        price?: number;
+        image?: string; // Added image property for stone
       };
       setting?: {
         style: string;
         metalType: string;
         settingType: string;
+        price?: number;
       };
     };
   };

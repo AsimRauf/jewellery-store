@@ -11,7 +11,6 @@ export default function CustomizationSteps({
   settingComplete = false,
   diamondComplete = false
 }: CustomizationStepsProps) {
-  // Determine the order of steps based on starting point
   const steps = startWith === 'setting' 
     ? [
         { name: 'Setting', step: 1 },
@@ -25,17 +24,14 @@ export default function CustomizationSteps({
       ];
 
   return (
-    <div className="mb-8 bg-amber-50 p-6 rounded-lg">
-      <div className="flex items-center justify-center">
+    <div className="mb-6 bg-amber-50 px-3 py-4 md:p-6 rounded-lg">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between max-w-3xl mx-auto">
         {steps.map((step, index) => (
-          <div key={step.name} className="flex items-center">
-            {index > 0 && (
-              <div className="mx-4 border-t-2 border-amber-200 w-16" />
-            )}
-            <div className="flex items-center">
+          <div key={step.name} className="flex flex-col md:flex-row items-center w-full md:flex-1">
+            <div className="flex items-center w-full md:w-auto justify-start">
               <div 
                 className={`
-                  rounded-full h-8 w-8 flex items-center justify-center text-white font-bold
+                  rounded-full h-7 w-7 md:h-8 md:w-8 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm md:text-base
                   ${(currentStep > step.step) || 
                     (step.name === 'Setting' && settingComplete) || 
                     (step.name === 'Diamond' && diamondComplete)
@@ -53,7 +49,8 @@ export default function CustomizationSteps({
                   : step.step
                 }
               </div>
-              <span className={`ml-2 font-medium ${currentStep === step.step ? 'text-amber-700' : 'text-gray-500'}`}>
+              
+              <span className={`ml-3 font-medium text-sm md:text-base flex-shrink-0 ${currentStep === step.step ? 'text-amber-700' : 'text-gray-500'}`}>
                 {step.step === 3 
                   ? 'Complete Ring'
                   : currentStep > step.step || 
@@ -66,6 +63,13 @@ export default function CustomizationSteps({
                 }
               </span>
             </div>
+
+            {index < steps.length - 1 && (
+              <>
+                <div className="md:hidden h-6 w-0.5 bg-amber-200 my-1 mx-auto" />
+                <div className="hidden md:block flex-grow mx-4 border-t-2 border-amber-200 min-w-[2rem]" />
+              </>
+            )}
           </div>
         ))}
       </div>

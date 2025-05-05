@@ -43,40 +43,53 @@ export default function OrderSummaryItem({ item, sizeOption }: OrderSummaryItemP
             )}
           </div>
         )}
-
-        {item.customization.notes && (
-          <p className="mt-1 italic text-gray-500">{item.customization.notes}</p>
-        )}
       </div>
     );
   };
 
   return (
-    <div className="flex py-3 border-b border-gray-200 last:border-0">
-      <div className="w-16 h-16 relative flex-shrink-0">
-        <Image
-          src={item.image}
-          alt={item.title}
-          fill
-          sizes="64px"
-          className="object-cover rounded-md"
-        />
-      </div>
-      <div className="ml-3 flex-1">
-        <h3 className="text-sm font-medium">{item.title}</h3>
-        <p className="text-xs text-gray-500">
-          {item.metalOption && `${item.metalOption.karat} ${item.metalOption.color}`}
-          {item.size && ` • Size ${item.size}`}
-          {sizeOption && sizeOption.additionalPrice > 0 && 
-            ` (+$${sizeOption.additionalPrice.toFixed(2)})`}
-          {item.quantity > 1 && ` • Qty: ${item.quantity}`}
-        </p>
-        
-        {renderCustomizationDetails()}
-        
-        <p className="text-sm font-medium mt-1">
-          ${(item.price * item.quantity).toFixed(2)}
-        </p>
+    <div className="flex items-start py-4 border-b border-gray-200 last:border-0">
+      <div className="flex space-x-4 flex-1">
+        {/* Primary Image */}
+        <div className="w-20 h-20 relative flex-shrink-0 rounded-lg overflow-hidden">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            sizes="80px"
+            className="object-cover"
+          />
+        </div>
+
+        {/* If it's a custom item with both setting and stone, show stone image */}
+        {item.customization?.isCustomized && item.customization.customizationDetails?.stone && (
+          <div className="w-16 h-16 relative flex-shrink-0 mt-1 rounded-lg overflow-hidden">
+            <Image
+              src={item.customization.customizationDetails.stone.image || '/images/diamond-placeholder.jpg'}
+              alt={`${item.customization.customizationDetails.stone.type} ${item.customization.customizationDetails.stone.carat}ct`}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          </div>
+        )}
+
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {item.metalOption && `${item.metalOption.karat} ${item.metalOption.color}`}
+            {item.size && ` • Size ${item.size}`}
+            {sizeOption && sizeOption.additionalPrice > 0 && 
+              ` (+$${sizeOption.additionalPrice.toFixed(2)})`}
+            {item.quantity > 1 && ` • Qty: ${item.quantity}`}
+          </p>
+          
+          {renderCustomizationDetails()}
+          
+          <p className="text-sm font-medium mt-2 text-gray-900">
+            ${(item.price * item.quantity).toFixed(2)}
+          </p>
+        </div>
       </div>
     </div>
   );
