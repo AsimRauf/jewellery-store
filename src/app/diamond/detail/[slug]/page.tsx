@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useCart } from '@/context/CartContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
+import CustomizationSteps from '@/components/customize/CustomizationSteps';
 import { CartItem } from '@/types/cart';
 
 interface DiamondDetail {
@@ -42,8 +43,18 @@ interface DiamondDetail {
 
 export default function DiamondDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { addItem } = useCart();
+  
+  // Add customization flow parameters
+  const startWith = searchParams?.get('start');
+  const isCustomizationStart = startWith === 'diamond';
+  const isCustomizationEnd = searchParams?.get('end') === 'diamond';
+  const settingId = searchParams?.get('settingId');
+  const selectedMetal = searchParams?.get('metal');
+  const selectedSize = searchParams?.get('size');
+  const isSettingSelected = Boolean(settingId && selectedMetal && selectedSize);
   
   // Extract diamond ID from slug
   const slug = params?.slug as string;
@@ -102,15 +113,33 @@ export default function DiamondDetailPage() {
     setAddingToCart(true);
     
     try {
+      // Check if this is part of a customization flow
+      const isCustomized = Boolean(settingId || startWith === 'diamond');
+      
       const cartItem: CartItem = {
         _id: diamond._id,
         title: `${diamond.shape} ${diamond.carat}ct ${diamond.color} ${diamond.clarity} Diamond`,
         price: diamond.salePrice || diamond.price,
         quantity: quantity,
-        image: diamond.images && diamond.images.length > 0 
-          ? diamond.images[0].url 
-          : '/placeholder-diamond.jpg',
-        productType: 'diamond'
+        image: diamond.images?.[0]?.url || '',
+        productType: 'diamond' as const,
+        customization: isCustomized ? {
+          isCustomized: true,
+          customizationType: 'setting-diamond',
+          diamondId: diamond._id,
+          settingId: settingId || undefined,
+          metalType: selectedMetal || undefined,
+          size: selectedSize ? parseInt(selectedSize) : undefined,
+          customizationDetails: {
+            stone: {
+              type: 'diamond',
+              carat: diamond.carat,
+              color: diamond.color,
+              clarity: diamond.clarity,
+              cut: diamond.cut
+            }
+          }
+        } : undefined
       };
       
       addItem(cartItem);
@@ -123,13 +152,39 @@ export default function DiamondDetailPage() {
     }
   };
   
+  const handleGoToComplete = () => {
+    if (!diamond) return;
+    
+    // Build URL with all necessary parameters
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('diamondId', diamond._id);
+    params.set('complete', 'true');
+    
+    // Redirect to completion page
+    router.push(`/customize/complete?${params.toString()}`);
+  };
+
   // Handle select setting
   const handleSelectSetting = () => {
     if (!diamond) return;
-    
-    router.push(`/settings/search?diamond=${diamond._id}`);
+
+    if (isCustomizationStart) {
+      // If this is the start of diamond-first flow, go to settings with end=setting
+      const params = new URLSearchParams({
+        diamondId: diamond._id,
+        start: 'diamond',
+        end: 'setting'
+      });
+      router.push(`/settings/all?${params.toString()}`);
+    } else if (isSettingSelected) {
+      // If setting is already selected, go to completion
+      handleGoToComplete();
+    } else {
+      // Normal flow - browse settings
+      router.push(`/settings/all?diamond=${diamond._id}`);
+    }
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -155,6 +210,16 @@ export default function DiamondDetailPage() {
   
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Replace existing customization UI with new component */}
+      {(isCustomizationStart || isSettingSelected) && (
+        <CustomizationSteps
+          currentStep={isSettingSelected ? 3 : 2}
+          startWith="diamond"
+          diamondComplete={true}
+          settingComplete={isSettingSelected}
+        />
+      )}
+
       {/* Breadcrumbs */}
       <nav className="mb-8">
         <ol className="flex items-center space-x-2 text-sm">
@@ -290,13 +355,22 @@ export default function DiamondDetailPage() {
             >
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
-            
-            <button
-              onClick={handleSelectSetting}
-              className="w-full py-3 px-6 rounded-full font-medium text-white bg-[#8B0000] hover:bg-[#6B0000] transition-colors"
-            >
-              Select a Setting
-            </button>
+
+            {isSettingSelected ? (
+              <button
+                onClick={handleGoToComplete}
+                className="w-full py-3 px-6 rounded-full font-medium text-white bg-[#8B0000] hover:bg-[#6B0000] transition-colors"
+              >
+                Complete Your Ring
+              </button>
+            ) : (
+              <button
+                onClick={handleSelectSetting}
+                className="w-full py-3 px-6 rounded-full font-medium text-white bg-[#8B0000] hover:bg-[#6B0000] transition-colors"
+              >
+                {isCustomizationStart ? 'Select a Setting' : 'Start with this Diamond'}
+              </button>
+            )}
           </div>
           
           {/* Diamond Specifications */}
@@ -347,7 +421,7 @@ export default function DiamondDetailPage() {
                     <p className="mt-1">{diamond.symmetry}</p>
                   </div>
                 )}
-                // Continuing from where we left off
+                
                 {diamond.fluorescence && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Fluorescence</h3>

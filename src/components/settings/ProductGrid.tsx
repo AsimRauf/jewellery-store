@@ -1,7 +1,14 @@
 import { Setting } from '@/types/settings';
 import Image from 'next/image';
-import Link from 'next/link';
-import { JSX } from 'react';
+import React, { useCallback } from 'react';
+
+interface MetalOption {
+  karat: string;
+  color: string;
+  price: number;
+  finish_type?: string | null;
+  isDefault?: boolean;
+}
 
 interface ProductGridProps {
   products: Setting[];
@@ -11,7 +18,8 @@ interface ProductGridProps {
   error: string | null;
   clearAllFilters: () => void;
   onLoadMore: () => void;
-  activeMetalFilters?: string[]; // Add this to match engagement component
+  activeMetalFilters?: string[];
+  onProductClick: (setting: Setting) => void;
 }
 
 export default function ProductGrid({
@@ -22,8 +30,35 @@ export default function ProductGrid({
   error,
   clearAllFilters,
   onLoadMore,
-  activeMetalFilters = []
+  activeMetalFilters = [],
+  onProductClick
 }: ProductGridProps) {
+  // Create a ref for the observer
+  const observer = React.useRef<IntersectionObserver | null>(null);
+  
+  // Create a ref for the last product element
+  const lastProductRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || loadingMore) return;
+    
+    // Disconnect the previous observer if it exists
+    if (observer.current) observer.current.disconnect();
+    
+    // Create a new observer
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        onLoadMore();
+      }
+    });
+    
+    // Observe the last product element
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore, onLoadMore]);
+
+  // Get default metal option for a product
+  const getDefaultMetalOption = (product: Setting): MetalOption => {
+    return product.metalOptions.find(m => m.isDefault) || product.metalOptions[0];
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -67,134 +102,67 @@ export default function ProductGrid({
     );
   }
 
-  // Function to get the image for a product and specific metal color
-  const getImageForMetal = (product: Setting, metalColor: string): string => {
-    if (product.metalColorImages[metalColor]?.length > 0) {
-      return product.metalColorImages[metalColor][0].url;
-    }
-    
-    // If no image for this metal color, try to get any image from media
-    if (product.media?.images?.length > 0) {
-      return product.media.images[0].url;
-    }
-    
-    // Fallback to placeholder
-    return '/images/placeholder-ring.jpg';
-  };
-
-  // Function to get the price for a specific metal option
-  const getPriceForMetal = (product: Setting, metalColor: string): number => {
-    const metalOption = product.metalOptions.find(m => m.color === metalColor);
-    return metalOption ? metalOption.price : product.basePrice;
-  };
-
-  // Function to get the price display
-  const getPriceDisplay = (product: Setting, metalColor: string): JSX.Element => {
-    const price = getPriceForMetal(product, metalColor);
-    
-    if (product.onSale && product.originalPrice) {
-      const discountPercentage = Math.round(((product.originalPrice - price) / product.originalPrice) * 100);
-      
-      return (
-        <div className="flex flex-col">
-          <div className="flex items-center">
-            <span className="text-amber-600 font-medium">${price.toLocaleString()}</span>
-            <span className="ml-2 text-gray-400 line-through text-sm">${product.originalPrice.toLocaleString()}</span>
-          </div>
-          <span className="text-green-600 text-sm">Save {discountPercentage}%</span>
-        </div>
-      );
-    }
-    
-    return <span className="text-amber-600 font-medium">${price.toLocaleString()}</span>;
-  };
-
-  // Function to generate SEO-friendly URL with metal option
-  const getProductUrl = (product: Setting, metalColor: string): string => {
-    // Create a slug from the product title
-    const titleSlug = product.title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-'); // Replace multiple hyphens with a single hyphen
-    
-    // Add style and metal color to the slug if available
-    const styleSlug = product.style && product.style.length > 0 
-      ? `-${product.style[0].toLowerCase().replace(/\s+/g, '-')}` 
-      : '';
-    
-    const metalSlug = metalColor
-      .toLowerCase()
-      .replace(/\s+/g, '-');
-    
-    // Combine into a descriptive slug
-    const slug = `${titleSlug}${styleSlug}-${metalSlug}-ring-${product._id}`;
-    
-    return `/products/rings/settings/${slug}?metal=${encodeURIComponent(metalColor)}`;
-  };
-
-  
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.flatMap((product) => 
-          // For each product, create a card for each metal color
-          product.metalOptions
-            // Filter by active metal filters if any
-            .filter(option => activeMetalFilters.length === 0 || activeMetalFilters.includes(option.color))
-            .map((metalOption) => (
-              <Link 
-                href={getProductUrl(product, metalOption.color)} 
-                key={`${product._id}-${metalOption.color}`}
-                className="group"
-              >
-                <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="relative aspect-square">
-                    <Image
-                      src={getImageForMetal(product, metalOption.color)}
-                      alt={`${product.title} - ${metalOption.color}`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {product.isNew && (
-                      <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">New</div>
-                    )}
-                    {product.onSale && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">Sale</div>
-                    )}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {products.map((product, index) => {
+          const isLastItem = index === products.length - 1;
+          const metalOption = getDefaultMetalOption(product);
+          
+          return (
+            <div 
+              key={product._id}
+              ref={isLastItem ? lastProductRef : null}
+              onClick={() => onProductClick(product)}
+              className="group cursor-pointer"
+            >
+              <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="relative aspect-square">
+                  <Image
+                    src={product.metalColorImages[metalOption.color]?.[0]?.url || product.media?.images?.[0]?.url || '/placeholder-ring.jpg'}
+                    alt={`${product.title} - ${metalOption.color}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {product.isNew && (
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">New</div>
+                  )}
+                  {product.onSale && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">Sale</div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-medium text-gray-800 mb-1 truncate">{product.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{metalOption.color}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-amber-600 font-medium">${metalOption.price.toLocaleString()}</span>
+                    <div className="text-xs text-gray-500">
+                      {product.compatibleStoneShapes.length > 0 && (
+                        <span>{product.compatibleStoneShapes.length} stone shapes</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-medium text-gray-800 mb-1 truncate">{product.title}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{metalOption.color}</p>
-                    <div className="flex justify-between items-center">
-                      {getPriceDisplay(product, metalOption.color)}
-                      <div className="text-xs text-gray-500">
-                        {product.compatibleStoneShapes.length > 0 && (
-                          <span>{product.compatibleStoneShapes.length} stone shapes</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <div 
-                        className="w-5 h-5 rounded-full border border-gray-300"
-                        style={{
-                          background: 
-                            metalOption.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
-                            metalOption.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
-                            metalOption.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
-                            metalOption.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
-                            metalOption.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
-                            'gray'
-                        }}
-                        title={metalOption.color}
-                      ></div>
-                    </div>
+                  <div className="mt-2">
+                    <div 
+                      className="w-5 h-5 rounded-full border border-gray-300"
+                      style={{
+                        background: 
+                          metalOption.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                          metalOption.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                          metalOption.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                          metalOption.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                          metalOption.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                          'gray'
+                      }}
+                      title={metalOption.color}
+                    ></div>
                   </div>
                 </div>
-              </Link>
-            ))
-        )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Load More Button */}

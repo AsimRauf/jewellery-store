@@ -107,50 +107,50 @@ const CATEGORIES: Category[] = [
   },
   {
     name: 'Settings',
-    path: '/settings',
+    path: '/settings?start=setting',
     subcategories: [
       {
         name: 'All Settings',
-        path: '/settings/all',
+        path: '/settings/all?start=setting',
         icon: '/icons/settings/all-settings.svg'
       },
       {
         name: 'Solitaire',
-        path: '/settings/type-solitaire',
+        path: '/settings/type-solitaire?start=setting',
         icon: '/icons/settings/solitaire.svg'
       },
       {
         name: 'Halo',
-        path: '/settings/type-halo',
+        path: '/settings/type-halo?start=setting',
         icon: '/icons/settings/halo.svg'
       },
       {
         name: 'Three Stone',
-        path: '/settings/type-three-stone',
+        path: '/settings/type-three-stone?start=setting',
         icon: '/icons/settings/three-stone.svg'
       },
       {
         name: 'Side Stone',
-        path: '/settings/type-side-stone',
+        path: '/settings/type-side-stone?start=setting',
         icon: '/icons/settings/side-stone.svg'
       }
     ],
     styles: RING_STYLES.map(style => ({
       ...style,
-      path: `/settings/style-${style.name.toLowerCase().replace(/\s+/g, '-')}`
+      path: `/settings/style-${style.name.toLowerCase().replace(/\s+/g, '-')}?start=setting`
     })),
     metals: RingEnums.METAL_COLORS.map(color => {
       if (color === "Two Tone Gold") {
         return {
           name: "Two Tone Gold",
-          path: `/settings/metal-two-tone-gold`,
+          path: `/settings/metal-two-tone-gold?start=setting`,
           icon: "/placeholder-image.jpg"
         };
       }
       const baseName = color.toLowerCase().replace(' gold', '');
       return {
         name: color,
-        path: `/settings/metal-${baseName}`,
+        path: `/settings/metal-${baseName}?start=setting`,
         icon: `/placeholder-image.jpg`
       };
     }),
@@ -244,16 +244,16 @@ const CATEGORIES: Category[] = [
   },
   {
     name: 'Diamond',
-    path: '/diamond',
+    path: '/diamond?start=diamond',
     subcategories: [
       {
         name: 'Natural Diamonds',
-        path: '/diamond/natural',
+        path: '/diamond/natural?start=diamond',
         icon: '/icons/customize/diamond.svg'
       },
       {
         name: 'Lab Diamonds',
-        path: '/diamond/lab',
+        path: '/diamond/lab?start=diamond',
         icon: '/icons/customize/lab-diamond.svg'
       },
       {

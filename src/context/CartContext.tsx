@@ -22,7 +22,7 @@ const CartContext = createContext<CartContextType>({
   addItem: () => {},
   removeItem: () => {},
   updateQuantity: () => {},
-  updateItem: () => {}, // Add this line
+  updateItem: () => {},
   clearCart: () => {},
   itemCount: 0,
   subtotal: 0
@@ -79,11 +79,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Use a function to update items to ensure we're working with the latest state
     flushSync(() => {
       setItems(currentItems => {
-        // Generate a unique identifier for comparison
+        // For customized items, always add as new item
+        if (newItem.customization?.isCustomized) {
+          const cartItemId = `${newItem._id}-${Date.now()}`;
+          return [...currentItems, { ...newItem, cartItemId }];
+        }
+        
+        // For regular items, check for duplicates
         const itemIdentifier = `${newItem._id}-${newItem.metalOption?.karat || ''}-${newItem.metalOption?.color || ''}-${newItem.size || ''}-${newItem.productType || ''}`;
         
         // Check if item already exists in cart using the identifier
         const existingItemIndex = currentItems.findIndex(item => {
+          if (item.customization?.isCustomized) return false; // Never match customized items
           const currentIdentifier = `${item._id}-${item.metalOption?.karat || ''}-${item.metalOption?.color || ''}-${item.size || ''}-${item.productType || ''}`;
           return currentIdentifier === itemIdentifier;
         });
@@ -100,18 +107,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
         } else {
           // Add new item if it doesn't exist
-          // Add a unique identifier to each cart item to prevent key conflicts
           const cartItemId = `${itemIdentifier}-${Date.now()}`;
-          const uniqueItem = {
-            ...newItem,
-            cartItemId
-          };
-          updatedItems = [...currentItems, uniqueItem];
+          updatedItems = [...currentItems, { ...newItem, cartItemId }];
         }
-        
-        // Log the before and after state for debugging
-        console.log('Before update:', currentItems);
-        console.log('After update:', updatedItems);
         
         return updatedItems;
       });

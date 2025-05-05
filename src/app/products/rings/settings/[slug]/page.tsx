@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import CustomizationSteps from '@/components/customize/CustomizationSteps';
 
 // Define types for metal options and sizes
 interface MetalOption {
@@ -85,7 +86,14 @@ export default function SettingDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem } = useCart(); // Add this line to get addItem from cart context
+  
+  // Add this to track customization flow
+  const isCustomizationEnd = searchParams?.get('end') === 'setting';
+  const startWith = searchParams?.get('start');
+  const isDiamondFirst = startWith === 'diamond';
+  const diamondId = searchParams?.get('diamondId');
+  const hasDiamondSelected = Boolean(diamondId);
 
   // Extract product ID from slug
   const slug = params?.slug || '';
@@ -213,6 +221,9 @@ export default function SettingDetailPage() {
       imageUrl = product.media.images[0].url;
     }
 
+    // Check if this is part of a customization flow
+    const isCustomized = Boolean(diamondId || startWith === 'setting' || isCustomizationEnd);
+
     // Create cart item
     return {
       _id: product._id,
@@ -225,7 +236,22 @@ export default function SettingDetailPage() {
         color: selectedMetal.color
       },
       size: selectedSize,
-      productType: 'setting'
+      productType: 'setting',
+      customization: isCustomized ? {
+        isCustomized: true,
+        customizationType: 'setting-diamond',
+        settingId: product._id,
+        diamondId: diamondId || undefined,
+        metalType: `${selectedMetal.karat} ${selectedMetal.color}`,
+        size: selectedSize,
+        customizationDetails: {
+          setting: {
+            style: product.style ? product.style[0] : 'Classic',
+            metalType: `${selectedMetal.karat} ${selectedMetal.color}`,
+            settingType: product.type ? product.type[0] : 'Solitaire'
+          }
+        }
+      } : undefined
     };
   };
 
@@ -252,14 +278,49 @@ export default function SettingDetailPage() {
     }
   };
 
-  // Handle select diamond
+  // Modify handleSelectDiamond for completion flow
   const handleSelectDiamond = () => {
     if (!product || !selectedMetal || !selectedSize) {
       toast.error('Please select a size and metal option');
       return;
     }
 
-    router.push(`/diamond/search?setting=${product._id}&metal=${selectedMetal.color}&size=${selectedSize}`);
+    if (isDiamondFirst && hasDiamondSelected) {
+      // If we're in diamond-first flow and have a diamond, go to completion
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      params.set('settingId', product._id);
+      params.set('metal', selectedMetal.color);
+      params.set('size', selectedSize.toString());
+      params.set('complete', 'true');
+      router.push(`/customize/complete?${params.toString()}`);
+    } else {
+      // Normal flow or starting customization - go to diamond selection
+      const params = new URLSearchParams({
+        settingId: product._id,
+        metal: selectedMetal.color,
+        size: selectedSize.toString(),
+        start: 'setting',
+        end: 'diamond'
+      });
+      router.push(`/diamond/all?${params.toString()}`);
+    }
+  };
+
+  const handleGoToComplete = () => {
+    if (!product || !selectedMetal || !selectedSize) {
+      toast.error('Please select a size and metal option');
+      return;
+    }
+
+    // Build URL with all necessary parameters
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('settingId', product._id);
+    params.set('metal', selectedMetal.color);
+    params.set('size', selectedSize.toString());
+    params.set('complete', 'true');
+    
+    // Redirect to completion page
+    router.push(`/customize/complete?${params.toString()}`);
   };
 
   // Get images for the selected metal color
@@ -293,6 +354,15 @@ export default function SettingDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Show CustomizationSteps for both end of flow and start of flow */}
+      {(isCustomizationEnd || startWith === 'setting') && (
+        <CustomizationSteps
+          currentStep={2}
+          startWith={(startWith === 'setting' || startWith === 'diamond') ? startWith : 'setting'}
+          settingComplete={Boolean(selectedSize && selectedMetal)}
+        />
+      )}
+
       {/* Breadcrumbs */}
       <nav className="mb-8">
         <ol className="flex items-center space-x-2 text-sm">
@@ -505,7 +575,7 @@ export default function SettingDetailPage() {
             >
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
-            
+
             <button
               onClick={handleSelectDiamond}
               disabled={!selectedSize || !selectedMetal}
@@ -515,7 +585,7 @@ export default function SettingDetailPage() {
                   : 'bg-[#8B0000] hover:bg-[#6B0000]'} 
                 transition-colors`}
             >
-              Select a Diamond
+              {isDiamondFirst && hasDiamondSelected ? 'Complete Your Ring' : 'Select a Diamond'}
             </button>
           </div>
           

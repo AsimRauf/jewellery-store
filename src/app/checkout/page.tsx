@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
+import { CartItem } from '@/types/cart';
 
 // Form state interfaces
 interface ShippingInfo {
@@ -34,6 +35,49 @@ interface SizeOption {
   isAvailable: boolean;
   additionalPrice: number;
 }
+
+// Display customization details for each cart item
+const renderCustomizationDetails = (item: CartItem) => {
+  if (!item.customization?.isCustomized) return null;
+
+  return (
+    <div className="mt-2 text-sm">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+        {item.customization.customizationType === 'setting-diamond' && 'Custom Diamond Ring'}
+        {item.customization.customizationType === 'setting-gemstone' && 'Custom Gemstone Ring'}
+        {item.customization.customizationType === 'preset' && 'Pre-set Ring'}
+      </span>
+
+      {/* Display detailed customization info */}
+      {item.customization.customizationDetails && (
+        <div className="mt-2 space-y-1 text-xs text-gray-600">
+          {item.customization.customizationDetails.stone && (
+            <div>
+              <span className="font-medium">Stone: </span>
+              {item.customization.customizationDetails.stone.type}{' '}
+              {item.customization.customizationDetails.stone.carat}ct
+              {item.customization.customizationDetails.stone.color && `, ${item.customization.customizationDetails.stone.color}`}
+              {item.customization.customizationDetails.stone.clarity && `, ${item.customization.customizationDetails.stone.clarity}`}
+              {item.customization.customizationDetails.stone.cut && `, ${item.customization.customizationDetails.stone.cut}`}
+            </div>
+          )}
+          {item.customization.customizationDetails.setting && (
+            <div>
+              <span className="font-medium">Setting: </span>
+              {item.customization.customizationDetails.setting.style}{' '}
+              {item.customization.customizationDetails.setting.settingType} in{' '}
+              {item.customization.customizationDetails.setting.metalType}
+            </div>
+          )}
+        </div>
+      )}
+
+      {item.customization.notes && (
+        <p className="mt-1 italic text-gray-500">{item.customization.notes}</p>
+      )}
+    </div>
+  );
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -431,6 +475,10 @@ export default function CheckoutPage() {
                         {sizeOption && sizeOption.additionalPrice > 0 && ` (+$${sizeOption.additionalPrice.toFixed(2)})`}
                         {item.quantity > 1 && ` • Qty: ${item.quantity}`}
                       </p>
+                      
+                      {/* Display customization details for the item */}
+                      {renderCustomizationDetails(item)}
+                      
                       <p className="text-sm font-medium mt-1">${(item.price * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
@@ -758,7 +806,7 @@ export default function CheckoutPage() {
                     <label htmlFor="sameAsShipping" className="ml-2 text-sm text-gray-700">
                       Same as shipping address
                     </label>
-]                  </div>
+                  </div>
                 </div>
                 
                 <div className="flex justify-between">
@@ -811,24 +859,24 @@ export default function CheckoutPage() {
         <div className="p-4">
           <div className="flex justify-center mb-3">
             <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.021 12.021 0 012 12h4a8.002 8.002 0 0014.618-2.016z" />
             </svg>
           </div>
           <h3 className="text-lg font-medium mb-2">Money-Back Guarantee</h3>
           <p className="text-sm text-gray-600">
-            Not satisfied with your purchase? Return it within 30 days for a full refund.
+            If you're not completely satisfied with your purchase, return it within 30 days for a full refund.
           </p>
         </div>
         
         <div className="p-4">
           <div className="flex justify-center mb-3">
             <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3v18h18M9 9h6v6H9z" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium mb-2">Need Help?</h3>
+          <h3 className="text-lg font-medium mb-2">Secure Transactions</h3>
           <p className="text-sm text-gray-600">
-            Our customer service team is available 24/7 to assist you with any questions.
+            All transactions are processed securely through our PCI DSS compliant payment processor.
           </p>
         </div>
       </div>

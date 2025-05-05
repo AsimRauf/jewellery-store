@@ -23,6 +23,13 @@ export default function SettingsCategoryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Add diamond-first flow parameters
+  const isCustomizationStart = searchParams?.get('start') === 'setting';
+  const isDiamondSelected = Boolean(searchParams?.get('diamondId'));
+  const diamondId = searchParams?.get('diamondId');
+  const startWith = searchParams?.get('start');
+  const endWith = searchParams?.get('end');
+
   // Ensure category is a string, defaulting to 'all' if undefined
   const category = params?.category ? String(params.category) : 'all';
 
@@ -482,8 +489,86 @@ export default function SettingsCategoryPage() {
     return 'Ring Settings';
   };
 
+  // Add these variables from URL params
+  const defaultSize = 6;
+  const defaultMetal = 'White Gold';
+
+  // Modify handleSettingClick to always go to detail page
+  const handleSettingClick = (setting: Setting) => {
+    if (isDiamondSelected && startWith === 'diamond') {
+      // Even with diamond selected, go to setting detail with parameters
+      const params = new URLSearchParams({
+        diamondId: diamondId!,
+        start: 'diamond',
+        end: 'setting'
+      });
+      router.push(`/products/rings/settings/${setting._id}?${params.toString()}`);
+    } else if (isCustomizationStart) {
+      // Setting-first flow - go to setting detail
+      router.push(`/products/rings/settings/${setting._id}?start=setting`);
+    } else {
+      // Normal flow - just view setting details
+      router.push(`/products/rings/settings/${setting._id}`);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Customization Steps - Show for both flows */}
+      {(isCustomizationStart || isDiamondSelected) && (
+        <div className="mb-8 bg-amber-50 p-6 rounded-lg">
+          <div className="flex items-center justify-center">
+            {isDiamondSelected ? (
+              <>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    ✓
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Diamond Selected</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Select a Setting</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    3
+                  </div>
+                  <span className="ml-2 text-gray-500">Complete Ring</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    1
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Select a Setting</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 text-gray-500">Select a Diamond</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    3
+                  </div>
+                  <span className="ml-2 text-gray-500">Complete Ring</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{getCategoryTitle()}</h1>
@@ -556,6 +641,7 @@ export default function SettingsCategoryPage() {
         clearAllFilters={clearAllFilters}
         onLoadMore={loadMoreProducts}
         activeMetalFilters={activeMetalFilters}
+        onProductClick={handleSettingClick}
       />
     </div>
   );

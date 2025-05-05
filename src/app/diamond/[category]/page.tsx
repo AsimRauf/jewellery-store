@@ -7,6 +7,8 @@ import MobileFilters from '@/components/diamond/MobileFilters';
 import SortingOptions from '@/components/diamond/SortingOptions';
 import ProductGrid from '@/components/diamond/ProductGrid';
 import { Diamond } from '@/types/diamond';
+import { useCart } from '@/context/CartContext';
+import { CartItem } from '@/types/cart';
 
 // Define available filter options
 const availableFilters = {
@@ -27,7 +29,17 @@ export default function DiamondCategoryPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+  const { addItem } = useCart();
+
+  // Add tracking for both customization flows
+  const startWith = searchParams?.get('start');
+  const isCustomizationStart = startWith === 'diamond';
+  const isSettingSelected = Boolean(
+    searchParams?.get('settingId') && 
+    searchParams?.get('metal') && 
+    searchParams?.get('size')
+  );
+
   // Ensure category is a string, defaulting to 'all' if undefined
   const category = params?.category ? String(params.category) : 'all';
   
@@ -470,9 +482,106 @@ export default function DiamondCategoryPage() {
     
     return 'Diamonds';
   };
-  
+
+  // Modify handleDiamondClick to always go to detail page
+  const handleDiamondClick = (diamond: Diamond) => {
+    if (isSettingSelected) {
+      // Even with setting selected, go to diamond detail with parameters
+      const params = new URLSearchParams(searchParams?.toString() || '');
+      router.push(`/diamond/detail/${diamond._id}?${params.toString()}`);
+    } else if (isCustomizationStart) {
+      // Diamond-first flow - go to diamond detail
+      router.push(`/diamond/detail/${diamond._id}?start=diamond`);
+    } else {
+      // Normal flow - just view diamond details
+      router.push(`/diamond/detail/${diamond._id}`);
+    }
+  };
+
+  const handleAddToCart = (diamond: Diamond) => {
+    const cartItem: CartItem = {
+      _id: diamond._id,
+      title: `${diamond.shape} ${diamond.carat}ct ${diamond.color} ${diamond.clarity} Diamond`,
+      price: diamond.salePrice || diamond.price,
+      quantity: 1,
+      image: diamond.images[0]?.url || '',
+      productType: 'diamond',
+      customization: {
+        isCustomized: true,
+        customizationType: 'setting-diamond',
+        diamondId: diamond._id,
+        customizationDetails: {
+          stone: {
+            type: 'diamond',
+            carat: diamond.carat,
+            color: diamond.color,
+            clarity: diamond.clarity,
+            cut: diamond.cut
+          }
+        }
+      }
+    };
+
+    addItem(cartItem);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Customization Steps - Show when in customization flow */}
+      {(isCustomizationStart || isSettingSelected) && (
+        <div className="mb-8 bg-amber-50 p-6 rounded-lg">
+          <div className="flex items-center justify-center">
+            {isSettingSelected ? (
+              <>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    ✓
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Setting Selected</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Select a Diamond</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    3
+                  </div>
+                  <span className="ml-2 text-gray-500">Complete Ring</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center">
+                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    1
+                  </div>
+                  <span className="ml-2 font-medium text-amber-700">Select a Diamond</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    2
+                  </div>
+                  <span className="ml-2 text-gray-500">Select a Setting</span>
+                </div>
+                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
+                <div className="flex items-center opacity-50">
+                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
+                    3
+                  </div>
+                  <span className="ml-2 text-gray-500">Complete Ring</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{getCategoryDisplayName()}</h1>
@@ -563,6 +672,8 @@ export default function DiamondCategoryPage() {
           error={error}
           clearAllFilters={clearAllFilters}
           onLoadMore={loadMoreProducts}
+          onProductClick={handleDiamondClick}
+          onAddToCart={handleAddToCart}
         />
       </div>
     </div>

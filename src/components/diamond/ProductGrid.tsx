@@ -11,6 +11,8 @@ interface ProductGridProps {
   error: string | null;
   clearAllFilters: () => void;
   onLoadMore: () => void;
+  onProductClick: (product: Diamond) => void;
+  onAddToCart: (product: Diamond) => void;
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ 
@@ -20,7 +22,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   hasMore,
   error, 
   clearAllFilters, 
-  onLoadMore
+  onLoadMore,
+  onProductClick,
+  onAddToCart
 }) => {
   // Helper function to get the image URL for a product
   const getImageUrl = (product: Diamond): string => {
@@ -132,48 +136,47 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             <div 
               key={product._id} 
               ref={isLastItem ? lastProductRef : null}
-              className="group"
+              className="group cursor-pointer"
+              onClick={() => onProductClick(product)}
             >
-              <Link href={getProductUrl(product)}>
-                <div className="relative aspect-square overflow-hidden rounded-lg mb-3 bg-gray-100">
-                  <Image
-                    src={getImageUrl(product)}
-                    alt={`${product.shape} ${product.carat}ct ${product.color} ${product.clarity} diamond`}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {product.type === 'lab' && (
-                    <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                      Lab Grown
-                    </div>
-                  )}
-                  {product.salePrice && product.salePrice < product.price && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                      Sale
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <h3 className="font-medium text-gray-900">
-                    {product.shape} {product.carat}ct {product.color} {product.clarity}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-1">
-                    {product.certificateLab} Certified
-                  </p>
-                  <div className="flex items-center">
-                    {product.salePrice && product.salePrice < product.price ? (
-                      <>
-                        <span className="text-red-600 font-medium">${formatPrice(product.salePrice)}</span>
-                        <span className="ml-2 text-gray-500 line-through text-sm">${formatPrice(product.price)}</span>
-                      </>
-                    ) : (
-                      <span className="text-gray-900 font-medium">${formatPrice(product.price)}</span>
-                    )}
+              <div className="relative aspect-square overflow-hidden rounded-lg mb-3 bg-gray-100">
+                <Image
+                  src={getImageUrl(product)}
+                  alt={`${product.shape} ${product.carat}ct ${product.color} ${product.clarity} diamond`}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                {product.type === 'lab' && (
+                  <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                    Lab Grown
                   </div>
+                )}
+                {product.salePrice && product.salePrice < product.price && (
+                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    Sale
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <h3 className="font-medium text-gray-900">
+                  {product.shape} {product.carat}ct {product.color} {product.clarity}
+                </h3>
+                <p className="text-sm text-gray-500 mb-1">
+                  {product.certificateLab} Certified
+                </p>
+                <div className="flex items-center">
+                  {product.salePrice && product.salePrice < product.price ? (
+                    <>
+                      <span className="text-red-600 font-medium">${formatPrice(product.salePrice)}</span>
+                      <span className="ml-2 text-gray-500 line-through text-sm">${formatPrice(product.price)}</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-900 font-medium">${formatPrice(product.price)}</span>
+                  )}
                 </div>
-              </Link>
+              </div>
             </div>
           );
         })}
