@@ -2,60 +2,61 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import FilterBar from '@/components/diamond/FilterBar';
-import MobileFilters from '@/components/diamond/MobileFilters';
-import SortingOptions from '@/components/diamond/SortingOptions';
-import ProductGrid from '@/components/diamond/ProductGrid';
-import { Diamond } from '@/types/diamond';
+import FilterBar from '@/components/gemstone/FilterBar';
+import MobileFilters from '@/components/gemstone/MobileFilters';
+import SortingOptions from '@/components/gemstone/SortingOptions';
+import ProductGrid from '@/components/gemstone/ProductGrid';
+import CustomizationSteps from '@/components/customize/CustomizationSteps';
+import { Gemstone } from '@/types/gemstone';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/types/cart';
 
 // Define available filter options
 const availableFilters = {
-  shapes: ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Pear', 'Heart', 'Marquise', 'Asscher'],
-  colors: ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'],
-  clarities: ['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 'I3'],
+  types: ['Ruby', 'Emerald', 'Sapphire', 'Amethyst', 'Aquamarine', 'Topaz', 'Opal', 'Garnet', 'Peridot', 'Tanzanite', 'Tourmaline', 'Citrine', 'Morganite'],
+  shapes: ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Radiant', 'Pear', 'Heart', 'Marquise', 'Asscher', 'Trillion', 'Baguette', 'Cabochon'],
+  colors: ['Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Pink', 'Orange', 'Brown', 'Black', 'White', 'Colorless', 'Multi'],
+  clarities: ['FL', 'IF', 'VVS', 'VS', 'SI', 'I', 'Opaque', 'Translucent', 'Transparent'],
   cuts: ['Excellent', 'Very Good', 'Good', 'Fair', 'Poor'],
-  caratRanges: [[0.3, 0.5], [0.5, 0.75], [0.75, 1.0], [1.0, 1.5], [1.5, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 10.0]] as [number, number][],
-  priceRanges: [[500, 1000], [1000, 2500], [2500, 5000], [5000, 10000], [10000, 25000], [25000, 50000], [50000, 100000]] as [number, number][],
-  types: ['natural', 'lab'],
-  polish: ['Excellent', 'Very Good', 'Good', 'Fair', 'Poor'],
-  symmetry: ['Excellent', 'Very Good', 'Good', 'Fair', 'Poor'],
-  fluorescence: ['None', 'Faint', 'Medium', 'Strong', 'Very Strong'],
-  fancyColors: ['Yellow', 'Pink', 'Blue', 'Green', 'Orange', 'Purple', 'Brown', 'Black', 'Red', 'Gray']
+  caratRanges: [[0.5, 1.0], [1.0, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 10.0], [10.0, 20.0]] as [number, number][],
+  priceRanges: [[100, 500], [500, 1000], [1000, 2500], [2500, 5000], [5000, 10000], [10000, 25000], [25000, 50000]] as [number, number][],
+  sources: ['natural', 'lab'],
+  origins: ['Africa', 'Asia', 'Australia', 'Europe', 'North America', 'South America', 'Burma', 'Colombia', 'Brazil', 'Sri Lanka', 'Thailand', 'India', 'Madagascar', 'Zambia', 'Tanzania', 'Russia', 'Afghanistan', 'Mozambique'],
+  treatments: ['None', 'Heat', 'Irradiation', 'Fracture Filling', 'Dyeing', 'Oiling', 'Waxing', 'Bleaching', 'Impregnation']
 };
 
-export default function DiamondCategoryPage() {
+export default function GemstoneCategoryPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addItem } = useCart();
 
-  // Add tracking for both customization flows
+  // Add customization flow parameters
+  const settingId = searchParams?.get('settingId');
   const startWith = searchParams?.get('start');
-  const isCustomizationStart = startWith === 'diamond';
-  const isSettingSelected = Boolean(
-    searchParams?.get('settingId') && 
-    searchParams?.get('metal') && 
-    searchParams?.get('size')
-  );
+  const selectedMetal = searchParams?.get('metal');
+  const selectedSize = searchParams?.get('size');
+  
+  // Customization flow checks
+  const isCustomizationFlow = Boolean(settingId);
+  const isCustomizationStart = startWith === 'gemstone';
+  const isSettingSelected = Boolean(settingId && selectedMetal && selectedSize);
 
   // Ensure category is a string, defaulting to 'all' if undefined
   const category = params?.category ? String(params.category) : 'all';
   
   // State for filters
   const [filters, setFilters] = useState({
+    types: [] as string[],
     shapes: [] as string[],
     colors: [] as string[],
     clarities: [] as string[],
     cuts: [] as string[],
     caratRange: null as [number, number] | null,
     priceRange: null as [number, number] | null,
-    types: [] as string[],
-    polish: [] as string[],
-    symmetry: [] as string[],
-    fluorescence: [] as string[],
-    fancyColors: [] as string[]
+    sources: [] as string[],
+    origins: [] as string[],
+    treatments: [] as string[]
   });
   
   // State for active filter section
@@ -68,7 +69,7 @@ export default function DiamondCategoryPage() {
   const [sortOption, setSortOption] = useState('price-asc');
   
   // State for products
-  const [products, setProducts] = useState<Diamond[]>([]);
+  const [products, setProducts] = useState<Gemstone[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,34 +82,32 @@ export default function DiamondCategoryPage() {
     const initFiltersFromUrl = () => {
       if (!searchParams) return;
       
+      const types = searchParams.get('types')?.split(',') || [];
       const shapes = searchParams.get('shapes')?.split(',') || [];
       const colors = searchParams.get('colors')?.split(',') || [];
       const clarities = searchParams.get('clarities')?.split(',') || [];
       const cuts = searchParams.get('cuts')?.split(',') || [];
+      const sources = searchParams.get('sources')?.split(',') || [];
+      const origins = searchParams.get('origins')?.split(',') || [];
+      const treatments = searchParams.get('treatments')?.split(',') || [];
       const minCarat = searchParams.get('minCarat');
       const maxCarat = searchParams.get('maxCarat');
       const minPrice = searchParams.get('minPrice');
       const maxPrice = searchParams.get('maxPrice');
-      const types = searchParams.get('types')?.split(',') || [];
-      const polish = searchParams.get('polish')?.split(',') || [];
-      const symmetry = searchParams.get('symmetry')?.split(',') || [];
-      const fluorescence = searchParams.get('fluorescence')?.split(',') || [];
-      const fancyColors = searchParams.get('fancyColors')?.split(',') || [];
       const sort = searchParams.get('sort') || 'price-asc';
       
       // Set filters based on URL parameters
       setFilters({
+        types: types.filter(t => availableFilters.types.includes(t)),
         shapes: shapes.filter(s => availableFilters.shapes.includes(s)),
         colors: colors.filter(c => availableFilters.colors.includes(c)),
         clarities: clarities.filter(c => availableFilters.clarities.includes(c)),
         cuts: cuts.filter(c => availableFilters.cuts.includes(c)),
+        sources: sources.filter(s => availableFilters.sources.includes(s)),
+        origins: origins.filter(o => availableFilters.origins.includes(o)),
+        treatments: treatments.filter(t => availableFilters.treatments.includes(t)),
         caratRange: minCarat && maxCarat ? [parseFloat(minCarat), parseFloat(maxCarat)] : null,
-        priceRange: minPrice && maxPrice ? [parseInt(minPrice), parseInt(maxPrice)] : null,
-        types: types.filter(t => availableFilters.types.includes(t)),
-        polish: polish.filter(p => availableFilters.polish.includes(p)),
-        symmetry: symmetry.filter(s => availableFilters.symmetry.includes(s)),
-        fluorescence: fluorescence.filter(f => availableFilters.fluorescence.includes(f)),
-        fancyColors: fancyColors.filter(c => availableFilters.fancyColors.includes(c))
+        priceRange: minPrice && maxPrice ? [parseInt(minPrice), parseInt(maxPrice)] : null
       });
       
       // Set sort option
@@ -123,13 +122,17 @@ export default function DiamondCategoryPage() {
       try {
         setLoading(true);
         setError(null);
-        setPage(1); // Reset to page 1 when filters change
+        setPage(1);
         
         const queryParams = new URLSearchParams();
         queryParams.append('page', '1');
         queryParams.append('limit', '12');
         
         // Add filters to query params
+        if (filters.types.length > 0) {
+          queryParams.append('types', filters.types.join(','));
+        }
+        
         if (filters.shapes.length > 0) {
           queryParams.append('shapes', filters.shapes.join(','));
         }
@@ -146,6 +149,18 @@ export default function DiamondCategoryPage() {
           queryParams.append('cuts', filters.cuts.join(','));
         }
         
+        if (filters.sources.length > 0) {
+          queryParams.append('sources', filters.sources.join(','));
+        }
+        
+        if (filters.origins.length > 0) {
+          queryParams.append('origins', filters.origins.join(','));
+        }
+        
+        if (filters.treatments.length > 0) {
+          queryParams.append('treatments', filters.treatments.join(','));
+        }
+        
         if (filters.caratRange) {
           queryParams.append('minCarat', filters.caratRange[0].toString());
           queryParams.append('maxCarat', filters.caratRange[1].toString());
@@ -156,27 +171,11 @@ export default function DiamondCategoryPage() {
           queryParams.append('maxPrice', filters.priceRange[1].toString());
         }
         
-        if (filters.types.length > 0) {
-          queryParams.append('types', filters.types.join(','));
-        }
-        
-        if (filters.polish.length > 0) {
-          queryParams.append('polish', filters.polish.join(','));
-        }
-        
-        if (filters.symmetry.length > 0) {
-          queryParams.append('symmetry', filters.symmetry.join(','));
-        }
-        
-        if (filters.fluorescence.length > 0) {
-          queryParams.append('fluorescence', filters.fluorescence.join(','));
-        }
-        
         // Add sort option
         queryParams.append('sort', sortOption);
         
         // Fetch products
-        const response = await fetch(`/api/products/diamond/${category}?${queryParams.toString()}`);
+        const response = await fetch(`/api/products/gemstone/${category}?${queryParams.toString()}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch products');
@@ -184,8 +183,8 @@ export default function DiamondCategoryPage() {
         
         const data = await response.json();
         setProducts(data.products);
-        setTotalProducts(data.total);
-        setHasMore(data.page < data.totalPages);
+        setTotalProducts(data.pagination.total);
+        setHasMore(data.pagination.hasMore);
         
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -210,6 +209,10 @@ export default function DiamondCategoryPage() {
       queryParams.append('limit', '12');
       
       // Add filters to query params
+      if (filters.types.length > 0) {
+        queryParams.append('types', filters.types.join(','));
+      }
+      
       if (filters.shapes.length > 0) {
         queryParams.append('shapes', filters.shapes.join(','));
       }
@@ -226,6 +229,18 @@ export default function DiamondCategoryPage() {
         queryParams.append('cuts', filters.cuts.join(','));
       }
       
+      if (filters.sources.length > 0) {
+        queryParams.append('sources', filters.sources.join(','));
+      }
+      
+      if (filters.origins.length > 0) {
+        queryParams.append('origins', filters.origins.join(','));
+      }
+      
+      if (filters.treatments.length > 0) {
+        queryParams.append('treatments', filters.treatments.join(','));
+      }
+      
       if (filters.caratRange) {
         queryParams.append('minCarat', filters.caratRange[0].toString());
         queryParams.append('maxCarat', filters.caratRange[1].toString());
@@ -236,36 +251,20 @@ export default function DiamondCategoryPage() {
         queryParams.append('maxPrice', filters.priceRange[1].toString());
       }
       
-      if (filters.types.length > 0) {
-        queryParams.append('types', filters.types.join(','));
-      }
-      
-      if (filters.polish.length > 0) {
-        queryParams.append('polish', filters.polish.join(','));
-      }
-      
-      if (filters.symmetry.length > 0) {
-        queryParams.append('symmetry', filters.symmetry.join(','));
-      }
-      
-      if (filters.fluorescence.length > 0) {
-        queryParams.append('fluorescence', filters.fluorescence.join(','));
-      }
-      
       // Add sort option
       queryParams.append('sort', sortOption);
       
       // Fetch more products
-      const response = await fetch(`/api/products/diamond/${category}?${queryParams.toString()}`);
+      const response = await fetch(`/api/products/gemstone/${category}?${queryParams.toString()}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch more products');
       }
       
       const data = await response.json();
-      setProducts((prev: Diamond[]) => [...prev, ...data.products]);
+      setProducts((prev: Gemstone[]) => [...prev, ...data.products]);
       setPage(nextPage);
-      setHasMore(data.page < data.totalPages);
+      setHasMore(data.pagination.hasMore);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -273,9 +272,14 @@ export default function DiamondCategoryPage() {
       setLoadingMore(false);
     }
   }, [filters, sortOption, page, loadingMore, hasMore, category]);  
+  
   // Update URL with filters
   const updateUrlWithFilters = useCallback(() => {
     const queryParams = new URLSearchParams();
+    
+    if (filters.types.length > 0) {
+      queryParams.append('types', filters.types.join(','));
+    }
     
     if (filters.shapes.length > 0) {
       queryParams.append('shapes', filters.shapes.join(','));
@@ -293,6 +297,18 @@ export default function DiamondCategoryPage() {
       queryParams.append('cuts', filters.cuts.join(','));
     }
     
+    if (filters.sources.length > 0) {
+      queryParams.append('sources', filters.sources.join(','));
+    }
+    
+    if (filters.origins.length > 0) {
+      queryParams.append('origins', filters.origins.join(','));
+    }
+    
+    if (filters.treatments.length > 0) {
+      queryParams.append('treatments', filters.treatments.join(','));
+    }
+    
     if (filters.caratRange) {
       queryParams.append('minCarat', filters.caratRange[0].toString());
       queryParams.append('maxCarat', filters.caratRange[1].toString());
@@ -303,37 +319,39 @@ export default function DiamondCategoryPage() {
       queryParams.append('maxPrice', filters.priceRange[1].toString());
     }
     
-    if (filters.types.length > 0) {
-      queryParams.append('types', filters.types.join(','));
-    }
-    
-    if (filters.polish.length > 0) {
-      queryParams.append('polish', filters.polish.join(','));
-    }
-    
-    if (filters.symmetry.length > 0) {
-      queryParams.append('symmetry', filters.symmetry.join(','));
-    }
-    
-    if (filters.fluorescence.length > 0) {
-      queryParams.append('fluorescence', filters.fluorescence.join(','));
-    }
-    
-    if (filters.fancyColors.length > 0) {
-      queryParams.append('fancyColors', filters.fancyColors.join(','));
-    }
-    
     // Add sort option
     queryParams.append('sort', sortOption);
     
+    // Preserve customization parameters
+    if (startWith) {
+      queryParams.append('start', startWith);
+    }
+    
+    const settingId = searchParams?.get('settingId');
+    const metal = searchParams?.get('metal');
+    const size = searchParams?.get('size');
+    
+    if (settingId) queryParams.append('settingId', settingId);
+    if (metal) queryParams.append('metal', metal);
+    if (size) queryParams.append('size', size);
+    
     // Update URL
-    const url = `/diamond/${category}?${queryParams.toString()}`;
+    const url = `/gemstone/${category}?${queryParams.toString()}`;
     router.push(url, { scroll: false });
-  }, [filters, sortOption, router, category]);
+  }, [filters, sortOption, router, category, startWith, searchParams]);
   
   // Filter toggle functions
   const toggleFilterSection = (section: string) => {
     setActiveFilterSection(activeFilterSection === section ? null : section);
+  };
+  
+  const toggleType = (type: string) => {
+    setFilters(prev => ({
+      ...prev,
+      types: prev.types.includes(type)
+        ? prev.types.filter(t => t !== type)
+        : [...prev.types, type]
+    }));
   };
   
   const toggleShape = (shape: string) => {
@@ -372,49 +390,30 @@ export default function DiamondCategoryPage() {
     }));
   };
   
-  const toggleType = (type: string) => {
+  const toggleSource = (source: string) => {
     setFilters(prev => ({
       ...prev,
-      types: prev.types.includes(type)
-        ? prev.types.filter(t => t !== type)
-        : [...prev.types, type]
+      sources: prev.sources.includes(source)
+        ? prev.sources.filter(s => s !== source)
+        : [...prev.sources, source]
     }));
   };
   
-  const togglePolish = (polish: string) => {
+  const toggleOrigin = (origin: string) => {
     setFilters(prev => ({
       ...prev,
-      polish: prev.polish.includes(polish)
-        ? prev.polish.filter(p => p !== polish)
-        : [...prev.polish, polish]
-    }));
-  };
-
-  const toggleFancyColor = (color: string) => {
-    setFilters(prev => ({
-      ...prev,
-      fancyColors: prev.fancyColors.includes(color)
-        ? prev.fancyColors.filter(c => c !== color)
-        : [...prev.fancyColors, color]
+      origins: prev.origins.includes(origin)
+        ? prev.origins.filter(o => o !== origin)
+        : [...prev.origins, origin]
     }));
   };
   
-  
-  const toggleSymmetry = (symmetry: string) => {
+  const toggleTreatment = (treatment: string) => {
     setFilters(prev => ({
       ...prev,
-      symmetry: prev.symmetry.includes(symmetry)
-        ? prev.symmetry.filter(s => s !== symmetry)
-        : [...prev.symmetry, symmetry]
-    }));
-  };
-  
-  const toggleFluorescence = (fluorescence: string) => {
-    setFilters(prev => ({
-      ...prev,
-      fluorescence: prev.fluorescence.includes(fluorescence)
-        ? prev.fluorescence.filter(f => f !== fluorescence)
-        : [...prev.fluorescence, fluorescence]
+      treatments: prev.treatments.includes(treatment)
+        ? prev.treatments.filter(t => t !== treatment)
+        : [...prev.treatments, treatment]
     }));
   };
   
@@ -434,17 +433,16 @@ export default function DiamondCategoryPage() {
   
   const clearAllFilters = () => {
     setFilters({
+      types: [],
       shapes: [],
       colors: [],
       clarities: [],
       cuts: [],
+      sources: [],
+      origins: [],
+      treatments: [],
       caratRange: null,
-      priceRange: null,
-      types: [],
-      polish: [],
-      symmetry: [],
-      fluorescence: [],
-      fancyColors: []
+      priceRange: null
     });
   };
   
@@ -455,10 +453,20 @@ export default function DiamondCategoryPage() {
   
   // Get category display name
   const getCategoryDisplayName = () => {
-    if (!category || category === 'all') return 'All Diamonds';
+    if (!category || category === 'all') return 'All Gemstones';
     
-    if (category === 'natural') return 'Natural Diamonds';
-    if (category === 'lab') return 'Lab Grown Diamonds';
+    if (category === 'natural') return 'Natural Gemstones';
+    if (category === 'lab') return 'Lab Grown Gemstones';
+    
+    if (category.startsWith('type-')) {
+      const type = category
+        .replace('type-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      return `${type} Gemstones`;
+    }
     
     if (category.startsWith('shape-')) {
       const shape = category
@@ -467,57 +475,63 @@ export default function DiamondCategoryPage() {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
       
-      return `${shape} Diamonds`;
+      return `${shape} Gemstones`;
     }
     
     if (category.startsWith('color-')) {
-      const color = category.replace('color-', '').toUpperCase();
-      return `Color ${color} Diamonds`;
+      const color = category
+        .replace('color-', '')
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      return `${color} Gemstones`;
     }
     
-    if (category.startsWith('clarity-')) {
-      const clarity = category.replace('clarity-', '').toUpperCase();
-      return `${clarity} Clarity Diamonds`;
-    }
+    // Handle direct gemstone type names
+    const type = category
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
     
-    return 'Diamonds';
+    return `${type} Gemstones`;
   };
 
-  // This should be the diamond click handler (for reference)
-  const handleDiamondClick = (diamond: Diamond) => {
+  // Handle gemstone click - should match diamond flow exactly
+  const handleGemstoneClick = (gemstone: Gemstone) => {
     if (isSettingSelected) {
-      // Even with setting selected, go to diamond detail with parameters
+      // Even with setting selected, go to gemstone detail with parameters
       const params = new URLSearchParams(searchParams?.toString() || '');
-      router.push(`/diamond/detail/${diamond._id}?${params.toString()}`);
+      router.push(`/gemstone/detail/${gemstone._id}?${params.toString()}`);
     } else if (isCustomizationStart) {
-      // Diamond-first flow - go to diamond detail
-      router.push(`/diamond/detail/${diamond._id}?start=diamond`);
+      // Gemstone-first flow - go to gemstone detail
+      router.push(`/gemstone/detail/${gemstone._id}?start=gemstone`);
     } else {
-      // Normal flow - just view diamond details
-      router.push(`/diamond/detail/${diamond._id}`);
+      // Normal flow - just view gemstone details
+      router.push(`/gemstone/detail/${gemstone._id}`);
     }
   };
 
-  const handleAddToCart = (diamond: Diamond) => {
+  const handleAddToCart = (gemstone: Gemstone) => {
     const cartItem: CartItem = {
-      _id: diamond._id,
-      title: `${diamond.shape} ${diamond.carat}ct ${diamond.color} ${diamond.clarity} Diamond`,
-      price: diamond.salePrice || diamond.price,
+      _id: gemstone._id,
+      title: `${gemstone.type} ${gemstone.carat}ct ${gemstone.color} ${gemstone.clarity} Gemstone`,
+      price: gemstone.salePrice || gemstone.price,
       quantity: 1,
-      image: diamond.images[0]?.url || '',
-      productType: 'diamond',
+      image: gemstone.images?.[0]?.url || '',
+      productType: 'gemstone',
       customization: {
         isCustomized: true,
-        customizationType: 'setting-diamond',
-        diamondId: diamond._id,
+        customizationType: 'setting-gemstone',
+        gemstoneId: gemstone._id,
         customizationDetails: {
           stone: {
-            type: 'diamond',
-            carat: diamond.carat,
-            color: diamond.color,
-            clarity: diamond.clarity,
-            cut: diamond.cut,
-            image: diamond.images?.[0]?.url || ''
+            type: 'gemstone',
+            carat: gemstone.carat,
+            color: gemstone.color,
+            clarity: gemstone.clarity,
+            cut: gemstone.cut,
+            image: gemstone.images?.[0]?.url || ''
           }
         }
       }
@@ -530,64 +544,19 @@ export default function DiamondCategoryPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Customization Steps - Show when in customization flow */}
       {(isCustomizationStart || isSettingSelected) && (
-        <div className="mb-8 bg-amber-50 p-6 rounded-lg">
-          <div className="flex items-center justify-center">
-            {isSettingSelected ? (
-              <>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    ✓
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Setting Selected</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    2
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Select a Diamond</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    3
-                  </div>
-                  <span className="ml-2 text-gray-500">Complete Ring</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    1
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Select a Diamond</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    2
-                  </div>
-                  <span className="ml-2 text-gray-500">Select a Setting</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    3
-                  </div>
-                  <span className="ml-2 text-gray-500">Complete Ring</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        <CustomizationSteps
+          currentStep={isSettingSelected ? 3 : 2}
+          startWith="gemstone"
+          gemstoneComplete={true}
+          settingComplete={isSettingSelected}
+        />
       )}
 
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{getCategoryDisplayName()}</h1>
         <p className="text-gray-600 mt-2">
-          {totalProducts} {totalProducts === 1 ? 'diamond' : 'diamonds'} available
+          {totalProducts} {totalProducts === 1 ? 'gemstone' : 'gemstones'} available
         </p>
       </div>
       
@@ -604,7 +573,7 @@ export default function DiamondCategoryPage() {
         </button>
       </div>
       
-      {/* Desktop Filters - Now at the top */}
+      {/* Desktop Filters */}
       <div className="hidden lg:block mb-8">
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <FilterBar
@@ -612,15 +581,14 @@ export default function DiamondCategoryPage() {
             availableFilters={availableFilters}
             activeFilterSection={activeFilterSection}
             toggleFilterSection={toggleFilterSection}
+            toggleType={toggleType}
             toggleShape={toggleShape}
             toggleColor={toggleColor}
-            toggleFancyColor={toggleFancyColor}
             toggleClarity={toggleClarity}
             toggleCut={toggleCut}
-            toggleType={toggleType}
-            togglePolish={togglePolish}
-            toggleSymmetry={toggleSymmetry}
-            toggleFluorescence={toggleFluorescence}
+            toggleSource={toggleSource}
+            toggleOrigin={toggleOrigin}
+            toggleTreatment={toggleTreatment}
             setCaratRange={setCaratRange}
             setPriceRange={setPriceRange}
             clearAllFilters={clearAllFilters}
@@ -634,15 +602,14 @@ export default function DiamondCategoryPage() {
         <MobileFilters
           filters={filters}
           availableFilters={availableFilters}
+          toggleType={toggleType}
           toggleShape={toggleShape}
           toggleColor={toggleColor}
-          toggleFancyColor={toggleFancyColor}
           toggleClarity={toggleClarity}
           toggleCut={toggleCut}
-          toggleType={toggleType}
-          togglePolish={togglePolish}
-          toggleSymmetry={toggleSymmetry}
-          toggleFluorescence={toggleFluorescence}
+          toggleSource={toggleSource}
+          toggleOrigin={toggleOrigin}
+          toggleTreatment={toggleTreatment}
           setCaratRange={setCaratRange}
           setPriceRange={setPriceRange}
           clearAllFilters={clearAllFilters}
@@ -651,7 +618,7 @@ export default function DiamondCategoryPage() {
         />
       )}
       
-      {/* Product Grid - Now takes full width */}
+      {/* Product Grid */}
       <div>
         {/* Sorting Options */}
         <div className="flex justify-end mb-6">
@@ -673,11 +640,11 @@ export default function DiamondCategoryPage() {
           error={error}
           clearAllFilters={clearAllFilters}
           onLoadMore={loadMoreProducts}
-          onProductClick={handleDiamondClick}
+          onProductClick={handleGemstoneClick}
           onAddToCart={handleAddToCart}
+          isCustomization={isCustomizationFlow}
         />
       </div>
     </div>
   );
 }
-

@@ -8,6 +8,7 @@ import SortingOptions from '@/components/settings/SortingOptions';
 import ProductGrid from '@/components/settings/ProductGrid';
 import { Setting } from '@/types/settings';
 import { RingEnums } from '@/constants/ringEnums';
+import CustomizationSteps from '@/components/customize/CustomizationSteps';
 
 // Define available filter options
 const availableFilters = {
@@ -25,8 +26,6 @@ export default function SettingsCategoryPage() {
 
   // Add diamond-first flow parameters
   const isCustomizationStart = searchParams?.get('start') === 'setting';
-  const isDiamondSelected = Boolean(searchParams?.get('diamondId'));
-  const diamondId = searchParams?.get('diamondId');
   const startWith = searchParams?.get('start');
 
   // Ensure category is a string, defaulting to 'all' if undefined
@@ -488,10 +487,22 @@ export default function SettingsCategoryPage() {
     return 'Ring Settings';
   };
 
-  // Modify handleSettingClick to always go to detail page
+  // Add gemstone parameters with diamond parameters
+  const isDiamondSelected = Boolean(searchParams?.get('diamondId'));
+  const diamondId = searchParams?.get('diamondId');
+  const isGemstoneSelected = Boolean(searchParams?.get('gemstoneId'));
+  const gemstoneId = searchParams?.get('gemstoneId');
+
+  // Modify handleSettingClick to include gemstone flow
   const handleSettingClick = (setting: Setting) => {
-    if (isDiamondSelected && startWith === 'diamond') {
-      // Even with diamond selected, go to setting detail with parameters
+    if (isGemstoneSelected && startWith === 'gemstone') {
+      const params = new URLSearchParams({
+        gemstoneId: gemstoneId!,
+        start: 'gemstone',
+        end: 'setting'
+      });
+      router.push(`/products/rings/settings/${setting._id}?${params.toString()}`);
+    } else if (isDiamondSelected && startWith === 'diamond') {
       const params = new URLSearchParams({
         diamondId: diamondId!,
         start: 'diamond',
@@ -510,58 +521,14 @@ export default function SettingsCategoryPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Customization Steps - Show for both flows */}
-      {(isCustomizationStart || isDiamondSelected) && (
-        <div className="mb-8 bg-amber-50 p-6 rounded-lg">
-          <div className="flex items-center justify-center">
-            {isDiamondSelected ? (
-              <>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    ✓
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Diamond Selected</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    2
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Select a Setting</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    3
-                  </div>
-                  <span className="ml-2 text-gray-500">Complete Ring</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center">
-                  <div className="bg-amber-500 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    1
-                  </div>
-                  <span className="ml-2 font-medium text-amber-700">Select a Setting</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    2
-                  </div>
-                  <span className="ml-2 text-gray-500">Select a Diamond</span>
-                </div>
-                <div className="mx-4 border-t-2 border-amber-200 w-16"></div>
-                <div className="flex items-center opacity-50">
-                  <div className="bg-gray-300 rounded-full h-8 w-8 flex items-center justify-center text-white font-bold">
-                    3
-                  </div>
-                  <span className="ml-2 text-gray-500">Complete Ring</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+      {(isCustomizationStart || isDiamondSelected || isGemstoneSelected) && (
+        <CustomizationSteps
+          currentStep={2}
+          startWith={startWith as 'setting' | 'diamond' | 'gemstone'}
+          diamondComplete={isDiamondSelected}
+          gemstoneComplete={isGemstoneSelected}
+          settingComplete={false}
+        />
       )}
 
       {/* Page Header */}

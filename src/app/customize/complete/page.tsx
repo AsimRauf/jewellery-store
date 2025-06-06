@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'react-hot-toast';
 import CustomizationSteps from '@/components/customize/CustomizationSteps';
+import { CartItem } from '@/types/cart';
 
 interface Setting {
   _id: string;
@@ -32,6 +33,21 @@ interface Diamond {
   carat: number;
   color: string;
   clarity: string;
+  cut?: string;
+  price: number;
+  images?: Array<{
+    url: string;
+  }>;
+}
+
+interface Gemstone {
+  _id: string;
+  type: string;
+  shape: string;
+  carat: number;
+  color: string;
+  clarity: string;
+  cut?: string;
   price: number;
   images?: Array<{
     url: string;
@@ -46,15 +62,21 @@ function CompletePageContent() {
 
   const [setting, setSetting] = useState<Setting | null>(null);
   const [diamond, setDiamond] = useState<Diamond | null>(null);
+  const [gemstone, setGemstone] = useState<Gemstone | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Get URL parameters
   const settingId = searchParams?.get('settingId');
   const diamondId = searchParams?.get('diamondId');
+  const gemstoneId = searchParams?.get('gemstoneId');
   const selectedMetal = searchParams?.get('metal');
   const selectedSize = searchParams?.get('size');
   const startWith = searchParams?.get('start') || 'setting';
+
+  // Determine what type of stone we're working with
+  const stoneType = diamondId ? 'diamond' : gemstoneId ? 'gemstone' : null;
+  const stone = diamond || gemstone;
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -77,6 +99,14 @@ function CompletePageContent() {
           setDiamond(diamondData.diamond);
         }
 
+        // Fetch gemstone details
+        if (gemstoneId) {
+          const gemstoneResponse = await fetch(`/api/products/gemstone/detail/${gemstoneId}`);
+          if (!gemstoneResponse.ok) throw new Error('Failed to fetch gemstone details');
+          const gemstoneData = await gemstoneResponse.json();
+          setGemstone(gemstoneData.gemstone);
+        }
+
       } catch (err) {
         console.error('Error fetching details:', err);
         setError('Failed to load ring details');
@@ -85,13 +115,13 @@ function CompletePageContent() {
       }
     };
 
-    if (settingId && diamondId) {
+    if (settingId && (diamondId || gemstoneId)) {
       fetchDetails();
     }
-  }, [settingId, diamondId]);
+  }, [settingId, diamondId, gemstoneId]);
 
   const calculateTotalPrice = () => {
-    if (!setting || !diamond) return 0;
+    if (!setting || !stone) return 0;
 
     const metalOption = setting.metalOptions.find(m => m.color === selectedMetal);
     if (!metalOption) return 0;
@@ -99,11 +129,11 @@ function CompletePageContent() {
     const sizeOption = setting.sizes.find(s => s.size === Number(selectedSize));
     const sizePrice = sizeOption?.additionalPrice || 0;
 
-    return metalOption.price + diamond.price + sizePrice;
+    return metalOption.price + stone.price + sizePrice;
   };
 
   const handleAddToCart = () => {
-    if (!setting || !diamond || !selectedMetal || !selectedSize) {
+    if (!setting || !stone || !selectedMetal || !selectedSize || !stoneType) {
       toast.error('Unable to add to cart. Please try again.');
       return;
     }
@@ -114,9 +144,13 @@ function CompletePageContent() {
       return;
     }
 
-    const cartItem = {
-      _id: `${setting._id}-${diamond._id}`,
-      title: `Custom ${setting.title} with ${diamond.shape} Diamond`,
+    const stoneDescription = stoneType === 'diamond' 
+      ? `${stone.shape} Diamond`
+      : `${(stone as Gemstone).type} Gemstone`;
+
+    const cartItem: CartItem = {
+      _id: `${setting._id}-${stone._id}`,
+      title: `Custom ${setting.title} with ${stoneDescription}`,
       price: calculateTotalPrice(),
       quantity: 1,
       image: setting.metalColorImages[selectedMetal]?.[0]?.url || '',
@@ -125,28 +159,37 @@ function CompletePageContent() {
         color: metalOption.color
       },
       size: parseInt(selectedSize),
-      diamond: {
-        _id: diamond._id,
-        shape: diamond.shape,
-        carat: diamond.carat,
-        color: diamond.color,
-        clarity: diamond.clarity
+      [stoneType]: {
+        _id: stone._id,
+        ...(stoneType === 'diamond' ? {
+          shape: stone.shape,
+          carat: stone.carat,
+          color: stone.color,
+          clarity: stone.clarity
+        } : {
+          type: (stone as Gemstone).type,
+          shape: stone.shape,
+          carat: stone.carat,
+          color: stone.color,
+          clarity: stone.clarity
+        })
       },
       productType: 'setting' as const,
       customization: {
         isCustomized: true,
-        customizationType: 'setting-diamond' as const,
-        diamondId: diamond._id,
+        customizationType: stoneType === 'diamond' ? 'setting-diamond' as const : 'setting-gemstone' as const,
+        ...(stoneType === 'diamond' ? { diamondId: stone._id } : { gemstoneId: stone._id }),
         settingId: setting._id,
         metalType: metalOption.color,
         size: parseInt(selectedSize),
         customizationDetails: {
           stone: {
-            type: 'diamond',
-            carat: diamond.carat,
-            color: diamond.color,
-            clarity: diamond.clarity,
-            image: diamond.images?.[0]?.url || ''
+            type: stoneType,
+            carat: stone.carat,
+            color: stone.color,
+            clarity: stone.clarity,
+            ...(stoneType === 'gemstone' && { gemstoneType: (stone as Gemstone).type }),
+            image: stone.images?.[0]?.url || ''
           },
           setting: {
             style: setting.title,
@@ -163,23 +206,50 @@ function CompletePageContent() {
   };
 
   const handleChangeSetting = () => {
-    const params = new URLSearchParams({
-      diamondId: diamond?._id || '',
-      start: 'diamond',
-      end: 'setting'
-    });
+    const params = new URLSearchParams();
+    if (diamondId) {
+      params.set('diamondId', diamondId);
+      params.set('start', 'diamond');
+    } else if (gemstoneId) {
+      params.set('gemstoneId', gemstoneId);
+      params.set('start', 'gemstone');
+    }
+    params.set('end', 'setting');
     router.push(`/settings/all?${params.toString()}`);
   };
 
-  const handleChangeDiamond = () => {
+  const handleChangeStone = () => {
     const params = new URLSearchParams({
       settingId: setting?._id || '',
       metal: selectedMetal || '',
       size: selectedSize || '',
-      start: 'setting',
-      end: 'diamond'
+      start: 'setting'
     });
-    router.push(`/diamond/all?${params.toString()}`);
+
+    if (stoneType === 'diamond') {
+      params.set('end', 'diamond');
+      router.push(`/diamond/all?${params.toString()}`);
+    } else if (stoneType === 'gemstone') {
+      params.set('end', 'gemstone');
+      router.push(`/gemstone/all?${params.toString()}`);
+    }
+  };
+
+  const getStoneDisplayInfo = () => {
+    if (!stone) return { title: '', description: '' };
+
+    if (stoneType === 'diamond') {
+      return {
+        title: `${stone.shape} Diamond`,
+        description: `${stone.carat}ct ${stone.color} ${stone.clarity}`
+      };
+    } else {
+      const gem = stone as Gemstone;
+      return {
+        title: `${gem.type} Gemstone`,
+        description: `${gem.carat}ct ${gem.color} ${gem.clarity}`
+      };
+    }
   };
 
   if (loading) {
@@ -192,7 +262,7 @@ function CompletePageContent() {
     );
   }
 
-  if (error || !setting || !diamond) {
+  if (error || !setting || !stone) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -209,14 +279,17 @@ function CompletePageContent() {
     );
   }
 
+  const stoneDisplayInfo = getStoneDisplayInfo();
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Progress Steps */}
       <CustomizationSteps
         currentStep={3}
-        startWith={startWith as 'setting' | 'diamond'}
+        startWith={startWith as 'setting' | 'diamond' | 'gemstone'}
         settingComplete={true}
-        diamondComplete={true}
+        diamondComplete={stoneType === 'diamond'}
+        gemstoneComplete={stoneType === 'gemstone'}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -249,13 +322,13 @@ function CompletePageContent() {
           </div>
         </div>
 
-        {/* Right Column: Diamond */}
+        {/* Right Column: Stone (Diamond or Gemstone) */}
         <div>
           <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm">
             <div className="relative aspect-square">
               <Image
-                src={diamond.images?.[0]?.url || '/placeholder-diamond.jpg'}
-                alt={`${diamond.shape} ${diamond.carat}ct Diamond`}
+                src={stone.images?.[0]?.url || '/placeholder-stone.jpg'}
+                alt={stoneDisplayInfo.title}
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -265,17 +338,17 @@ function CompletePageContent() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h2 className="text-xl font-bold">
-                    {diamond.shape} Diamond
+                    {stoneDisplayInfo.title}
                   </h2>
                   <p className="text-gray-600">
-                    {diamond.carat}ct {diamond.color} {diamond.clarity}
+                    {stoneDisplayInfo.description}
                   </p>
                 </div>
                 <button
-                  onClick={handleChangeDiamond}
+                  onClick={handleChangeStone}
                   className="text-amber-600 hover:text-amber-700 text-sm font-medium"
                 >
-                  Change Diamond
+                  Change {stoneType === 'diamond' ? 'Diamond' : 'Gemstone'}
                 </button>
               </div>
             </div>

@@ -275,11 +275,6 @@ const CATEGORIES: Category[] = [
         icon: '/icons/gemstone/all.svg'
       },
       {
-        name: 'Sapphire',
-        path: '/gemstone/sapphire',
-        icon: '/icons/gemstone/sapphire.svg'
-      },
-      {
         name: 'Ruby',
         path: '/gemstone/ruby',
         icon: '/icons/gemstone/ruby.svg'
@@ -288,6 +283,38 @@ const CATEGORIES: Category[] = [
         name: 'Emerald',
         path: '/gemstone/emerald',
         icon: '/icons/gemstone/emerald.svg'
+      },
+      {
+        name: 'Sapphire',
+        path: '/gemstone/sapphire',
+        icon: '/icons/gemstone/sapphire.svg'
+      },
+      {
+        name: 'Natural Gemstones',
+        path: '/gemstone/natural',
+        icon: '/icons/gemstone/natural.svg'
+      },
+      {
+        name: 'Lab Grown Gemstones',
+        path: '/gemstone/lab',
+        icon: '/icons/gemstone/lab.svg'
+      }
+    ],
+    featured: [
+      {
+        name: 'Under $2500',
+        path: '/gemstone/price/under-2500',
+        icon: '/icons/featured/under-2500.svg'
+      },
+      {
+        name: 'Ready To Ship',
+        path: '/gemstone/ready-to-ship',
+        icon: '/icons/featured/ready-to-ship.svg'
+      },
+      {
+        name: 'Start with Gemstone',
+        path: '/gemstone/all?start=gemstone',
+        icon: '/icons/customize/gemstone.svg'
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
@@ -327,23 +354,23 @@ const CATEGORIES: Category[] = [
     subcategories: [
       {
         name: 'Start with a Setting',
-        path: '/customize/setting',
+        path: '/settings/all?start=setting',
         icon: '/icons/customize/setting.svg'
       },
       {
         name: 'Start with a Diamond',
-        path: '/customize/diamond',
+        path: '/diamond/all?start=diamond',
         icon: '/icons/customize/diamond.svg'
       },
       {
-        name: 'Start with a Lab Diamond',
-        path: '/customize/lab-diamond',
-        icon: '/icons/customize/lab-diamond.svg'
+        name: 'Start with a Gemstone',
+        path: '/gemstone/all?start=gemstone',
+        icon: '/icons/customize/gemstone.svg'
       },
       {
-        name: 'Start with a Gemstone',
-        path: '/customize/gemstone',
-        icon: '/icons/customize/gemstone.svg'
+        name: 'Start with a Lab Diamond',
+        path: '/diamond/lab?start=diamond',
+        icon: '/icons/customize/lab-diamond.svg'
       },
       {
         name: 'Bridal Sets',

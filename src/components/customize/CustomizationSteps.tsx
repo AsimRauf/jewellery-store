@@ -1,78 +1,91 @@
 interface CustomizationStepsProps {
-  currentStep: 1 | 2 | 3;
-  startWith: 'setting' | 'diamond';
+  currentStep: number;
+  startWith: 'setting' | 'diamond' | 'gemstone';
   settingComplete?: boolean;
   diamondComplete?: boolean;
+  gemstoneComplete?: boolean;
 }
 
-export default function CustomizationSteps({
+const CustomizationSteps: React.FC<CustomizationStepsProps> = ({
   currentStep,
   startWith,
   settingComplete = false,
-  diamondComplete = false
-}: CustomizationStepsProps) {
-  const steps = startWith === 'setting' 
-    ? [
-        { name: 'Setting', step: 1 },
-        { name: 'Diamond', step: 2 },
-        { name: 'Complete Ring', step: 3 }
-      ]
-    : [
-        { name: 'Diamond', step: 1 },
-        { name: 'Setting', step: 2 },
-        { name: 'Complete Ring', step: 3 }
-      ];
+  diamondComplete = false,
+  gemstoneComplete = false
+}) => {
+  const getStepStatus = (step: number) => {
+    if (step < currentStep) return 'completed';
+    if (step === currentStep) return 'current';
+    return 'upcoming';
+  };
+
+  const getStepIcon = (step: number, status: string) => {
+    if (status === 'completed') {
+      return '✓';
+    }
+    return step.toString();
+  };
+
+  const getStepLabel = (step: number) => {
+    if (startWith === 'setting') {
+      switch (step) {
+        case 1: return 'Select Setting';
+        case 2: return diamondComplete ? 'Diamond Selected' : gemstoneComplete ? 'Gemstone Selected' : 'Select Stone';
+        case 3: return 'Complete Ring';
+        default: return '';
+      }
+    } else if (startWith === 'diamond') {
+      switch (step) {
+        case 1: return 'Select Diamond';
+        case 2: return settingComplete ? 'Setting Selected' : 'Select Setting';
+        case 3: return 'Complete Ring';
+        default: return '';
+      }
+    } else if (startWith === 'gemstone') {
+      switch (step) {
+        case 1: return 'Select Gemstone';
+        case 2: return settingComplete ? 'Setting Selected' : 'Select Setting';
+        case 3: return 'Complete Ring';
+        default: return '';
+      }
+    }
+    return '';
+  };
 
   return (
-    <div className="mb-6 bg-amber-50 px-3 py-4 md:p-6 rounded-lg">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between max-w-3xl mx-auto">
-        {steps.map((step, index) => (
-          <div key={step.name} className="flex flex-col md:flex-row items-center w-full md:flex-1">
-            <div className="flex items-center w-full md:w-auto justify-start">
-              <div 
-                className={`
-                  rounded-full h-7 w-7 md:h-8 md:w-8 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm md:text-base
-                  ${(currentStep > step.step) || 
-                    (step.name === 'Setting' && settingComplete) || 
-                    (step.name === 'Diamond' && diamondComplete)
-                    ? 'bg-amber-500' 
-                    : currentStep === step.step
-                    ? 'bg-amber-500'
-                    : 'bg-gray-300'
-                  }
-                `}
-              >
-                {(currentStep > step.step) || 
-                 (step.name === 'Setting' && settingComplete) || 
-                 (step.name === 'Diamond' && diamondComplete)
-                  ? '✓'
-                  : step.step
-                }
+    <div className="mb-8 bg-amber-50 p-6 rounded-lg">
+      <div className="flex items-center justify-center">
+        {[1, 2, 3].map((step, index) => {
+          const status = getStepStatus(step);
+          const isLast = index === 2;
+          
+          return (
+            <div key={step} className="flex items-center">
+              <div className="flex items-center">
+                <div className={`rounded-full h-8 w-8 flex items-center justify-center text-white font-bold ${
+                  status === 'completed' ? 'bg-amber-500' :
+                  status === 'current' ? 'bg-amber-500' :
+                  'bg-gray-300'
+                }`}>
+                  {getStepIcon(step, status)}
+                </div>
+                <span className={`ml-2 font-medium ${
+                  status === 'completed' || status === 'current' ? 'text-amber-700' : 'text-gray-500'
+                }`}>
+                  {getStepLabel(step)}
+                </span>
               </div>
-              
-              <span className={`ml-3 font-medium text-sm md:text-base flex-shrink-0 ${currentStep === step.step ? 'text-amber-700' : 'text-gray-500'}`}>
-                {step.step === 3 
-                  ? 'Complete Ring'
-                  : currentStep > step.step || 
-                    (step.name === 'Setting' && settingComplete) || 
-                    (step.name === 'Diamond' && diamondComplete)
-                    ? `${step.name} Selected`
-                    : currentStep === step.step
-                    ? `Select ${step.name === 'Setting' ? 'a' : step.name === 'Diamond' ? 'a' : ''} ${step.name}`
-                    : step.name
-                }
-              </span>
+              {!isLast && (
+                <div className={`mx-4 border-t-2 w-16 ${
+                  status === 'completed' ? 'border-amber-200' : 'border-gray-200'
+                }`}></div>
+              )}
             </div>
-
-            {index < steps.length - 1 && (
-              <>
-                <div className="md:hidden h-6 w-0.5 bg-amber-200 my-1 mx-auto" />
-                <div className="hidden md:block flex-grow mx-4 border-t-2 border-amber-200 min-w-[2rem]" />
-              </>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
-}
+};
+
+export default CustomizationSteps;

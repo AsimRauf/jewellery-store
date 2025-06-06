@@ -15,7 +15,7 @@ import {
   GemstoneCut, 
   GemstoneOrigin, 
   GemstoneTreatment, 
-  CertificateLab,
+  GemstoneCertificateLab,
 
 } from '@/types/gemstone';
 
@@ -97,7 +97,7 @@ const formSections: FormSection[] = [
   {
     title: "Certification",
     fields: [
-      { name: "certificateLab", label: "Certificate Lab", type: "select", options: Object.values(CertificateLab) },
+      { name: "certificateLab", label: "Certificate Lab", type: "select", options: Object.values(GemstoneCertificateLab) },
       { name: "certificateNumber", label: "Certificate Number", type: "text" },
     ]
   },
@@ -127,7 +127,7 @@ export default function AddGemstone() {
     origin: '',
     treatment: GemstoneTreatment.NONE,
     measurements: '',
-    certificateLab: CertificateLab.NONE,
+    certificateLab: GemstoneCertificateLab.NONE,
     certificateNumber: '',
     refractive_index: 0,
     hardness: 0,

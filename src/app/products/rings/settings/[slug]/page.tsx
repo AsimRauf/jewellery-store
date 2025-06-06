@@ -95,6 +95,11 @@ export default function SettingDetailPage() {
   const diamondId = searchParams?.get('diamondId');
   const hasDiamondSelected = Boolean(diamondId);
 
+  // Add gemstone flow parameters
+  const isGemstoneFirst = startWith === 'gemstone';
+  const gemstoneId = searchParams?.get('gemstoneId');
+  const hasGemstoneSelected = Boolean(gemstoneId);
+
   // Extract product ID from slug
   const slug = params?.slug || '';
   const productId = typeof slug === 'string' ? slug : '';
@@ -306,6 +311,34 @@ export default function SettingDetailPage() {
     }
   };
 
+  const handleSelectGemstone = () => {
+  if (!product || !selectedMetal || !selectedSize) {
+    toast.error('Please select a size and metal option');
+    return;
+  }
+
+  if (isGemstoneFirst && hasGemstoneSelected) {
+    // If we're in gemstone-first flow and have a gemstone, go to completion
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('settingId', product._id);
+    params.set('metal', selectedMetal.color);
+    params.set('size', selectedSize.toString());
+    params.set('complete', 'true');
+    router.push(`/customize/complete?${params.toString()}`);
+  } else {
+    // Normal flow or starting customization - go to gemstone selection
+    const params = new URLSearchParams({
+      settingId: product._id,
+      metal: selectedMetal.color,
+      size: selectedSize.toString(),
+      start: 'setting',
+      end: 'gemstone'
+    });
+    router.push(`/gemstone/all?${params.toString()}`);
+  }
+};
+
+
   // Get images for the selected metal color
   const getImagesForSelectedMetal = () => {
     if (!product || !selectedMetal) return [];
@@ -341,8 +374,10 @@ export default function SettingDetailPage() {
       {(isCustomizationEnd || startWith === 'setting') && (
         <CustomizationSteps
           currentStep={2}
-          startWith={(startWith === 'setting' || startWith === 'diamond') ? startWith : 'setting'}
+          startWith={(startWith === 'setting' || startWith === 'diamond' || startWith === 'gemstone') ? startWith : 'setting'}
           settingComplete={Boolean(selectedSize && selectedMetal)}
+          diamondComplete={hasDiamondSelected}
+          gemstoneComplete={hasGemstoneSelected}
         />
       )}
 
@@ -546,7 +581,7 @@ export default function SettingDetailPage() {
           </div>
           
           {/* Action Buttons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <button
               onClick={handleAddToCart}
               disabled={addingToCart || !selectedSize || !selectedMetal}
@@ -568,7 +603,19 @@ export default function SettingDetailPage() {
                   : 'bg-[#8B0000] hover:bg-[#6B0000]'} 
                 transition-colors`}
             >
-              {isDiamondFirst && hasDiamondSelected ? 'Complete Your Ring' : 'Select a Diamond'}
+              {isDiamondFirst && hasDiamondSelected ? 'Complete With Diamond' : 'Select a Diamond'}
+            </button>
+
+            <button
+              onClick={handleSelectGemstone}
+              disabled={!selectedSize || !selectedMetal}
+              className={`w-full py-3 px-6 rounded-full font-medium text-white 
+                ${!selectedSize || !selectedMetal
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#8B0000] hover:bg-[#6B0000]'} 
+                transition-colors`}
+            >
+              {isGemstoneFirst && hasGemstoneSelected ? 'Complete With Gemstone' : 'Select a Gemstone'}
             </button>
           </div>
           

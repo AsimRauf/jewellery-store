@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
@@ -11,37 +11,35 @@ import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import CustomizationSteps from '@/components/customize/CustomizationSteps';
 import { CartItem } from '@/types/cart';
 
-interface DiamondDetail {
+interface GemstoneDetail {
   _id: string;
   sku: string;
   productNumber: string;
   type: string;
+  source: string;
   carat: number;
   shape: string;
   color: string;
-  fancyColor?: string;
   clarity: string;
   cut?: string;
-  polish?: string;
-  symmetry?: string;
-  fluorescence?: string;
-  measurements: string;
+  origin?: string;
   treatment?: string;
+  measurements: string;
   certificateLab?: string;
-  crownAngle?: number;
-  crownHeight?: number;
-  pavilionAngle?: number;
-  pavilionDepth?: number;
+  certificateNumber?: string;
+  refractive_index?: number;
+  hardness: number;
   price: number;
   salePrice?: number;
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export default function DiamondDetailPage() {
+export default function GemstoneDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -49,99 +47,88 @@ export default function DiamondDetailPage() {
   
   // Add customization flow parameters
   const startWith = searchParams?.get('start');
-  const isCustomizationStart = startWith === 'diamond';
+  const isCustomizationStart = startWith === 'gemstone';
   const settingId = searchParams?.get('settingId');
   const selectedMetal = searchParams?.get('metal');
   const selectedSize = searchParams?.get('size');
   const isSettingSelected = Boolean(settingId && selectedMetal && selectedSize);
   
-  // Extract diamond ID from slug
-  const slug = params?.slug as string;
+  // Extract gemstone ID from params
+  const gemstoneId = params?.id as string;
   
   // State variables
-  const [diamond, setDiamond] = useState<DiamondDetail | null>(null);
+  const [gemstone, setGemstone] = useState<GemstoneDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const isCustomizationFlow = Boolean(settingId || startWith === 'gemstone');
   
-  // Fetch diamond data
+  // Fetch gemstone data
   useEffect(() => {
-    const fetchDiamond = async () => {
-      if (!slug) return;
+    const fetchGemstone = async () => {
+      if (!gemstoneId) return;
       
       try {
         setLoading(true);
         
-        // Extract the ID from the slug
-        // If the slug is just an ID, use it directly
-        // Otherwise, extract the ID from the end of the slug
-        const diamondId = slug.includes('-') 
-          ? slug.split('-').pop() 
-          : slug;
-        
-        if (!diamondId) {
-          throw new Error('Invalid diamond ID');
-        }
-        
-        const response = await fetch(`/api/products/diamond/detail/${diamondId}`);
+        const response = await fetch(`/api/products/gemstone/detail/${gemstoneId}`);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch diamond details');
+          throw new Error('Failed to fetch gemstone details');
         }
         
         const data = await response.json();
-        setDiamond(data.diamond);
+        setGemstone(data.gemstone);
       } catch (err) {
-        console.error('Error fetching diamond:', err);
-        setError('Failed to load diamond details. Please try again later.');
+        console.error('Error fetching gemstone:', err);
+        setError('Failed to load gemstone details. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchDiamond();
-  }, [slug]);
+    fetchGemstone();
+  }, [gemstoneId]);
   
   // Handle add to cart
   const handleAddToCart = () => {
-    if (!diamond) return;
+    if (!gemstone) return;
     
     setAddingToCart(true);
     
     try {
-      // Check if this is part of a customization flow
-      const isCustomized = Boolean(settingId || startWith === 'diamond');
       
       const cartItem: CartItem = {
-        _id: diamond._id,
-        title: `${diamond.shape} ${diamond.carat}ct ${diamond.color} ${diamond.clarity} Diamond`,
-        price: diamond.salePrice || diamond.price,
+        _id: gemstone._id,
+        title: `${gemstone.type} ${gemstone.carat}ct ${gemstone.color} ${gemstone.clarity} Gemstone`,
+        price: gemstone.salePrice || gemstone.price,
         quantity: quantity,
-        image: diamond.images?.[0]?.url || '',
-        productType: 'diamond' as const,
-        customization: isCustomized ? {
+        image: gemstone.images?.[0]?.url || '',
+        productType: 'gemstone',
+        customization: isCustomizationFlow ? {
           isCustomized: true,
-          customizationType: 'setting-diamond',
-          diamondId: diamond._id,
-          settingId: settingId || undefined,
-          metalType: selectedMetal || undefined,
-          size: selectedSize ? parseInt(selectedSize) : undefined,
+          customizationType: 'setting-gemstone',
+          gemstoneId: gemstone._id,
+          settingId: searchParams?.get('settingId') || undefined,
+          metalType: searchParams?.get('metal') || undefined,
+          size: searchParams?.get('size') ? parseInt(searchParams.get('size')!) : undefined,
           customizationDetails: {
             stone: {
-              type: 'diamond',
-              carat: diamond.carat,
-              color: diamond.color,
-              clarity: diamond.clarity,
-              cut: diamond.cut
+              type: 'gemstone',
+              carat: gemstone.carat,
+              color: gemstone.color,
+              clarity: gemstone.clarity,
+              cut: gemstone.cut,
+              image: gemstone.images?.[0]?.url || '',
             }
           }
         } : undefined
       };
       
       addItem(cartItem);
-      toast.success('Diamond added to cart!');
+      toast.success('Gemstone added to cart!');
     } catch (err) {
       console.error('Error adding to cart:', err);
       toast.error('Failed to add to cart. Please try again.');
@@ -151,11 +138,11 @@ export default function DiamondDetailPage() {
   };
   
   const handleGoToComplete = () => {
-    if (!diamond) return;
+    if (!gemstone) return;
     
     // Build URL with all necessary parameters
     const params = new URLSearchParams(searchParams?.toString() || '');
-    params.set('diamondId', diamond._id);
+    params.set('gemstoneId', gemstone._id);
     params.set('complete', 'true');
     
     // Redirect to completion page
@@ -164,13 +151,13 @@ export default function DiamondDetailPage() {
 
   // Handle select setting
   const handleSelectSetting = () => {
-    if (!diamond) return;
+    if (!gemstone) return;
 
     if (isCustomizationStart) {
-      // If this is the start of diamond-first flow, go to settings with end=setting
+      // If this is the start of gemstone-first flow, go to settings with end=setting
       const params = new URLSearchParams({
-        diamondId: diamond._id,
-        start: 'diamond',
+        gemstoneId: gemstone._id,
+        start: 'gemstone',
         end: 'setting'
       });
       router.push(`/settings/all?${params.toString()}`);
@@ -179,7 +166,7 @@ export default function DiamondDetailPage() {
       handleGoToComplete();
     } else {
       // Normal flow - browse settings
-      router.push(`/settings/all?diamond=${diamond._id}`);
+      router.push(`/settings/all?gemstone=${gemstone._id}`);
     }
   };
 
@@ -191,24 +178,24 @@ export default function DiamondDetailPage() {
     );
   }
   
-  if (error || !diamond) {
+  if (error || !gemstone) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <ErrorDisplay message={error || 'Diamond not found'} />
+        <ErrorDisplay message={error || 'Gemstone not found'} />
       </div>
     );
   }
   
-  
+
   
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Replace existing customization UI with new component */}
+      {/* Customization Steps */}
       {(isCustomizationStart || isSettingSelected) && (
         <CustomizationSteps
           currentStep={isSettingSelected ? 3 : 2}
-          startWith="diamond"
-          diamondComplete={true}
+          startWith="gemstone"
+          gemstoneComplete={true}
           settingComplete={isSettingSelected}
         />
       )}
@@ -221,11 +208,11 @@ export default function DiamondDetailPage() {
           </li>
           <li className="text-gray-500">/</li>
           <li>
-            <Link href="/diamond/all" className="text-gray-500 hover:text-amber-500">Diamonds</Link>
+            <Link href="/gemstone/all" className="text-gray-500 hover:text-amber-500">Gemstones</Link>
           </li>
           <li className="text-gray-500">/</li>
           <li className="text-amber-600 font-medium">
-            {diamond.shape} {diamond.carat}ct Diamond
+            {gemstone.type} {gemstone.carat}ct Gemstone
           </li>
         </ol>
       </nav>
@@ -235,10 +222,10 @@ export default function DiamondDetailPage() {
         <div>
           {/* Main Image */}
           <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
-            {diamond.images && diamond.images.length > 0 ? (
+            {gemstone.images && gemstone.images.length > 0 ? (
               <Image
-                src={diamond.images[activeImageIndex].url}
-                alt={`${diamond.shape} ${diamond.carat}ct Diamond`}
+                src={gemstone.images[activeImageIndex].url}
+                alt={`${gemstone.type} ${gemstone.carat}ct Gemstone`}
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -251,9 +238,9 @@ export default function DiamondDetailPage() {
           </div>
           
           {/* Thumbnail Images */}
-          {diamond.images && diamond.images.length > 1 && (
+          {gemstone.images && gemstone.images.length > 1 && (
             <div className="grid grid-cols-5 gap-2">
-              {diamond.images.map((image, index) => (
+              {gemstone.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImageIndex(index)}
@@ -263,7 +250,7 @@ export default function DiamondDetailPage() {
                 >
                   <Image
                     src={image.url}
-                    alt={`${diamond.shape} Diamond Thumbnail ${index + 1}`}
+                    alt={`${gemstone.type} Gemstone Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 20vw, 10vw"
@@ -277,23 +264,23 @@ export default function DiamondDetailPage() {
         {/* Right Column: Details */}
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {diamond.shape} {diamond.carat}ct {diamond.color} {diamond.clarity} Diamond
+            {gemstone.type} {gemstone.carat}ct {gemstone.color} {gemstone.clarity} Gemstone
           </h1>
           
           <p className="text-gray-600 mb-4">
-            {diamond.certificateLab} Certified {diamond.type === 'lab' ? 'Lab-Grown' : 'Natural'} Diamond
+            {gemstone.certificateLab && gemstone.certificateLab !== 'None' ? `${gemstone.certificateLab} Certified` : ''} {gemstone.source === 'lab' ? 'Lab-Grown' : 'Natural'} Gemstone
           </p>
           
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center">
               <span className="text-2xl font-bold text-amber-600">
-                ${(diamond.salePrice || diamond.price).toLocaleString()}
+                ${(gemstone.salePrice || gemstone.price).toLocaleString()}
               </span>
-              {diamond.salePrice && diamond.salePrice < diamond.price ? (
+              {gemstone.salePrice && gemstone.salePrice < gemstone.price ? (
                 <>
                   <span className="ml-3 text-gray-500 line-through">
-                    ${diamond.price.toLocaleString()}
+                    ${gemstone.price.toLocaleString()}
                   </span>
                   <span className="ml-3 bg-red-100 text-red-700 px-2 py-1 rounded text-sm">
                     Sale
@@ -304,7 +291,7 @@ export default function DiamondDetailPage() {
           </div>
           
           {/* SKU */}
-          <p className="text-sm text-gray-500 mb-6">SKU: {diamond.sku}</p>
+          <p className="text-sm text-gray-500 mb-6">SKU: {gemstone.sku}</p>
           
           {/* Quantity */}
           <div className="mb-6">
@@ -338,8 +325,12 @@ export default function DiamondDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <button
               onClick={handleAddToCart}
-              disabled={addingToCart || !diamond.isAvailable}
-              className="w-full py-3 px-6 rounded-full font-medium text-white bg-amber-500 hover:bg-amber-600 transition-colors"
+              disabled={addingToCart || !gemstone.isAvailable}
+              className={`w-full py-3 px-6 rounded-full font-medium text-white 
+                ${addingToCart || !gemstone.isAvailable
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-amber-500 hover:bg-amber-600'} 
+                transition-colors`}
             >
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
@@ -356,86 +347,84 @@ export default function DiamondDetailPage() {
                 onClick={handleSelectSetting}
                 className="w-full py-3 px-6 rounded-full font-medium text-white bg-[#8B0000] hover:bg-[#6B0000] transition-colors"
               >
-                {isCustomizationStart ? 'Select a Setting' : 'Start with this Diamond'}
+                {isCustomizationStart ? 'Select a Setting' : 'Start with this Gemstone'}
               </button>
             )}
           </div>
           
-          {/* Diamond Specifications */}
+          {/* Gemstone Specifications */}
           <div className="border border-gray-200 rounded-lg overflow-hidden mb-8">
             <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-              <h2 className="font-medium text-gray-900">Diamond Specifications</h2>
+              <h2 className="font-medium text-gray-900">Gemstone Specifications</h2>
             </div>
             
             <div className="p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <h3 className="text-sm font-medium text-gray-500">Type</h3>
+                  <p className="mt-1">{gemstone.type}</p>
+                </div>
+                
+                <div>
                   <h3 className="text-sm font-medium text-gray-500">Shape</h3>
-                  <p className="mt-1">{diamond.shape}</p>
+                  <p className="mt-1">{gemstone.shape}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Carat Weight</h3>
-                  <p className="mt-1">{diamond.carat}</p>
+                  <p className="mt-1">{gemstone.carat}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Color</h3>
-                  <p className="mt-1">{diamond.color}</p>
+                  <p className="mt-1">{gemstone.color}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Clarity</h3>
-                  <p className="mt-1">{diamond.clarity}</p>
+                  <p className="mt-1">{gemstone.clarity}</p>
                 </div>
                 
-                {diamond.cut && (
+                {gemstone.cut && (
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Cut</h3>
-                    <p className="mt-1">{diamond.cut}</p>
+                    <p className="mt-1">{gemstone.cut}</p>
                   </div>
                 )}
                 
-                {diamond.polish && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Polish</h3>
-                    <p className="mt-1">{diamond.polish}</p>
-                  </div>
-                )}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Source</h3>
+                  <p className="mt-1">{gemstone.source === 'lab' ? 'Lab-Grown' : 'Natural'}</p>
+                </div>
                 
-                {diamond.symmetry && (
+                {gemstone.origin && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Symmetry</h3>
-                    <p className="mt-1">{diamond.symmetry}</p>
-                  </div>
-                )}
-                
-                {diamond.fluorescence && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Fluorescence</h3>
-                    <p className="mt-1">{diamond.fluorescence}</p>
+                    <h3 className="text-sm font-medium text-gray-500">Origin</h3>
+                    <p className="mt-1">{gemstone.origin}</p>
                   </div>
                 )}
                 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Measurements</h3>
-                  <p className="mt-1">{diamond.measurements}</p>
+                  <p className="mt-1">{gemstone.measurements}</p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Certificate</h3>
-                  <p className="mt-1">{diamond.certificateLab || 'N/A'}</p>
+                  <h3 className="text-sm font-medium text-gray-500">Hardness</h3>
+                  <p className="mt-1">{gemstone.hardness}</p>
                 </div>
                 
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Type</h3>
-                  <p className="mt-1">{diamond.type === 'lab' ? 'Lab-Grown' : 'Natural'}</p>
-                </div>
-                
-                {diamond.fancyColor && (
+                {gemstone.treatment && gemstone.treatment !== 'None' && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Fancy Color</h3>
-                    <p className="mt-1">{diamond.fancyColor}</p>
+                    <h3 className="text-sm font-medium text-gray-500">Treatment</h3>
+                    <p className="mt-1">{gemstone.treatment}</p>
+                  </div>
+                )}
+                
+                {gemstone.certificateLab && gemstone.certificateLab !== 'None' && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">Certificate</h3>
+                    <p className="mt-1">{gemstone.certificateLab}</p>
                   </div>
                 )}
               </div>
@@ -450,41 +439,27 @@ export default function DiamondDetailPage() {
             
             <div className="p-4">
               <div className="grid grid-cols-2 gap-4">
-                {diamond.crownAngle && (
+                {gemstone.refractive_index && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Crown Angle</h3>
-                    <p className="mt-1">{diamond.crownAngle}°</p>
+                    <h3 className="text-sm font-medium text-gray-500">Refractive Index</h3>
+                    <p className="mt-1">{gemstone.refractive_index}</p>
                   </div>
                 )}
                 
-                {diamond.crownHeight && (
+                {gemstone.certificateNumber && (
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Crown Height</h3>
-                    <p className="mt-1">{diamond.crownHeight}%</p>
-                  </div>
-                )}
-                
-                {diamond.pavilionAngle && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Pavilion Angle</h3>
-                    <p className="mt-1">{diamond.pavilionAngle}°</p>
-                  </div>
-                )}
-                
-                {diamond.pavilionDepth && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Pavilion Depth</h3>
-                    <p className="mt-1">{diamond.pavilionDepth}%</p>
-                  </div>
-                )}
-                
-                {diamond.treatment && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Treatment</h3>
-                    <p className="mt-1">{diamond.treatment}</p>
+                    <h3 className="text-sm font-medium text-gray-500">Certificate Number</h3>
+                    <p className="mt-1">{gemstone.certificateNumber}</p>
                   </div>
                 )}
               </div>
+              
+              {gemstone.description && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
+                  <p className="text-gray-700">{gemstone.description}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -492,4 +467,3 @@ export default function DiamondDetailPage() {
     </div>
   );
 }
-
