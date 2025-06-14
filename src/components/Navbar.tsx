@@ -112,7 +112,7 @@ const CATEGORIES: Category[] = [
       {
         name: 'All Settings',
         path: '/settings/all?start=setting',
-        icon: '/icons/settings/all-settings.svg'
+        icon: '/icons/settings/all-rings.svg'
       },
       {
         name: 'Solitaire',
@@ -144,29 +144,29 @@ const CATEGORIES: Category[] = [
         return {
           name: "Two Tone Gold",
           path: `/settings/metal-two-tone-gold?start=setting`,
-          icon: "/placeholder-image.jpg"
+          icon: "/icons/metals/two-tone.webp"
         };
       }
       const baseName = color.toLowerCase().replace(' gold', '');
       return {
         name: color,
         path: `/settings/metal-${baseName}?start=setting`,
-        icon: `/placeholder-image.jpg`
+        icon: `/icons/metals/${baseName}.webp`
       };
     }),
     featured: [
       {
         name: 'Under $1500',
         path: '/settings/price/under-1500',
-        icon: '/placeholder-image.jpg'
+        icon: '/icons/featured/under-2500.svg'
       },
       {
         name: 'New Arrivals',
         path: '/settings/new-arrivals',
-        icon: '/placeholder-image.jpg'
+        icon: '/icons/featured/custom.svg'
       }
     ],
-    bannerImage: '/placeholder-image.jpg',
+    bannerImage: '/icons/banner/megamenu-banner.webp',
     bannerLink: '/settings/custom'
   },
   {
@@ -191,7 +191,7 @@ const CATEGORIES: Category[] = [
         } else if (subcategory.includes("Anniversary")) {
           icon += 'anniversary-bands.svg';
         } else if (subcategory.includes("His & Her")) {
-          icon += 'matching-sets.svg';
+          icon += 'matching-set.svg';
         } else {
           icon += 'all-rings.svg';
         }
@@ -292,12 +292,12 @@ const CATEGORIES: Category[] = [
       {
         name: 'Natural Gemstones',
         path: '/gemstone/natural',
-        icon: '/icons/gemstone/natural.svg'
+        icon: '/icons/gemstone/natural1.png'
       },
       {
         name: 'Lab Grown Gemstones',
         path: '/gemstone/lab',
-        icon: '/icons/gemstone/lab.svg'
+        icon: '/icons/gemstone/lab.png'
       }
     ],
     featured: [
@@ -480,8 +480,9 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="Jewelry Store"
-                  width={120}
+                  width={80}
                   height={30}
+                  style={{ paddingLeft: 10 }}
                   className="object-contain"
                 />
               </div>
@@ -1039,7 +1040,13 @@ const MenuCategory = ({
                         onClick={onToggle}
                       >
                         {item.icon && (
-                          <Image src={item.icon} alt="" width={20} height={20} className="mr-3" />
+                         <Image 
+                         src={item.icon} 
+                         alt="" 
+                         width={item.name.includes('Natural Gemstones') || item.name.includes('Lab Grown Gemstones') ? 25 : 20} 
+                         height={item.name.includes('Natural Gemstones') || item.name.includes('Lab Grown Gemstones') ? 25 : 20} 
+                         className="mr-3" 
+                       />
                         )}
                         <span>{item.name}</span>
                       </Link>
