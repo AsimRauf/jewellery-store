@@ -21,6 +21,7 @@
     "framer-motion": "^12.7.4",
     "fs": "^0.0.1-security",
     "jose": "^6.0.10",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.503.0",
     "mongoose": "^8.13.2",

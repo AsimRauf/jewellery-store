@@ -159,39 +159,30 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       // Make the original request
       const response = await originalFetch(input, init);
       
-      // If we get a 401 (Unauthorized) and we're not already on the refresh endpoint
-      if (response.status === 401 && 
-          !(input instanceof Request ? input.url : input.toString()).includes('/api/auth/refresh')) {
-        
-        // Check if we have a refresh token before attempting refresh
+      // Skip auth handling for /api/orders endpoint
+      const url = input instanceof Request ? input.url : input.toString();
+      if (url.includes('/api/orders')) {
+        return response;
+      }
+      
+      // Handle auth for other endpoints
+      if (response.status === 401 && !url.includes('/api/auth/refresh')) {
         const hasRefreshToken = document.cookie.includes('refreshToken=');
         
         if (hasRefreshToken) {
-          console.log('Received 401, attempting token refresh...');
           const refreshed = await refreshToken();
           
           if (refreshed) {
-            // Retry the original request with fresh cookies
-            console.log('Token refreshed, retrying original request with fresh cookies');
-            
-            // Create a new request with the same parameters but fresh cookies
-            // The browser will automatically include the new cookies
             const newInit = { ...init };
             if (newInit.headers) {
-              // Clone headers to avoid modifying the original
               newInit.headers = new Headers(newInit.headers);
             }
-            
             return originalFetch(input, newInit);
           }
           
-          // If refresh failed and we're authenticated, log out
           if (user) {
-            console.log('Token refresh failed, logging out');
             logout();
           }
-        } else {
-          console.log('Received 401 but no refresh token exists, skipping refresh');
         }
       }
       

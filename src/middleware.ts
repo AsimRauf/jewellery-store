@@ -11,6 +11,11 @@ const verifyToken = async (token: string) => {
 
 export async function middleware(request: NextRequest) {
   try {
+    // Allow orders API endpoint to bypass authentication
+    if (request.nextUrl.pathname === '/api/orders') {
+      return NextResponse.next();
+    }
+
     if (request.nextUrl.pathname === '/api/auth/refresh') {
       return NextResponse.next();
     }
@@ -26,7 +31,6 @@ export async function middleware(request: NextRequest) {
                               request.nextUrl.pathname.startsWith('/collections');
     
     const isProtectedApiRoute = request.nextUrl.pathname.startsWith('/api/user') ||
-                               request.nextUrl.pathname.startsWith('/api/orders') ||
                                request.nextUrl.pathname.startsWith('/api/cart') ||
                                request.nextUrl.pathname.startsWith('/api/upload');
 
@@ -113,7 +117,6 @@ export const config = {
     '/api/admin/:path*',
     '/api/upload/:path*',
     '/api/user/:path*',
-    '/api/orders/:path*', 
     '/api/cart/:path*',
     '/api/auth/refresh',
     '/login'

@@ -61,11 +61,11 @@ export default function OrderSummaryItem({ item, sizeOption }: OrderSummaryItemP
           />
         </div>
 
-        {/* If it's a custom item with both setting and stone, show stone image */}
+        {/* Stone Image for Custom Items (Diamond or Gemstone) */}
         {item.customization?.isCustomized && item.customization.customizationDetails?.stone && (
           <div className="w-16 h-16 relative flex-shrink-0 mt-1 rounded-lg overflow-hidden">
             <Image
-              src={item.customization.customizationDetails.stone.image || '/images/diamond-placeholder.jpg'}
+              src={item.customization.customizationDetails.stone.image || '/images/stone-placeholder.jpg'}
               alt={`${item.customization.customizationDetails.stone.type} ${item.customization.customizationDetails.stone.carat}ct`}
               fill
               sizes="64px"
