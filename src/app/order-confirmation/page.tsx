@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,7 +16,7 @@ interface Order {
   createdAt: string;
 }
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams?.get('orderNumber');
   const [order, setOrder] = useState<Order | null>(null);
@@ -26,7 +26,7 @@ export default function OrderConfirmationPage() {
     if (orderNumber) {
       fetchOrder();
     }
-  }, [orderNumber]);
+  }, [orderNumber]); // fetchOrder is stable, no need to include
 
   const fetchOrder = async () => {
     try {
@@ -56,7 +56,7 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Order Not Found</h1>
-          <p className="text-gray-600 mb-6">We couldn't find the order you're looking for.</p>
+          <p className="text-gray-600 mb-6">We couldn&apos;t find the order you&apos;re looking for.</p>
           <Link href="/" className="bg-amber-500 text-white px-6 py-2 rounded-md hover:bg-amber-600">
             Return Home
           </Link>
@@ -114,15 +114,15 @@ export default function OrderConfirmationPage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-3">What's Next?</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">What&apos;s Next?</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    You'll receive an email confirmation shortly
+                    You&apos;ll receive an email confirmation shortly
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    We'll notify you when your order ships
+                    We&apos;ll notify you when your order ships
                   </li>
                   <li className="flex items-start">
                     <span className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
@@ -150,5 +150,17 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
+      </div>
+    }>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }

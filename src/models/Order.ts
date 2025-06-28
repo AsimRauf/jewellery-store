@@ -17,7 +17,7 @@ const StoneSchema = new Schema({
 
 // Customization Details Schema
 const CustomizationDetailsSchema = new Schema({
-  stone: StoneSchema, // Direct reference to StoneSchema
+  stone: StoneSchema,
   setting: {
     style: String,
     metalType: String,
@@ -69,16 +69,31 @@ const ShippingAddressSchema = new Schema({
   country: { type: String, required: true, default: 'US' }
 }, { _id: false });
 
-// Payment Info Schema (secure)
+// Updated Payment Info Schema for Stripe
 const PaymentInfoSchema = new Schema({
-  cardHolder: { type: String, required: true },
-  cardLastFour: { type: String, required: true, maxlength: 4 },
-  cardType: String,
   paymentMethod: { 
     type: String, 
-    enum: ['card', 'paypal', 'bank_transfer'],
-    default: 'card'
+    enum: ['stripe', 'paypal', 'bank_transfer'],
+    default: 'stripe'
   },
+  // Stripe-specific fields
+  stripePaymentIntentId: String,
+  stripePaymentMethodId: String,
+  cardLastFour: String,
+  cardBrand: String,
+  cardExpMonth: Number,
+  cardExpYear: Number,
+  billingAddress: {
+    line1: String,
+    line2: String,
+    city: String,
+    state: String,
+    postal_code: String,
+    country: String
+  },
+  // Legacy fields for backward compatibility
+  cardHolder: String,
+  cardType: String,
   transactionId: String
 }, { _id: false });
 
@@ -99,8 +114,8 @@ const PricingSchema = new Schema({
 const OrderSchema = new Schema({
   orderNumber: { 
     type: String, 
-    required: true, 
     unique: true
+    // Remove required: true - let the pre-save hook handle it
   },
   userId: { 
     type: Schema.Types.ObjectId, 
@@ -116,47 +131,129 @@ const OrderSchema = new Schema({
   pricing: { type: PricingSchema, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'],
+    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded', 'disputed'],
     default: 'pending'
   },
   paymentStatus: { 
     type: String, 
-    enum: ['pending', 'paid', 'failed', 'refunded'],
+    enum: ['pending', 'succeeded', 'failed', 'requires_action', 'refunded'],
     default: 'pending'
   },
   trackingNumber: String,
   estimatedDelivery: Date,
   notes: String
 }, {
-  timestamps: true
+  timestamps: true,
+  suppressReservedKeysWarning: true
 });
 
-// Generate order number before saving
-OrderSchema.pre('save', async function(next) {
+// Generate order number before saving - FIXED VERSION
+OrderSchema.pre('save', function(next) {
+  // Only generate if this is a new document and orderNumber is not set
   if (this.isNew && !this.orderNumber) {
     const timestamp = Date.now().toString();
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.orderNumber = `ORD-${timestamp.slice(-6)}-${random}`;
+    console.log('✅ Generated order number:', this.orderNumber);
   }
   next();
 });
 
-// Indexes for better query performance
+// Indexes for better query performance - REMOVE DUPLICATE
 OrderSchema.index({ createdAt: -1 });
-OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ customerEmail: 1, createdAt: -1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ 'paymentInfo.stripePaymentIntentId': 1 });
 
 import { Document } from 'mongoose';
+
+interface IOrderItem {
+  productId: string;
+  productType: string;
+  title: string;
+  image: string;
+  price: number;
+  quantity: number;
+  size: number;
+  metalOption: {
+    karat: string;
+    color: string;
+  };
+  customization: {
+    isCustomized: boolean;
+    customizationType?: 'setting-diamond' | 'setting-gemstone' | 'preset';
+    settingId?: string;
+    diamondId?: string;
+    gemstoneId?: string;
+    metalType?: string;
+    size?: number;
+    customizationDetails?: {
+      stone: {
+        type: string;
+        carat: number;
+        color: string;
+        clarity: string;
+        gemstoneType?: string;
+        image?: string;
+      };
+      setting: {
+        style?: string;
+        metalType?: string;
+        settingType?: string;
+      };
+    };
+  };
+}
+
+interface IShippingAddress {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+interface IPaymentInfo {
+  paymentMethod: 'stripe' | 'paypal' | 'bank_transfer';
+  stripePaymentIntentId?: string;
+  stripePaymentMethodId?: string;
+  cardLastFour?: string;
+  cardBrand?: string;
+  cardExpMonth?: number;
+  cardExpYear?: number;
+  billingAddress?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  cardHolder?: string;
+  cardType?: string;
+  transactionId?: string;
+}
+
+interface IPricing {
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  shippingMethod: 'standard' | 'express' | 'overnight';
+}
 
 interface IOrder extends Document {
   orderNumber: string;
   userId: string;
   customerEmail: string;
-  items: any[];
-  shippingAddress: any;
-  paymentInfo: any;
-  pricing: any;
+  items: IOrderItem[];
+  shippingAddress: IShippingAddress;
+  paymentInfo: IPaymentInfo;
+  pricing: IPricing;
   status: string;
   paymentStatus: string;
   trackingNumber?: string;
