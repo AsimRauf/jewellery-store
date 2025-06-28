@@ -1,14 +1,13 @@
 'use client';
 
 import React from 'react';
-import type { Metadata } from 'next';
 
 // Move metadata outside the component since we're using 'use client'
-const metadata = {
-  title: 'Ring Sizing Guide - Arise Jewels | Find Your Perfect Fit',
-  description: 'Learn how to measure your ring size accurately with our comprehensive sizing guide. Includes size charts, measurement tips, and professional advice.',
-  keywords: 'ring sizing guide, how to measure ring size, ring size chart, jewelry sizing, arise jewels',
-};
+// const metadata = {
+//   title: 'Ring Sizing Guide - Arise Jewels | Find Your Perfect Fit',
+//   description: 'Learn how to measure your ring size accurately with our comprehensive sizing guide. Includes size charts, measurement tips, and professional advice.',
+//   keywords: 'ring sizing guide, how to measure ring size, ring size chart, jewelry sizing, arise jewels',
+// };
 
 const SizingPage = () => {
   // Smooth scroll function
@@ -173,7 +172,7 @@ const SizingPage = () => {
                 </div>
                 <div className="p-4 bg-blue-50 rounded-lg mt-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Pro Tip:</strong> This method is most accurate if the existing ring fits the same finger you're sizing for.
+                    <strong>Pro Tip:</strong> This method is most accurate if the existing ring fits the same finger you&apos;re sizing for.
                   </p>
                 </div>
               </div>
@@ -227,7 +226,7 @@ const SizingPage = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">Best Time to Measure</h3>
               <p className="text-gray-600 text-sm text-center">
                 Measure your finger at the end of the day when your fingers are at their largest. 
-                Avoid measuring when you're cold, as fingers shrink.
+                Avoid measuring when you&apos;re cold, as fingers shrink.
               </p>
             </div>
 
@@ -238,7 +237,7 @@ const SizingPage = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">Finger Differences</h3>
               <p className="text-gray-600 text-sm text-center">
                 Your dominant hand fingers are typically 1/4 to 1/2 size larger. 
-                Always measure the specific finger you'll wear the ring on.
+                Always measure the specific finger you&apos;ll wear the ring on.
               </p>
             </div>
 
@@ -271,7 +270,7 @@ const SizingPage = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">Multiple Measurements</h3>
               <p className="text-gray-600 text-sm text-center">
                 Take measurements 2-3 times to ensure accuracy. 
-                If you're between sizes, it's usually better to size up.
+                If you&apos;re between sizes, it&apos;s usually better to size up.
               </p>
             </div>
 
@@ -282,7 +281,7 @@ const SizingPage = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">Weather Considerations</h3>
               <p className="text-gray-600 text-sm text-center">
                 Fingers can vary by up to 1/2 size between summer and winter. 
-                Consider the season when you'll wear the ring most.
+                Consider the season when you&apos;ll wear the ring most.
               </p>
             </div>
           </div>
@@ -347,7 +346,7 @@ const SizingPage = () => {
               <h2 className="text-3xl font-cinzel text-amber-600 mb-6">Ring Resizing Services</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  Don't worry if your ring doesn't fit perfectly! Most rings can be resized by our expert jewelers. 
+                  Don&apos;t worry if your ring doesn&apos;t fit perfectly! Most rings can be resized by our expert jewelers. 
                   We offer complimentary resizing within 60 days of purchase.
                 </p>
                 <div className="space-y-3">
@@ -397,7 +396,7 @@ const SizingPage = () => {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-cinzel text-amber-600 mb-6">Still Unsure About Your Size?</h2>
             <p className="text-lg text-gray-700 leading-relaxed mb-8">
-              Get the most accurate measurement with our free ring sizer kit. We'll mail it to you at no cost, 
+              Get the most accurate measurement with our free ring sizer kit. We&apos;ll mail it to you at no cost, 
               and you can take your time to find the perfect fit.
             </p>
             <div className="bg-amber-50 p-8 rounded-lg border border-amber-200">

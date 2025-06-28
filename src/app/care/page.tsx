@@ -237,7 +237,7 @@ const CarePage = () => {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4 text-green-600">Do's</h4>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4 text-green-600">Do&apos;s</h4>
                       <ul className="space-y-2">
                         {guide.dos.map((item, itemIndex) => (
                           <li key={itemIndex} className="flex items-start space-x-2 text-sm text-gray-600">
@@ -248,7 +248,7 @@ const CarePage = () => {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4 text-red-600">Don'ts</h4>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4 text-red-600">Don&apos;ts</h4>
                       <ul className="space-y-2">
                         {guide.donts.map((item, itemIndex) => (
                           <li key={itemIndex} className="flex items-start space-x-2 text-sm text-gray-600">
@@ -502,7 +502,7 @@ const CarePage = () => {
                     Stop wearing immediately. Place in a safe container and visit a jeweler as soon as possible.
                   </p>
                   <p className="text-xs text-yellow-700 font-medium">
-                    Don't attempt to tighten or fix yourself - this can cause more damage.
+                    Don&apos;t attempt to tighten or fix yourself - this can cause more damage.
                   </p>
                 </div>
               </div>
@@ -514,7 +514,7 @@ const CarePage = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Broken Chain or Clasp</h3>
                   <p className="text-gray-600 text-sm mb-2">
-                    Carefully collect all pieces. Don't wear until professionally repaired.
+                    Carefully collect all pieces. Don&apos;t wear until professionally repaired.
                   </p>
                   <p className="text-xs text-red-700 font-medium">
                     Keep all pieces together - even small fragments can be important for repair.
@@ -532,7 +532,7 @@ const CarePage = () => {
                     Dry immediately with soft cloth. For watches, seek professional help immediately.
                   </p>
                   <p className="text-xs text-blue-700 font-medium">
-                    Don't use heat sources - air dry only to prevent damage.
+                    Don&apos;t use heat sources - air dry only to prevent damage.
                   </p>
                 </div>
               </div>
@@ -662,7 +662,7 @@ const CarePage = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Can I wear my jewelry in the shower?</h3>
               <p className="text-gray-600 text-sm">
-                It's best to remove jewelry before showering. Soap residue can build up and dull the appearance, and some gemstones can be damaged by chemicals in soaps and shampoos.
+                It&apos;s best to remove jewelry before showering. Soap residue can build up and dull the appearance, and some gemstones can be damaged by chemicals in soaps and shampoos.
               </p>
             </div>
 

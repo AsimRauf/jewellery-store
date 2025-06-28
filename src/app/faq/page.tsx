@@ -114,7 +114,7 @@ export default function FAQPage() {
           <div className="max-w-4xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-cinzel text-amber-600 mb-6">Need Help?</h2>
             <p className="text-gray-700 leading-relaxed mb-8">
-              Can't find what you're looking for? Our customer service team is here to help!
+              Can&apos;t find what you&apos;re looking for? Our customer service team is here to help!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">

@@ -32,7 +32,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-cinzel text-amber-600 mb-6">💎 About Our Loose Gemstones</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  At <strong>Arise Precious Gems</strong>, gemstones are more than a product—they're our heritage. 
+                  At <strong>Arise Precious Gems</strong>, gemstones are more than a product—they&apos;re our heritage. 
                   Our journey began in <strong>1959</strong>, when our grandfather mastered the art of gem cutting and built 
                   a reputation as a trusted gemstone dealer. Now in our third generation, we continue that legacy 
                   by offering ethically sourced, high-quality loose gemstones to jewelers, collectors, and 
@@ -41,7 +41,7 @@ export default function AboutPage() {
                 <p>
                   We specialize in a wide variety of fine gemstones—sapphires, rubies, emeralds, spinels, 
                   tourmalines, and many more—each hand-selected for its beauty, rarity, and authenticity. 
-                  Whether you're a jewelry designer looking for the perfect stone or a retailer sourcing inventory, 
+                  Whether you&apos;re a jewelry designer looking for the perfect stone or a retailer sourcing inventory, 
                   we provide reliable service, competitive pricing, and deep industry knowledge to help you make 
                   informed, confident choices.
                 </p>
@@ -81,13 +81,13 @@ export default function AboutPage() {
               <div className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
                   At <strong>Arise Jewel</strong>, we turn exceptional stones into meaningful designs. 
-                  Since <strong>1996</strong>, we've been crafting fine designer jewelry and offering custom-made pieces 
+                  Since <strong>1996</strong>, we&apos;ve been crafting fine designer jewelry and offering custom-made pieces 
                   that reflect elegance, personality, and timeless value. Our jewelry line is a natural extension 
-                  of our gemstone heritage—bringing each stone's beauty to life in one-of-a-kind creations.
+                  of our gemstone heritage—bringing each stone&apos;s beauty to life in one-of-a-kind creations.
                 </p>
                 <p>
                   From classic elegance to modern sophistication, our collections are designed with meticulous 
-                  care and made with premium materials. Whether you're celebrating a milestone, marking a moment, 
+                  care and made with premium materials. Whether you&apos;re celebrating a milestone, marking a moment, 
                   or designing something completely personal, we work closely with you to bring your vision to life.
                 </p>
                 <p>
@@ -217,8 +217,8 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-cinzel text-white mb-6">Ready to Discover Our Collection?</h2>
           <p className="text-xl text-amber-100 mb-8 max-w-3xl mx-auto">
-            Whether you're looking for exceptional loose gemstones or custom jewelry pieces, 
-            we're here to help you find exactly what you're seeking.
+            Whether you&apos;re looking for exceptional loose gemstones or custom jewelry pieces,
+            we&apos;re here to help you find exactly what you&apos;re seeking.
           </p>
           <div className="space-x-4">
             <a

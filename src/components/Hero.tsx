@@ -117,9 +117,9 @@ export default function Hero() {
   };
 
   // Determine image justify content class
-  const getImageJustifyClass = () => {
-    return "justify-center lg:justify-end"; // Center for mobile, right for desktop
-  };
+  // const getImageJustifyClass = () => {
+  //   return "justify-center lg:justify-end"; // Center for mobile, right for desktop
+  // };
 
   const backgroundColor = transitioning
     ? lightenColor(currentSlideData.backgroundColor, 20) // Lighten during transition

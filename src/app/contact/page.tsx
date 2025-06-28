@@ -206,7 +206,7 @@ export default function ContactPage() {
                 </button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  * Required fields. We'll respond to your inquiry within 24 hours during business days.
+                  * Required fields. We&apos;ll respond to your inquiry within 24 hours during business days.
                 </p>
               </form>
             </div>
@@ -237,7 +237,7 @@ export default function ContactPage() {
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Custom Jewelry Design</h3>
               <p className="text-gray-600 text-sm">
                 Work with our designers to create one-of-a-kind pieces that reflect your 
-                personal style and celebrate life's special moments.
+                personal style and celebrate life&apos;s special moments.
               </p>
             </div>
 
@@ -272,7 +272,7 @@ export default function ContactPage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">How long does custom jewelry take?</h3>
               <p className="text-gray-600">
                 Custom jewelry timelines vary depending on complexity. Simple pieces may take 2-4 weeks, 
-                while intricate designs can take 6-8 weeks. We'll provide a timeline during consultation.
+                while intricate designs can take 6-8 weeks. We&apos;ll provide a timeline during consultation.
               </p>
             </div>
 
