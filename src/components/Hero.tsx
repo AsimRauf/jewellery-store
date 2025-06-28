@@ -221,6 +221,14 @@ export default function Hero() {
                   // right on desktop via Tailwind below
                 }}
               />
+              
+              {/* Gradient fade overlay - Mobile only */}
+              <div 
+                className="absolute bottom-0 left-0 right-0 h-20 lg:hidden pointer-events-none transition-all duration-500 ease-in-out"
+                style={{
+                  background: `linear-gradient(to top, ${backgroundColor} 0%, transparent 100%)`
+                }}
+              />
             </div>
           </div>
         </div>
