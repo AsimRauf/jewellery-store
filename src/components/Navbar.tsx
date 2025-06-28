@@ -480,10 +480,10 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="Jewelry Store"
-                  width={80}
-                  height={30}
+                  width={120} // Increased width
+                  height={45} // Increased height
                   style={{ paddingLeft: 10 }}
-                  className="object-contain"
+                  className="object-contain " // Added shadow
                 />
               </div>
             </Link>

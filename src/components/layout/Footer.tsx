@@ -56,13 +56,13 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/products/engagement" className="text-gray-600 hover:text-amber-500 transition-colors">
+                <Link href="/engagement/products" className="text-gray-600 hover:text-amber-500 transition-colors">
                   Engagement Rings
                 </Link>
               </li>
               <li>
-                <Link href="/products/wedding" className="text-gray-600 hover:text-amber-500 transition-colors">
-                  Wedding Bands
+                <Link href="/wedding/products" className="text-gray-600 hover:text-amber-500 transition-colors">
+                  Wedding Rings
                 </Link>
               </li>
               <li>
