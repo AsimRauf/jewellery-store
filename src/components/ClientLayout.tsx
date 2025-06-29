@@ -20,6 +20,9 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   
   // Don't show navbar and headline banner for admin routes or if user is admin
   const showNavbar = !isAdminRoute && (!user || user.role !== 'admin');
+  
+  // Don't show footer on admin routes
+  const showFooter = !isAdminRoute;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -28,7 +31,7 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
+      {showFooter && <Footer />}
     </div>
   );
 };
