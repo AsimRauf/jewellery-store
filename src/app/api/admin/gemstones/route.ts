@@ -4,7 +4,7 @@ import GemstoneModel from '@/models/Gemstone';
 import { withAdminAuth } from '@/utils/authMiddleware';
 
 export async function POST(request: NextRequest) {
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 

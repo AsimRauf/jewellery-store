@@ -499,16 +499,18 @@ export default function GemstoneCategoryPage() {
 
   // Handle gemstone click - should match diamond flow exactly
   const handleGemstoneClick = (gemstone: Gemstone) => {
+    const productSlug = gemstone.slug || gemstone._id;
+    
     if (isSettingSelected) {
       // Even with setting selected, go to gemstone detail with parameters
       const params = new URLSearchParams(searchParams?.toString() || '');
-      router.push(`/gemstone/detail/${gemstone._id}?${params.toString()}`);
+      router.push(`/gemstone/detail/${productSlug}?${params.toString()}`);
     } else if (isCustomizationStart) {
       // Gemstone-first flow - go to gemstone detail
-      router.push(`/gemstone/detail/${gemstone._id}?start=gemstone`);
+      router.push(`/gemstone/detail/${productSlug}?start=gemstone`);
     } else {
       // Normal flow - just view gemstone details
-      router.push(`/gemstone/detail/${gemstone._id}`);
+      router.push(`/gemstone/detail/${productSlug}`);
     }
   };
 

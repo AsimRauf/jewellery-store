@@ -1,9 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 import { RingEnums } from '../constants/ringEnums';
+import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define interface for EngagementRing document
 interface IEngagementRing {
   title: string;
+  slug: string;
   category: string;
   style: string[];
   type: string[];
@@ -77,6 +79,11 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
   title: {
     type: String,
     required: true
+  },
+  slug: {
+    type: String,
+    unique: true,
+    index: true
   },
   category: {
     type: String,
@@ -285,8 +292,35 @@ function arrayMinLength(val: unknown[]): boolean {
   return val.length > 0;
 }
 
+// Pre-save middleware to generate slug
+EngagementRingSchema.pre('save', async function(next) {
+  try {
+    // Only generate slug if it doesn't exist or title has changed
+    if (!this.slug || this.isModified('title')) {
+      // Find existing slugs to ensure uniqueness
+      const existingSlugs = await mongoose.model('EngagementRing').find({
+        _id: { $ne: this._id },
+        slug: { $exists: true }
+      }).distinct('slug');
+      
+      // Generate unique slug
+      const baseSlug = generateProductSlug(
+        this.title,
+        'engagement-ring',
+        undefined,
+        this._id?.toString()
+      );
+      
+      this.slug = generateUniqueSlug(baseSlug, existingSlugs);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
 EngagementRingSchema.virtual('productUrl').get(function(this: mongoose.HydratedDocument<IEngagementRing>) {
-  return `/products/rings/engagement/${this._id}`;
+  return `/products/rings/engagement/${this.slug || this._id}`;
 });
 
 // Method to get the price for a specific metal option

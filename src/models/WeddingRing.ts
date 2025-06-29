@@ -1,9 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 import { RingEnums } from '../constants/ringEnums';
+import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define interface for WeddingRing document
 interface IWeddingRing {
   title: string;
+  slug: string;
   category: string;
   subcategory: string;
   style: string[];
@@ -68,6 +70,11 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
   title: {
     type: String,
     required: true
+  },
+  slug: {
+    type: String,
+    unique: true,
+    index: true
   },
   category: {
     type: String,
@@ -239,8 +246,35 @@ function arrayMinLength(val: unknown[]): boolean {
   return val.length > 0;
 }
 
+// Pre-save middleware to generate slug
+WeddingRingSchema.pre('save', async function(next) {
+  try {
+    // Only generate slug if it doesn't exist or title has changed
+    if (!this.slug || this.isModified('title')) {
+      // Find existing slugs to ensure uniqueness
+      const existingSlugs = await mongoose.model('WeddingRing').find({
+        _id: { $ne: this._id },
+        slug: { $exists: true }
+      }).distinct('slug');
+      
+      // Generate unique slug
+      const baseSlug = generateProductSlug(
+        this.title,
+        'wedding-ring',
+        this.subcategory,
+        this._id?.toString()
+      );
+      
+      this.slug = generateUniqueSlug(baseSlug, existingSlugs);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
 WeddingRingSchema.virtual('productUrl').get(function(this: mongoose.HydratedDocument<IWeddingRing>) {
-  return `/products/rings/wedding/${this._id}`;
+  return `/products/rings/wedding/${this.slug || this._id}`;
 });
 
 // Method to get the price for a specific metal option

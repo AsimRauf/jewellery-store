@@ -13,6 +13,7 @@ import { CartItem } from '@/types/cart';
 
 interface GemstoneDetail {
   _id: string;
+  slug?: string;
   sku: string;
   productNumber: string;
   type: string;
@@ -53,8 +54,8 @@ export default function GemstoneDetailPage() {
   const selectedSize = searchParams?.get('size');
   const isSettingSelected = Boolean(settingId && selectedMetal && selectedSize);
   
-  // Extract gemstone ID from params
-  const gemstoneId = params?.id as string;
+  // Extract gemstone ID from slug
+  const slug = params?.slug as string;
   
   // State variables
   const [gemstone, setGemstone] = useState<GemstoneDetail | null>(null);
@@ -68,12 +69,15 @@ export default function GemstoneDetailPage() {
   // Fetch gemstone data
   useEffect(() => {
     const fetchGemstone = async () => {
-      if (!gemstoneId) return;
+      if (!slug) return;
       
       try {
         setLoading(true);
         
-        const response = await fetch(`/api/products/gemstone/detail/${gemstoneId}`);
+        // Use the slug directly as identifier (API handles slug or ID lookup)
+        const identifier = slug;
+        
+        const response = await fetch(`/api/products/gemstone/detail/${identifier}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch gemstone details');
@@ -90,7 +94,7 @@ export default function GemstoneDetailPage() {
     };
     
     fetchGemstone();
-  }, [gemstoneId]);
+  }, [slug]);
   
   // Handle add to cart
   const handleAddToCart = () => {

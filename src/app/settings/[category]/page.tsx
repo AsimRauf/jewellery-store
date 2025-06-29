@@ -495,26 +495,28 @@ export default function SettingsCategoryPage() {
 
   // Modify handleSettingClick to include gemstone flow
   const handleSettingClick = (setting: Setting) => {
+    const productSlug = setting.slug || setting._id;
+    
     if (isGemstoneSelected && startWith === 'gemstone') {
       const params = new URLSearchParams({
         gemstoneId: gemstoneId!,
         start: 'gemstone',
         end: 'setting'
       });
-      router.push(`/products/rings/settings/${setting._id}?${params.toString()}`);
+      router.push(`/products/rings/settings/${productSlug}?${params.toString()}`);
     } else if (isDiamondSelected && startWith === 'diamond') {
       const params = new URLSearchParams({
         diamondId: diamondId!,
         start: 'diamond',
         end: 'setting'
       });
-      router.push(`/products/rings/settings/${setting._id}?${params.toString()}`);
+      router.push(`/products/rings/settings/${productSlug}?${params.toString()}`);
     } else if (isCustomizationStart) {
       // Setting-first flow - go to setting detail
-      router.push(`/products/rings/settings/${setting._id}?start=setting`);
+      router.push(`/products/rings/settings/${productSlug}?start=setting`);
     } else {
       // Normal flow - just view setting details
-      router.push(`/products/rings/settings/${setting._id}`);
+      router.push(`/products/rings/settings/${productSlug}`);
     }
   };
 

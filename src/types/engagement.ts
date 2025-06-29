@@ -20,6 +20,7 @@ export interface MediaImage {
 
 export interface EngagementRing {
   _id: string;
+  slug?: string;
   title: string;
   category: string;
   style: string[];

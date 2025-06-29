@@ -485,16 +485,18 @@ export default function DiamondCategoryPage() {
 
   // This should be the diamond click handler (for reference)
   const handleDiamondClick = (diamond: Diamond) => {
+    const productSlug = diamond.slug || diamond._id;
+    
     if (isSettingSelected) {
       // Even with setting selected, go to diamond detail with parameters
       const params = new URLSearchParams(searchParams?.toString() || '');
-      router.push(`/diamond/detail/${diamond._id}?${params.toString()}`);
+      router.push(`/diamond/detail/${productSlug}?${params.toString()}`);
     } else if (isCustomizationStart) {
       // Diamond-first flow - go to diamond detail
-      router.push(`/diamond/detail/${diamond._id}?start=diamond`);
+      router.push(`/diamond/detail/${productSlug}?start=diamond`);
     } else {
       // Normal flow - just view diamond details
-      router.push(`/diamond/detail/${diamond._id}`);
+      router.push(`/diamond/detail/${productSlug}`);
     }
   };
 

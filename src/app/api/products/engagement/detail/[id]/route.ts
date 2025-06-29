@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import EngagementRing from '@/models/EngagementRing';
+import { findBySlugOrId } from '@/utils/slugLookup';
 
 export function GET(request: NextRequest) {
   return handleRequest(request);
@@ -10,11 +11,11 @@ async function handleRequest(request: NextRequest) {
   try {
     await connectDB();
     
-    // Extract ID from URL path
+    // Extract identifier (slug or ID) from URL path
     const pathParts = request.nextUrl.pathname.split('/');
-    const productId = pathParts[pathParts.length - 1];
+    const identifier = pathParts[pathParts.length - 1];
     
-    const product = await EngagementRing.findById(productId).lean();
+    const product = await findBySlugOrId(EngagementRing, identifier);
     
     if (!product) {
       return NextResponse.json(

@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 
@@ -37,7 +37,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 
@@ -81,7 +81,6 @@ export async function PUT(
     }
 
     // Add update metadata
-    filteredData.updatedBy = user.id;
     filteredData.updatedAt = new Date();
 
     const ring = await WeddingRing.findByIdAndUpdate(
@@ -113,7 +112,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 

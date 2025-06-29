@@ -1,5 +1,6 @@
 export interface WeddingRing {
   _id: string;
+  slug?: string;
   title: string;
   category: string;
   subcategory: string;

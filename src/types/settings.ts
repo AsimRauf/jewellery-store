@@ -1,5 +1,6 @@
 export interface Setting {
   _id: string;
+  slug?: string;
   title: string;
   category: string;
   style: string[];

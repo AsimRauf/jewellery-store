@@ -13,6 +13,7 @@ import { CartItem } from '@/types/cart';
 
 interface DiamondDetail {
   _id: string;
+  slug?: string;
   sku: string;
   productNumber: string;
   type: string;
@@ -74,18 +75,8 @@ export default function DiamondDetailPage() {
       try {
         setLoading(true);
         
-        // Extract the ID from the slug
-        // If the slug is just an ID, use it directly
-        // Otherwise, extract the ID from the end of the slug
-        const diamondId = slug.includes('-') 
-          ? slug.split('-').pop() 
-          : slug;
-        
-        if (!diamondId) {
-          throw new Error('Invalid diamond ID');
-        }
-        
-        const response = await fetch(`/api/products/diamond/detail/${diamondId}`);
+        // Use the slug directly - API will handle slug/ID lookup
+        const response = await fetch(`/api/products/diamond/detail/${slug}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch diamond details');

@@ -190,6 +190,7 @@ async function handleRequest(request: NextRequest) {
             {
               $project: {
                 _id: 1,
+                slug: 1,
                 sku: 1,
                 type: 1,
                 source: 1,

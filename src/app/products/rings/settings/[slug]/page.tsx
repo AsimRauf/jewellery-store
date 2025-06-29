@@ -120,19 +120,14 @@ export default function SettingDetailPage() {
       try {
         setLoading(true);
         
-        // Extract the ID from the slug
-        // If the slug is just an ID, use it directly
-        // Otherwise, extract the ID from the end of the slug
+        // Use the slug directly as identifier (API handles slug or ID lookup)
         const slugStr = Array.isArray(slug) ? slug[0] : slug;
-        const productId = slugStr.includes('-') 
-          ? slugStr.split('-').pop() 
-          : slugStr;
         
-        if (!productId) {
-          throw new Error('Invalid product ID');
+        if (!slugStr) {
+          throw new Error('Invalid product identifier');
         }
         
-        const response = await fetch(`/api/products/settings/detail/${productId}`);
+        const response = await fetch(`/api/products/settings/detail/${slugStr}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch product details');

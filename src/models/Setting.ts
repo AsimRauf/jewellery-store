@@ -1,9 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 import { RingEnums } from '../constants/ringEnums';
+import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define interface for Setting document
 interface ISetting {
   title: string;
+  slug: string;
   category: string;
   style: string[];
   type: string[];
@@ -71,6 +73,11 @@ const SettingSchema = new mongoose.Schema<ISetting, SettingModel, ISettingMethod
   title: {
     type: String,
     required: true
+  },
+  slug: {
+    type: String,
+    unique: true,
+    index: true
   },
   category: {
     type: String,
@@ -252,8 +259,35 @@ function arrayMinLength(val: unknown[]): boolean {
   return val.length > 0;
 }
 
+// Pre-save middleware to generate slug
+SettingSchema.pre('save', async function(next) {
+  try {
+    // Only generate slug if it doesn't exist or title has changed
+    if (!this.slug || this.isModified('title')) {
+      // Find existing slugs to ensure uniqueness
+      const existingSlugs = await mongoose.model('Setting').find({
+        _id: { $ne: this._id },
+        slug: { $exists: true }
+      }).distinct('slug');
+      
+      // Generate unique slug
+      const baseSlug = generateProductSlug(
+        this.title,
+        'ring-setting',
+        undefined,
+        this._id?.toString()
+      );
+      
+      this.slug = generateUniqueSlug(baseSlug, existingSlugs);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
 SettingSchema.virtual('productUrl').get(function(this: mongoose.HydratedDocument<ISetting>) {
-  return `/products/rings/settings/${this._id}`;
+  return `/products/rings/settings/${this.slug || this._id}`;
 });
 
 // Method to get the price for a specific metal option

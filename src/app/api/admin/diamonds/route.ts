@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to list all diamonds
 export async function GET(request: NextRequest) {
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
       await connectDB();
 

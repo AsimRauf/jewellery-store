@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define enums for consistent values
 export enum DiamondType {
@@ -103,6 +104,7 @@ export enum DiamondFancyColor {
 
 export interface IDiamond extends Document {
   sku: string;
+  slug: string;
   productNumber: string;
   type: DiamondType;
   carat: number;
@@ -147,6 +149,11 @@ const ImageSchema = new Schema({
 const DiamondSchema: Schema = new Schema(
   {
     sku: { type: String, required: true, unique: true },
+    slug: { 
+      type: String, 
+      unique: true, 
+      index: true 
+    },
     productNumber: { type: String, required: true },
     type: { 
       type: String, 
@@ -227,6 +234,34 @@ const DiamondSchema: Schema = new Schema(
     strict: true // Ensure strict schema validation
   }
 );
+
+// Pre-save middleware to generate slug
+DiamondSchema.pre('save', async function(next) {
+  try {
+    // Only generate slug if it doesn't exist or key properties have changed
+    if (!this.slug || this.isModified('shape') || this.isModified('carat') || this.isModified('color') || this.isModified('clarity')) {
+      // Find existing slugs to ensure uniqueness
+      const existingSlugs = await mongoose.model('Diamond').find({
+        _id: { $ne: this._id },
+        slug: { $exists: true }
+      }).distinct('slug');
+      
+      // Generate unique slug based on diamond properties
+      const title = `${this.shape} ${this.carat}ct ${this.color} ${this.clarity}`;
+      const baseSlug = generateProductSlug(
+        title,
+        'diamond',
+        this.type as string,
+        this._id?.toString()
+      );
+      
+      this.slug = generateUniqueSlug(baseSlug, existingSlugs);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
 
 // Virtual for calculating discount percentage if not provided
 DiamondSchema.virtual('calculatedDiscountPercentage').get(function(this: IDiamond) {

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define string literal types for gemstone properties
 export const GemstoneType = {
@@ -120,6 +121,7 @@ export const CertificateLab = {
 
 export interface IGemstone extends Document {
   sku: string;
+  slug: string;
   productNumber: string;
   type: string;
   source: string;
@@ -162,6 +164,11 @@ const ImageSchema = new Schema({
 const GemstoneSchema = new Schema(
   {
     sku: { type: String, required: true, unique: true },
+    slug: { 
+      type: String, 
+      unique: true, 
+      index: true 
+    },
     productNumber: { type: String, required: true },
     type: { 
       type: String, 
@@ -226,6 +233,34 @@ const GemstoneSchema = new Schema(
     timestamps: true
   }
 );
+
+// Pre-save middleware to generate slug
+GemstoneSchema.pre('save', async function(next) {
+  try {
+    // Only generate slug if it doesn't exist or title has changed
+    if (!this.slug || this.isModified('type') || this.isModified('carat') || this.isModified('color')) {
+      // Find existing slugs to ensure uniqueness
+      const existingSlugs = await mongoose.model('Gemstone').find({
+        _id: { $ne: this._id },
+        slug: { $exists: true }
+      }).distinct('slug');
+      
+      // Generate unique slug based on gemstone properties
+      const title = `${this.type} ${this.carat}ct ${this.color} ${this.shape}`;
+      const baseSlug = generateProductSlug(
+        title,
+        'gemstone',
+        this.source,
+        this._id?.toString()
+      );
+      
+      this.slug = generateUniqueSlug(baseSlug, existingSlugs);
+    }
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
 
 // Virtual for calculating discount percentage if not provided
 GemstoneSchema.virtual('calculatedDiscountPercentage').get(function() {

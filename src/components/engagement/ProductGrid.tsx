@@ -79,15 +79,11 @@ export default function ProductGrid({
 
   // Function to generate SEO-friendly URL with metal option
   const getProductUrl = (product: EngagementRing, metalOption?: {karat: string, color: string}): string => {
-    // Create slug from product title
-    const slug = product.title
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    // Use the product's slug or fallback to ID
+    const identifier = product.slug || product._id;
     
-    // Base URL with slug and ID
-    let url = `/products/rings/engagement/${slug}-${product._id}`;
+    // Base URL with slug/ID
+    let url = `/engagement/detail/${identifier}`;
     
     // Add metal option as query parameter if provided
     if (metalOption) {

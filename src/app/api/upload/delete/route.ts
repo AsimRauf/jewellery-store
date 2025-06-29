@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 export async function DELETE(request: NextRequest) {
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
 
     const { publicId, resourceType = 'image' } = await request.json();

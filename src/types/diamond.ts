@@ -1,5 +1,6 @@
 export interface Diamond {
   _id: string;
+  slug?: string;
   sku: string;
   type: 'natural' | 'lab';
   carat: number;

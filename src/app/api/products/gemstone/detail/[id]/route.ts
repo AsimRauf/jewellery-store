@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import Gemstone from '@/models/Gemstone';
+import { findBySlugOrId } from '@/utils/slugLookup';
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
     
-    // Extract ID from URL path
+    // Extract identifier (slug or ID) from URL path
     const pathParts = request.nextUrl.pathname.split('/');
-    const gemstoneId = pathParts[pathParts.length - 1];
+    const identifier = pathParts[pathParts.length - 1];
     
-    const gemstone = await Gemstone.findById(gemstoneId).lean();
+    const gemstone = await findBySlugOrId(Gemstone, identifier);
     
     if (!gemstone) {
       return NextResponse.json(

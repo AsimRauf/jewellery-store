@@ -138,6 +138,7 @@ async function handleRequest(request: NextRequest) {
             {
               $project: {
                 _id: 1,
+                slug: 1,
                 title: 1,
                 SKU: 1,
                 basePrice: 1,

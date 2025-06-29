@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 export async function POST(request: NextRequest) {
-  return withAdminAuth(request, async (req, user) => {
+  return withAdminAuth(request, async () => {
     try {
 
     const { file, category } = await request.json();

@@ -1,5 +1,6 @@
 export interface Gemstone {
   _id: string;
+  slug?: string;
   sku: string;
   productNumber: string;
   type: string;
