@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
-import { HiArrowLeft } from 'react-icons/hi';
+import Image from 'next/image';
+import { HiArrowLeft, HiTrash, HiPlus } from 'react-icons/hi';
 import { RingEnums } from '@/constants/ringEnums';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 interface MetalOption {
   karat: string;
@@ -62,6 +64,10 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
   const [ring, setRing] = useState<WeddingRing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
+  const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     // Check authentication and admin status
@@ -126,6 +132,128 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
     }
   };
 
+  // Helper function to convert File to base64
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // Handle image deletion
+  const handleDeleteExistingImage = (publicId: string, index: number) => {
+    if (!ring) return;
+    
+    // Add to deletion list
+    setImagesToDelete(prev => [...prev, publicId]);
+    
+    // Remove from ring images
+    setRing(prev => {
+      if (!prev) return null;
+      const updatedImages = prev.media.images.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        media: {
+          ...prev.media,
+          images: updatedImages
+        }
+      };
+    });
+  };
+
+  // Handle video deletion
+  const handleDeleteExistingVideo = () => {
+    if (!ring?.media?.video?.publicId) return;
+    
+    setVideoToDelete(ring.media.video.publicId);
+    setRing(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        media: {
+          ...prev.media,
+          video: { url: '', publicId: '' }
+        }
+      };
+    });
+  };
+
+  // Handle metal option changes
+  const handleMetalOptionChange = (index: number, field: keyof MetalOption, value: string | number | boolean) => {
+    if (!ring) return;
+    
+    setRing(prev => {
+      if (!prev) return null;
+      const updatedOptions = [...prev.metalOptions];
+      updatedOptions[index] = { ...updatedOptions[index], [field]: value };
+      return { ...prev, metalOptions: updatedOptions };
+    });
+  };
+
+  // Add new metal option
+  const handleAddMetalOption = () => {
+    if (!ring) return;
+    
+    const newOption: MetalOption = {
+      karat: '',
+      color: '',
+      price: ring.basePrice,
+      description: '',
+      finish_type: '',
+      width_mm: 0,
+      total_carat_weight: 0,
+      isDefault: ring.metalOptions.length === 0
+    };
+    
+    setRing(prev => {
+      if (!prev) return null;
+      return { ...prev, metalOptions: [...prev.metalOptions, newOption] };
+    });
+  };
+
+  // Remove metal option
+  const handleRemoveMetalOption = (index: number) => {
+    if (!ring || ring.metalOptions.length <= 1) return;
+    
+    setRing(prev => {
+      if (!prev) return null;
+      const updatedOptions = prev.metalOptions.filter((_, i) => i !== index);
+      // If removed option was default, make first option default
+      if (prev.metalOptions[index].isDefault && updatedOptions.length > 0) {
+        updatedOptions[0].isDefault = true;
+      }
+      return { ...prev, metalOptions: updatedOptions };
+    });
+  };
+
+  // Handle size changes
+  const handleSizeChange = (sizeValue: number, field: 'isAvailable' | 'additionalPrice', value: boolean | number) => {
+    if (!ring) return;
+    
+    setRing(prev => {
+      if (!prev) return null;
+      const updatedSizes = [...prev.sizes];
+      const existingIndex = updatedSizes.findIndex(s => s.size === sizeValue);
+      
+      if (existingIndex >= 0) {
+        if (field === 'isAvailable' && !value) {
+          // Remove size if unchecked
+          updatedSizes.splice(existingIndex, 1);
+        } else {
+          // Update existing size
+          updatedSizes[existingIndex] = { ...updatedSizes[existingIndex], [field]: value };
+        }
+      } else if (field === 'isAvailable' && value) {
+        // Add new size
+        updatedSizes.push({ size: sizeValue, isAvailable: true, additionalPrice: 0 });
+      }
+      
+      return { ...prev, sizes: updatedSizes };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ring) return;
@@ -133,13 +261,102 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
     setIsSubmitting(true);
 
     try {
+      // Delete images from Cloudinary
+      if (imagesToDelete.length > 0) {
+        toast.loading('Deleting old images...', { id: 'deleteImages' });
+        for (const publicId of imagesToDelete) {
+          await fetch('/api/upload/delete', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ publicId, resourceType: 'image' })
+          });
+        }
+        toast.success('Old images deleted', { id: 'deleteImages' });
+      }
+
+      // Delete video from Cloudinary
+      if (videoToDelete) {
+        toast.loading('Deleting old video...', { id: 'deleteVideo' });
+        await fetch('/api/upload/delete', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ publicId: videoToDelete, resourceType: 'video' })
+        });
+        toast.success('Old video deleted', { id: 'deleteVideo' });
+      }
+
+      // Upload new images
+      let newUploadedImages: Array<{ url: string; publicId: string }> = [];
+      if (temporaryImages.length > 0) {
+        toast.loading('Uploading new images...', { id: 'uploadImages' });
+        newUploadedImages = await Promise.all(
+          temporaryImages.map(async (file) => {
+            const base64 = await convertToBase64(file);
+            const response = await fetch('/api/upload/image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ 
+                file: base64,
+                category: 'wedding'
+              })
+            });
+            
+            if (!response.ok) {
+              throw new Error('Failed to upload image');
+            }
+            
+            return response.json();
+          })
+        );
+        toast.success('New images uploaded', { id: 'uploadImages' });
+      }
+
+      // Upload new video
+      let newVideoData = ring.media.video;
+      if (temporaryVideo) {
+        toast.loading('Uploading new video...', { id: 'uploadVideo' });
+        const base64 = await convertToBase64(temporaryVideo);
+        const response = await fetch('/api/upload/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            file: base64,
+            category: 'wedding'
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to upload video');
+        }
+        
+        newVideoData = await response.json();
+        toast.success('New video uploaded', { id: 'uploadVideo' });
+      }
+
+
+
+      // Prepare final data
+      const finalData = {
+        ...ring,
+        media: {
+          images: [...ring.media.images, ...newUploadedImages],
+          video: newVideoData
+        }
+      };
+
+      // Update ring
+      toast.loading('Updating ring...', { id: 'updateRing' });
       const response = await fetch(`/api/admin/rings/wedding/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify(ring)
+        body: JSON.stringify(finalData)
       });
 
       if (!response.ok) {
@@ -147,7 +364,7 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
         throw new Error(error.error || 'Failed to update ring');
       }
 
-      toast.success('Ring updated successfully');
+      toast.success('Ring updated successfully', { id: 'updateRing' });
       router.push('/admin/rings/wedding/list');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An error occurred';
@@ -266,6 +483,379 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
                 step="0.01"
                 required
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Product Images */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Images</h2>
+          
+          {/* Existing Images */}
+          {ring.media?.images?.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Current Images</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {ring.media.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <div className="aspect-square relative overflow-hidden rounded-lg border border-gray-200">
+                      <Image
+                        src={image.url}
+                        alt={`Ring image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteExistingImage(image.publicId, index)}
+                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <HiTrash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Add New Images */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-3">Add New Images</h3>
+            <ImageUpload
+              onImagesSelect={setTemporaryImages}
+              onVideoSelect={() => {}} // Not used here since we handle video separately
+              temporaryImages={temporaryImages}
+              temporaryVideo={null}
+              maxImages={10}
+            />
+          </div>
+        </div>
+
+        {/* Video */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Video</h2>
+          
+          {/* Current Video */}
+          {ring.media?.video?.url && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Current Video</h3>
+              <div className="relative">
+                <video controls className="w-full max-w-md rounded-lg">
+                  <source src={ring.media.video.url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <button
+                  type="button"
+                  onClick={handleDeleteExistingVideo}
+                  className="mt-2 inline-flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  <HiTrash className="w-4 h-4 mr-2" />
+                  Remove Video
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Upload New Video */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-3">
+              {ring.media?.video?.url ? 'Replace Video' : 'Add Video'}
+            </h3>
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setTemporaryVideo(file || null);
+              }}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+            />
+            {temporaryVideo && (
+              <p className="mt-2 text-sm text-green-600">New video selected: {temporaryVideo.name}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Metal Options */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Metal Options</h2>
+          
+          {ring.metalOptions.map((option, index) => (
+            <div key={index} className={`mb-6 p-4 border rounded-lg ${option.isDefault ? 'border-purple-200 bg-purple-50' : 'border-gray-200'}`}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">
+                  Metal Option {index + 1}
+                  {option.isDefault && <span className="ml-2 text-xs bg-purple-600 text-white px-2 py-1 rounded">Default</span>}
+                </h3>
+                {ring.metalOptions.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMetalOption(index)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <HiTrash className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Karat *</label>
+                  <select
+                    value={option.karat}
+                    onChange={(e) => handleMetalOptionChange(index, 'karat', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    required
+                  >
+                    <option value="">Select Karat</option>
+                    {RingEnums.METAL_KARATS.map(karat => (
+                      <option key={karat} value={karat}>{karat}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Color *</label>
+                  <select
+                    value={option.color}
+                    onChange={(e) => handleMetalOptionChange(index, 'color', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    required
+                  >
+                    <option value="">Select Color</option>
+                    {RingEnums.METAL_COLORS.map(color => (
+                      <option key={color} value={color}>{color}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($) *</label>
+                  <input
+                    type="number"
+                    value={option.price}
+                    onChange={(e) => handleMetalOptionChange(index, 'price', parseFloat(e.target.value) || 0)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Finish Type</label>
+                  <select
+                    value={option.finish_type}
+                    onChange={(e) => handleMetalOptionChange(index, 'finish_type', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="">Select Finish</option>
+                    {RingEnums.FINISH_TYPES.map(finish => (
+                      <option key={finish} value={finish}>{finish}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Width (mm)</label>
+                  <input
+                    type="number"
+                    value={option.width_mm}
+                    onChange={(e) => handleMetalOptionChange(index, 'width_mm', parseFloat(e.target.value) || 0)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Carat Weight</label>
+                  <input
+                    type="number"
+                    value={option.total_carat_weight}
+                    onChange={(e) => handleMetalOptionChange(index, 'total_carat_weight', parseFloat(e.target.value) || 0)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <input
+                    type="text"
+                    value={option.description}
+                    onChange={(e) => handleMetalOptionChange(index, 'description', e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={option.isDefault}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        // Make this option default and unset others
+                        setRing(prev => {
+                          if (!prev) return null;
+                          const updatedOptions = prev.metalOptions.map((opt, i) => ({
+                            ...opt,
+                            isDefault: i === index
+                          }));
+                          return { ...prev, metalOptions: updatedOptions };
+                        });
+                      }
+                    }}
+                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 mr-2"
+                  />
+                  <label className="text-sm font-medium text-gray-700">Set as default</label>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <button
+            type="button"
+            onClick={handleAddMetalOption}
+            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            <HiPlus className="w-5 h-5 mr-2" />
+            Add Metal Option
+          </button>
+        </div>
+
+        {/* Available Sizes */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Sizes</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Additional Price ($)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {RingEnums.SIZES.map(({ size, circumference }) => {
+                  const sizeData = ring.sizes.find(s => s.size === size);
+                  const isAvailable = !!sizeData;
+                  
+                  return (
+                    <tr key={size} className={isAvailable ? 'bg-white' : 'bg-gray-50'}>
+                      <td className="px-4 py-2 text-sm">
+                        {size.toFixed(2)} ({circumference}mm)
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={isAvailable}
+                          onChange={(e) => handleSizeChange(size, 'isAvailable', e.target.checked)}
+                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="number"
+                          value={sizeData?.additionalPrice || ''}
+                          onChange={(e) => handleSizeChange(size, 'additionalPrice', parseFloat(e.target.value) || 0)}
+                          disabled={!isAvailable}
+                          min="0"
+                          step="0.01"
+                          className="w-24 p-1 border border-gray-300 rounded focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Side Stone Details */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Side Stone Details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Stone Type</label>
+              <select
+                value={ring.side_stone.type}
+                onChange={(e) => handleFieldChange('side_stone.type', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select Stone Type</option>
+                {RingEnums.SIDE_STONE_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Number of Stones</label>
+              <input
+                type="number"
+                value={ring.side_stone.number_of_stones}
+                onChange={(e) => handleFieldChange('side_stone.number_of_stones', parseInt(e.target.value) || 0)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                min="0"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Total Carat</label>
+              <input
+                type="number"
+                value={ring.side_stone.total_carat}
+                onChange={(e) => handleFieldChange('side_stone.total_carat', parseFloat(e.target.value) || 0)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Stone Shape</label>
+              <select
+                value={ring.side_stone.shape}
+                onChange={(e) => handleFieldChange('side_stone.shape', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select Stone Shape</option>
+                {RingEnums.STONE_SHAPES.map(shape => (
+                  <option key={shape} value={shape}>{shape}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Stone Color</label>
+              <select
+                value={ring.side_stone.color}
+                onChange={(e) => handleFieldChange('side_stone.color', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select Stone Color</option>
+                {RingEnums.STONE_COLORS.map(color => (
+                  <option key={color} value={color}>{color}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Stone Clarity</label>
+              <select
+                value={ring.side_stone.clarity}
+                onChange={(e) => handleFieldChange('side_stone.clarity', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">Select Stone Clarity</option>
+                {RingEnums.STONE_CLARITIES.map(clarity => (
+                  <option key={clarity} value={clarity}>{clarity}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

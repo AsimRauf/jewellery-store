@@ -13,15 +13,32 @@ export const RingEnums = {
     "Floral", 
     "Classic", 
     "Celtic", 
-    "Branch"
+    "Branch",
+    "Two Tone",
+    "Modern",
+    "Traditional",
+    "Art Deco"
   ],
   TYPES: [
-    "Bridal Set", "Halo", "Side Stone", "Solitaire",
-    "Three-Stone", "Two-Tone"
+    "Bridal Set", 
+    "Halo", 
+    "Side Stone", 
+    "Solitaire",
+    "Three-Stone", 
+    "Two-Tone",
+    "Eternity",
+    "Band",
+    "Anniversary",
+    "Promise"
   ],
   METAL_KARATS: ["14K", "18K"],
   METAL_COLORS: [
-    "Rose Gold", "Two Tone Gold", "White Gold", "Yellow Gold"
+    "Rose Gold", 
+    "Two Tone Gold", 
+    "White Gold", 
+    "Yellow Gold",
+    "Platinum",
+    "Palladium"
   ],
   FINISH_TYPES: ["Polished", "Matte", "Brushed", "Hammered"],
   MAIN_STONE_TYPES: ["Gemstone", "Lab Diamond", "Natural Diamond", "Moissanite"],
