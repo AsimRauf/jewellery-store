@@ -6,10 +6,21 @@ import {
 } from "react-icons/hi";
 import { GiRing, GiDiamonds, GiCrystalGrowth } from "react-icons/gi";
 
+interface MenuItem {
+  title: string;
+  icon: React.ReactNode;
+  href: string;
+  isParent?: boolean;
+  submenu?: Array<{
+    title: string;
+    href: string;
+  }>;
+}
+
 const Sidebar = () => {
   const pathname = usePathname();
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
       title: "Dashboard",
       icon: <HiHome className="w-6 h-6" />,
@@ -19,6 +30,7 @@ const Sidebar = () => {
       title: "Rings",
       icon: <GiRing className="w-6 h-6" />,
       href: "/admin/rings",
+      isParent: true,
       submenu: [
         { title: "Wedding Rings", href: "/admin/rings/wedding" },
         { title: "Engagement Rings", href: "/admin/rings/engagement" },
@@ -54,17 +66,27 @@ const Sidebar = () => {
       <nav className="mt-6 px-4">
         {menuItems.map((item) => (
           <div key={item.href} className="mb-4">
-            <Link href={item.href}>
+            {item.isParent ? (
               <div className={`
                 flex items-center px-4 py-3 rounded-lg transition-colors
-                ${isActive(item.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-100'}
+                ${isSubActive(item.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-100'}
               `}>
                 {item.icon}
                 <span className="ml-3">{item.title}</span>
               </div>
-            </Link>
+            ) : (
+              <Link href={item.href}>
+                <div className={`
+                  flex items-center px-4 py-3 rounded-lg transition-colors
+                  ${isActive(item.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-100'}
+                `}>
+                  {item.icon}
+                  <span className="ml-3">{item.title}</span>
+                </div>
+              </Link>
+            )}
 
-            {item.submenu && isSubActive(item.href) && (
+            {item.submenu && (item.isParent || isSubActive(item.href)) && (
               <div className="ml-8 mt-2 space-y-2">
                 {item.submenu.map((subItem) => (
                   <Link key={subItem.href} href={subItem.href}>
