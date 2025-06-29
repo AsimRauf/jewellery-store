@@ -44,7 +44,7 @@ export default function Hero() {
         text: "Learn More",
         href: "/about"
       },
-      backgroundColor: '#FDF6EC ', // A slightly different background color
+      backgroundColor: '#FDF6EC', // A slightly different background color
     },
     {
       id: 3,
