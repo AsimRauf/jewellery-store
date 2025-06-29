@@ -1,0 +1,510 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useUser } from '@/context/UserContext';
+import { toast } from 'react-hot-toast';
+import Link from 'next/link';
+import Image from 'next/image';
+import { 
+  HiPencil, 
+  HiTrash, 
+  HiPlus, 
+  HiSearch,
+  HiEye,
+  HiAdjustments
+} from 'react-icons/hi';
+
+interface Diamond {
+  _id: string;
+  sku: string;
+  productNumber: string;
+  type: string;
+  carat: number;
+  shape: string;
+  color: string;
+  fancyColor?: string;
+  clarity: string;
+  cut?: string;
+  polish?: string;
+  symmetry?: string;
+  fluorescence?: string;
+  measurements: string;
+  treatment?: string;
+  certificateLab?: string;
+  price: number;
+  salePrice?: number;
+  discountPercentage?: number;
+  images?: Array<{
+    url: string;
+    publicId: string;
+  }>;
+  isAvailable: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export default function DiamondsList() {
+  const { user } = useUser();
+  
+  const [diamonds, setDiamonds] = useState<Diamond[]>([]);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [shapeFilter, setShapeFilter] = useState('');
+
+  const fetchDiamonds = async () => {
+    try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        search: search,
+        sortBy: sortBy,
+        sortOrder: sortOrder
+      });
+
+      if (typeFilter) queryParams.append('type', typeFilter);
+      if (shapeFilter) queryParams.append('shape', shapeFilter);
+
+      const response = await fetch(`/api/admin/diamonds?${queryParams}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch diamonds');
+      }
+
+      const result = await response.json();
+      setDiamonds(result.data);
+      setPagination({
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        total: result.pagination.total,
+        totalPages: result.pagination.pages
+      });
+    } catch (error) {
+      toast.error('Failed to fetch diamonds');
+      console.error('Fetch error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDiamonds();
+    }
+  }, [user, pagination.page, search, sortBy, sortOrder, typeFilter, shapeFilter]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this diamond?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/diamonds/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete diamond');
+      }
+
+      toast.success('Diamond deleted successfully');
+      fetchDiamonds(); // Refresh the list
+    } catch (error) {
+      toast.error('Failed to delete diamond');
+      console.error('Delete error:', error);
+    }
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/diamonds/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ isAvailable: !currentStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update diamond status');
+      }
+
+      toast.success('Diamond status updated');
+      fetchDiamonds(); // Refresh the list
+    } catch (error) {
+      toast.error('Failed to update diamond status');
+      console.error('Update error:', error);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  const getSalePrice = (diamond: Diamond) => {
+    if (diamond.salePrice) return diamond.salePrice;
+    if (diamond.discountPercentage) {
+      return diamond.price * (1 - diamond.discountPercentage / 100);
+    }
+    return diamond.price;
+  };
+
+  const diamondTypes = ['natural', 'lab'];
+  const diamondShapes = ['round', 'princess', 'cushion', 'emerald', 'oval', 'radiant', 'pear', 'heart', 'marquise', 'asscher'];
+
+  return (
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Diamonds</h1>
+          <p className="mt-2 text-gray-600">Manage your diamond inventory</p>
+        </div>
+        <div className="mt-4 sm:mt-0">
+          <Link
+            href="/admin/diamonds"
+            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          >
+            <HiPlus className="w-5 h-5 mr-2" />
+            Add New Diamond
+          </Link>
+        </div>
+      </div>
+
+      {/* Search and Filter Controls */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search diamonds by SKU, product number, or certificate lab..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="createdAt">Created Date</option>
+                <option value="price">Price</option>
+                <option value="carat">Carat</option>
+                <option value="sku">SKU</option>
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+          </div>
+          
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">All Types</option>
+                {diamondTypes.map(type => (
+                  <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Shape</label>
+              <select
+                value={shapeFilter}
+                onChange={(e) => setShapeFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="">All Shapes</option>
+                {diamondShapes.map(shape => (
+                  <option key={shape} value={shape}>{shape.charAt(0).toUpperCase() + shape.slice(1)}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Diamonds List */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      ) : diamonds.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+          <div className="text-gray-400 mb-4">
+            <HiAdjustments className="w-12 h-12 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No diamonds found</h3>
+          <p className="text-gray-600 mb-4">Get started by adding your first diamond.</p>
+          <Link
+            href="/admin/diamonds"
+            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            <HiPlus className="w-5 h-5 mr-2" />
+            Add Diamond
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Diamond
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Specifications
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Quality
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {diamonds.map((diamond) => (
+                  <tr key={diamond._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-16 w-16">
+                          {diamond.images?.[0]?.url ? (
+                            <Image
+                              src={diamond.images[0].url}
+                              alt={`${diamond.shape} diamond`}
+                              width={64}
+                              height={64}
+                              className="h-16 w-16 rounded-lg object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = target.nextSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center"
+                            style={{ display: diamond.images?.[0]?.url ? 'none' : 'flex' }}
+                          >
+                            <HiAdjustments className="w-8 h-8 text-gray-400" />
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {diamond.carat}ct {diamond.shape} {diamond.type}
+                          </div>
+                          <div className="text-sm text-gray-500">SKU: {diamond.sku}</div>
+                          <div className="text-sm text-gray-500">#{diamond.productNumber}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        <div className="font-medium">{diamond.color} {diamond.clarity}</div>
+                        <div className="text-gray-500">{diamond.measurements}</div>
+                        {diamond.fancyColor && (
+                          <div className="text-purple-600 text-xs">Fancy {diamond.fancyColor}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {diamond.cut && <div>Cut: {diamond.cut}</div>}
+                        {diamond.polish && <div>Polish: {diamond.polish}</div>}
+                        {diamond.symmetry && <div>Symmetry: {diamond.symmetry}</div>}
+                        {diamond.fluorescence && (
+                          <div className="text-xs text-gray-500">FL: {diamond.fluorescence}</div>
+                        )}
+                      </div>
+                      {diamond.certificateLab && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                          {diamond.certificateLab}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {formatPrice(getSalePrice(diamond))}
+                      </div>
+                      {(diamond.salePrice || diamond.discountPercentage) && (
+                        <>
+                          <div className="text-sm text-gray-500 line-through">
+                            {formatPrice(diamond.price)}
+                          </div>
+                          {diamond.discountPercentage && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              -{diamond.discountPercentage}%
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        diamond.isAvailable 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {diamond.isAvailable ? 'Available' : 'Sold'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/admin/diamonds/${diamond._id}`}
+                          className="text-purple-600 hover:text-purple-900"
+                          title="View Details"
+                        >
+                          <HiEye className="w-5 h-5" />
+                        </Link>
+                        <Link
+                          href={`/admin/diamonds/edit/${diamond._id}`}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="Edit Diamond"
+                        >
+                          <HiPencil className="w-5 h-5" />
+                        </Link>
+                        <button
+                          onClick={() => handleToggleStatus(diamond._id, diamond.isAvailable)}
+                          className={`${
+                            diamond.isAvailable ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'
+                          }`}
+                          title={diamond.isAvailable ? 'Mark as Sold' : 'Mark as Available'}
+                        >
+                          <HiAdjustments className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(diamond._id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete Diamond"
+                        >
+                          <HiTrash className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  disabled={pagination.page === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  disabled={pagination.page === pagination.totalPages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{((pagination.page - 1) * pagination.limit) + 1}</span> to{' '}
+                    <span className="font-medium">
+                      {Math.min(pagination.page * pagination.limit, pagination.total)}
+                    </span>{' '}
+                    of <span className="font-medium">{pagination.total}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                      disabled={pagination.page === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    
+                    {/* Page numbers */}
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPagination(prev => ({ ...prev, page: pageNum }))}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          pageNum === pagination.page
+                            ? 'z-10 bg-purple-50 border-purple-500 text-purple-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+                    
+                    <button
+                      onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                      disabled={pagination.page === pagination.totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
