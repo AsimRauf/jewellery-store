@@ -222,11 +222,11 @@ export default function Hero() {
                 }}
               />
               
-              {/* Gradient fade overlay - Mobile only */}
+              {/* Natural image fade - Mobile only */}
               <div 
-                className="absolute bottom-0 left-0 right-0 h-20 lg:hidden pointer-events-none"
+                className="absolute bottom-0 left-0 right-0 h-24 lg:hidden pointer-events-none"
                 style={{
-                  background: `linear-gradient(to top, ${backgroundColor} 0%, ${backgroundColor}E6 20%, ${backgroundColor}B3 40%, ${backgroundColor}80 60%, ${backgroundColor}4D 80%, transparent 100%)`
+                  background: `linear-gradient(to top, rgba(248, 240, 225, 0.95) 0%, rgba(248, 240, 225, 0.8) 25%, rgba(248, 240, 225, 0.6) 50%, rgba(248, 240, 225, 0.3) 75%, transparent 100%)`
                 }}
               />
             </div>
