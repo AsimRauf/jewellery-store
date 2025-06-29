@@ -2,10 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   HiHome, 
-  HiUsers, 
-  HiShoppingCart, 
-  HiCog, 
-  HiChartBar 
+  HiShoppingCart
 } from "react-icons/hi";
 import { GiRing, GiDiamonds, GiCrystalGrowth } from "react-icons/gi";
 
@@ -25,51 +22,23 @@ const Sidebar = () => {
       submenu: [
         { title: "Wedding Rings", href: "/admin/rings/wedding" },
         { title: "Engagement Rings", href: "/admin/rings/engagement" },
-        { title: "Eternity Rings", href: "/admin/rings/eternity" },
         { title: "Ring Settings", href: "/admin/rings/settings" },
       ]
     },
     {
       title: "Diamonds",
       icon: <GiDiamonds className="w-6 h-6" />,
-      href: "/admin/diamonds",
-      submenu: [
-        { title: "All Diamonds", href: "/admin/diamonds/list" },
-        { title: "Add Diamond", href: "/admin/diamonds" },
-        { title: "Lab Diamonds", href: "/admin/diamonds?type=lab" },
-        { title: "Natural Diamonds", href: "/admin/diamonds?type=natural" },
-      ]
+      href: "/admin/diamonds"
     },
     {
       title: "Gemstones",
       icon: <GiCrystalGrowth className="w-6 h-6" />,
-      href: "/admin/gemstones",
-      submenu: [
-        { title: "All Gemstones", href: "/admin/gemstones/list" },
-        { title: "Add Gemstone", href: "/admin/gemstones" },
-        { title: "Lab Gemstones", href: "/admin/gemstones/list?source=lab" },
-        { title: "Natural Gemstones", href: "/admin/gemstones/list?source=natural" },
-      ]
+      href: "/admin/gemstones"
     },
     {
       title: "Orders",
       icon: <HiShoppingCart className="w-6 h-6" />,
       href: "/admin/orders"
-    },
-    {
-      title: "Customers",
-      icon: <HiUsers className="w-6 h-6" />,
-      href: "/admin/customers"
-    },
-    {
-      title: "Analytics",
-      icon: <HiChartBar className="w-6 h-6" />,
-      href: "/admin/analytics"
-    },
-    {
-      title: "Settings",
-      icon: <HiCog className="w-6 h-6" />,
-      href: "/admin/settings"
     }
   ];
 
