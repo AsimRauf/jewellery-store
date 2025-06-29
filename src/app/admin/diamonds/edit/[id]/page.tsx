@@ -89,6 +89,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
   });
 
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -149,57 +150,45 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
     }));
   };
 
-  // Handle temporary images from upload component
-  const handleUploadImages = async () => {
-    if (temporaryImages.length === 0) return;
+  // Helper function to convert File to base64
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
 
+  const uploadImage = async (file: File, category: string, index?: number) => {
     try {
-      const uploadedImages: Array<{ url: string; publicId: string }> = [];
-      
-      for (const file of temporaryImages) {
-        // Convert file to base64 for the upload API
-        const base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-        
-        const response = await fetch('/api/upload/image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            file: base64,
-            category: 'diamonds',
-          }),
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          uploadedImages.push({
-            url: result.url,
-            publicId: result.publicId
-          });
-        }
+      const base64 = await convertToBase64(file);
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          file: base64, 
+          category,
+          index
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
       }
-      
-      // Add uploaded images to existing images
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...uploadedImages]
-      }));
-      
-      // Clear temporary images
-      setTemporaryImages([]);
-      toast.success(`${uploadedImages.length} images uploaded successfully`);
+
+      return response.json();
     } catch (error) {
-      console.error('Error uploading images:', error);
-      toast.error('Failed to upload images');
+      console.error('Image upload error:', error);
+      throw error;
     }
   };
 
   const removeImage = (index: number) => {
+    const imageToDelete = formData.images[index];
+    if (imageToDelete) {
+      setImagesToDelete(prev => [...prev, imageToDelete.publicId]);
+    }
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
