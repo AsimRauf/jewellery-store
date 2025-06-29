@@ -311,17 +311,18 @@ export default function EditEngagementRing({ params }: { params: Promise<{ id: s
   };
 
   // Handle ring field updates
-  const updateRingField = (field: string, value: any) => {
+  const updateRingField = (field: string, value: unknown) => {
     if (!ring) return;
     
     const fieldParts = field.split('.');
     if (fieldParts.length === 1) {
       setRing({ ...ring, [field]: value });
     } else if (fieldParts.length === 2) {
+      const currentValue = ring[fieldParts[0] as keyof EngagementRing];
       setRing({
         ...ring,
         [fieldParts[0]]: {
-          ...ring[fieldParts[0] as keyof EngagementRing],
+          ...(typeof currentValue === 'object' && currentValue !== null ? currentValue : {}),
           [fieldParts[1]]: value
         }
       });
@@ -366,7 +367,7 @@ export default function EditEngagementRing({ params }: { params: Promise<{ id: s
     });
   };
 
-  const updateMetalOption = (index: number, field: keyof MetalOption, value: any) => {
+  const updateMetalOption = (index: number, field: keyof MetalOption, value: unknown) => {
     if (!ring) return;
     
     const updatedOptions = ring.metalOptions.map((option, i) => {
@@ -1023,8 +1024,10 @@ export default function EditEngagementRing({ params }: { params: Promise<{ id: s
             
             {/* New Images Upload */}
             <ImageUpload
-              images={temporaryImages}
-              onImagesChange={setTemporaryImages}
+              temporaryImages={temporaryImages}
+              onImagesSelect={setTemporaryImages}
+              temporaryVideo={null}
+              onVideoSelect={() => {}}
               maxImages={10}
               label="Add New Images"
             />

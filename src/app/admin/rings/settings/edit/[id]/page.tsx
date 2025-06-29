@@ -305,17 +305,18 @@ export default function EditSetting({ params }: { params: Promise<{ id: string }
   };
 
   // Handle setting field updates
-  const updateSettingField = (field: string, value: any) => {
+  const updateSettingField = (field: string, value: unknown) => {
     if (!setting) return;
     
     const fieldParts = field.split('.');
     if (fieldParts.length === 1) {
       setSetting({ ...setting, [field]: value });
     } else if (fieldParts.length === 2) {
+      const currentValue = setting[fieldParts[0] as keyof Setting];
       setSetting({
         ...setting,
         [fieldParts[0]]: {
-          ...setting[fieldParts[0] as keyof Setting],
+          ...(typeof currentValue === 'object' && currentValue !== null ? currentValue : {}),
           [fieldParts[1]]: value
         }
       });
@@ -360,7 +361,7 @@ export default function EditSetting({ params }: { params: Promise<{ id: string }
     });
   };
 
-  const updateMetalOption = (index: number, field: keyof MetalOption, value: any) => {
+  const updateMetalOption = (index: number, field: keyof MetalOption, value: unknown) => {
     if (!setting) return;
     
     const updatedOptions = setting.metalOptions.map((option, i) => {
@@ -971,8 +972,10 @@ export default function EditSetting({ params }: { params: Promise<{ id: string }
             
             {/* New Images Upload */}
             <ImageUpload
-              images={temporaryImages}
-              onImagesChange={setTemporaryImages}
+              temporaryImages={temporaryImages}
+              onImagesSelect={setTemporaryImages}
+              temporaryVideo={null}
+              onVideoSelect={() => {}}
               maxImages={10}
               label="Add New Images"
             />

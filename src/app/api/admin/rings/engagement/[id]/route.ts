@@ -49,7 +49,7 @@ export async function PUT(
     const updateData = await request.json();
     
     // Handle metalColorImages if provided
-    let filteredData = { ...updateData };
+    const filteredData = { ...updateData };
     
     if (updateData.metalColorImages && typeof updateData.metalColorImages === 'object') {
       // Convert object to Map for Mongoose

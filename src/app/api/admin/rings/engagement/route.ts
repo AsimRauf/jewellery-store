@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = url.searchParams.get('sortOrder') || 'desc';
 
     // Build search filter
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build sort object
-    const sort: any = {};
+    const sort: Record<string, 1 | -1> = {};
     sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
     // Execute queries
