@@ -7,7 +7,8 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { HiArrowLeft, HiTrash } from 'react-icons/hi';
 import ImageUpload from '@/components/admin/ImageUpload';
-import { 
+import { DiamondEnums } from '@/constants/diamondEnums';
+import type { 
   DiamondType, 
   DiamondShape, 
   DiamondColor, 
@@ -18,7 +19,7 @@ import {
   DiamondFluorescence, 
   CertificateLab, 
   DiamondFancyColor 
-} from '@/models/Diamond';
+} from '@/constants/diamondEnums';
 
 interface Diamond {
   _id: string;
@@ -63,19 +64,19 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
   const [formData, setFormData] = useState({
     sku: '',
     productNumber: '',
-    type: DiamondType.NATURAL,
+    type: 'natural' as DiamondType,
     carat: 0,
-    shape: DiamondShape.ROUND,
-    color: DiamondColor.D,
+    shape: 'round' as DiamondShape,
+    color: 'D' as DiamondColor,
     fancyColor: '',
-    clarity: DiamondClarity.FL,
-    cut: DiamondCut.EXCELLENT,
-    polish: DiamondPolish.EXCELLENT,
-    symmetry: DiamondSymmetry.EXCELLENT,
-    fluorescence: DiamondFluorescence.NONE,
+    clarity: 'FL' as DiamondClarity,
+    cut: 'Excellent' as DiamondCut,
+    polish: 'Excellent' as DiamondPolish,
+    symmetry: 'Excellent' as DiamondSymmetry,
+    fluorescence: 'None' as DiamondFluorescence,
     measurements: '',
     treatment: '',
-    certificateLab: CertificateLab.GIA,
+    certificateLab: 'GIA' as CertificateLab,
     crownAngle: 0,
     crownHeight: 0,
     pavilionAngle: 0,
@@ -107,19 +108,19 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
       setFormData({
         sku: data.sku || '',
         productNumber: data.productNumber || '',
-        type: data.type || DiamondType.NATURAL,
+        type: data.type || 'natural',
         carat: data.carat || 0,
-        shape: data.shape || DiamondShape.ROUND,
-        color: data.color || DiamondColor.D,
+        shape: data.shape || 'round',
+        color: data.color || 'D',
         fancyColor: data.fancyColor || '',
-        clarity: data.clarity || DiamondClarity.FL,
-        cut: data.cut || DiamondCut.EXCELLENT,
-        polish: data.polish || DiamondPolish.EXCELLENT,
-        symmetry: data.symmetry || DiamondSymmetry.EXCELLENT,
-        fluorescence: data.fluorescence || DiamondFluorescence.NONE,
+        clarity: data.clarity || 'FL',
+        cut: data.cut || 'Excellent',
+        polish: data.polish || 'Excellent',
+        symmetry: data.symmetry || 'Excellent',
+        fluorescence: data.fluorescence || 'None',
         measurements: data.measurements || '',
         treatment: data.treatment || '',
-        certificateLab: data.certificateLab || CertificateLab.GIA,
+        certificateLab: data.certificateLab || 'GIA',
         crownAngle: data.crownAngle || 0,
         crownHeight: data.crownHeight || 0,
         pavilionAngle: data.pavilionAngle || 0,
@@ -156,12 +157,22 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
       const uploadedImages: Array<{ url: string; publicId: string }> = [];
       
       for (const file of temporaryImages) {
-        const formData = new FormData();
-        formData.append('image', file);
+        // Convert file to base64 for the upload API
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
         
         const response = await fetch('/api/upload/image', {
           method: 'POST',
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file: base64,
+            category: 'diamonds',
+          }),
         });
         
         if (response.ok) {
@@ -331,7 +342,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondType).map(type => (
+                  {DiamondEnums.TYPES.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
                 </select>
@@ -344,7 +355,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondShape).map(shape => (
+                  {DiamondEnums.SHAPES.map(shape => (
                     <option key={shape} value={shape}>{shape}</option>
                   ))}
                 </select>
@@ -377,7 +388,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondColor).map(color => (
+                  {DiamondEnums.COLORS.map(color => (
                     <option key={color} value={color}>{color}</option>
                   ))}
                 </select>
@@ -391,7 +402,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">None</option>
-                  {Object.values(DiamondFancyColor).map(color => (
+                  {DiamondEnums.FANCY_COLORS.map(color => (
                     <option key={color} value={color}>{color}</option>
                   ))}
                 </select>
@@ -404,7 +415,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondClarity).map(clarity => (
+                  {DiamondEnums.CLARITIES.map(clarity => (
                     <option key={clarity} value={clarity}>{clarity}</option>
                   ))}
                 </select>
@@ -417,7 +428,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondCut).map(cut => (
+                  {DiamondEnums.CUTS.map(cut => (
                     <option key={cut} value={cut}>{cut}</option>
                   ))}
                 </select>
@@ -430,7 +441,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondPolish).map(polish => (
+                  {DiamondEnums.POLISH.map(polish => (
                     <option key={polish} value={polish}>{polish}</option>
                   ))}
                 </select>
@@ -443,7 +454,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondSymmetry).map(symmetry => (
+                  {DiamondEnums.SYMMETRY.map(symmetry => (
                     <option key={symmetry} value={symmetry}>{symmetry}</option>
                   ))}
                 </select>
@@ -456,7 +467,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(DiamondFluorescence).map(fluorescence => (
+                  {DiamondEnums.FLUORESCENCE.map(fluorescence => (
                     <option key={fluorescence} value={fluorescence}>{fluorescence}</option>
                   ))}
                 </select>
@@ -469,7 +480,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.values(CertificateLab).map(lab => (
+                  {DiamondEnums.CERTIFICATE_LABS.map(lab => (
                     <option key={lab} value={lab}>{lab}</option>
                   ))}
                 </select>

@@ -99,7 +99,8 @@ export enum DiamondFancyColor {
   BROWN = 'Brown',
   BLACK = 'Black',
   RED = 'Red',
-  GRAY = 'Gray'
+  GRAY = 'Gray',
+  WHITE = 'White'
 }
 
 export interface IDiamond extends Document {
