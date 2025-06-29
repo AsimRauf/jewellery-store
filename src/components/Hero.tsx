@@ -205,7 +205,7 @@ export default function Hero() {
 
           {/* Image section - flush right on desktop, unchanged on mobile */}
           <div 
-            className="w-full lg:w-[65%] relative order-1 lg:order-2 flex items-end min-h-[50vh] lg:min-h-full"
+            className="w-full lg:w-[65%] relative order-1 lg:order-2 flex items-end min-h-[50vh] lg:min-h-full pt-8 sm:pt-12 lg:pt-0"
             style={{ marginTop }}
           >
             <div className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[75vh] xl:h-[80vh] w-full flex items-end 
