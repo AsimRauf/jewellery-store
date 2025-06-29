@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -71,7 +71,7 @@ export default function GemstonesList() {
   const [shapeFilter, setShapeFilter] = useState('');
   const [colorFilter, setColorFilter] = useState('');
 
-  const fetchGemstones = async (page = 1) => {
+  const fetchGemstones = useCallback(async (page = 1) => {
     try {
       setIsLoading(true);
       const queryParams = new URLSearchParams({
@@ -104,7 +104,7 @@ export default function GemstonesList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [search, sortBy, sortOrder, typeFilter, sourceFilter, shapeFilter, colorFilter]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this gemstone?')) return;
@@ -175,7 +175,7 @@ export default function GemstonesList() {
     if (user?.role === 'admin') {
       fetchGemstones();
     }
-  }, [user, sortBy, sortOrder]);
+  }, [user, sortBy, sortOrder, fetchGemstones]);
 
   if (!user || user.role !== 'admin') {
     return (

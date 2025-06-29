@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+import Image from 'next/image';
 import { HiArrowLeft, HiTrash } from 'react-icons/hi';
 import ImageUpload from '@/components/admin/ImageUpload';
 import { 
@@ -85,15 +86,7 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      router.push('/login');
-      return;
-    }
-    fetchGemstone();
-  }, [user, router]);
-
-  const fetchGemstone = async () => {
+  const fetchGemstone = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/admin/gemstones/${resolvedParams.id}`);
@@ -137,7 +130,15 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
     } finally {
       setLoading(false);
     }
-  };
+  }, [resolvedParams.id, router]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      router.push('/login');
+      return;
+    }
+    fetchGemstone();
+  }, [user, router, fetchGemstone]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -662,14 +663,39 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
             <h2 className="text-lg font-medium text-gray-900 mb-6">Images</h2>
             
             <ImageUpload
-              onUpload={handleImageUpload}
-              existingImages={formData.images}
-              onDeleteExisting={handleImageDelete}
+              onImagesSelect={handleImageUpload}
+              onVideoSelect={() => {}}
               temporaryImages={temporaryImages}
-              onDeleteTemporary={(index) => {
-                setTemporaryImages(prev => prev.filter((_, i) => i !== index));
-              }}
+              temporaryVideo={null}
+              maxImages={10}
             />
+
+            {/* Existing Images */}
+            {formData.images && formData.images.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Current Images</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <Image
+                        src={image.url}
+                        alt={`Gemstone image ${index + 1}`}
+                        width={150}
+                        height={150}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleImageDelete(image.publicId)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Availability */}

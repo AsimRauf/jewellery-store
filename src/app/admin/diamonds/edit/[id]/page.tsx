@@ -634,16 +634,7 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
               label="Add New Images"
             />
             
-            {/* Upload Button */}
-            {temporaryImages.length > 0 && (
-              <button
-                type="button"
-                onClick={handleUploadImages}
-                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              >
-                Upload {temporaryImages.length} Image{temporaryImages.length > 1 ? 's' : ''}
-              </button>
-            )}
+
           </div>
 
           {/* Status */}

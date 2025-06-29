@@ -88,23 +88,25 @@ export async function GET(request: NextRequest) {
 
       // Carat range filter
       if (minCarat || maxCarat) {
-        query.carat = {};
-        if (minCarat) query.carat.$gte = parseFloat(minCarat);
-        if (maxCarat) query.carat.$lte = parseFloat(maxCarat);
+        const caratQuery: Record<string, number> = {};
+        if (minCarat) caratQuery.$gte = parseFloat(minCarat);
+        if (maxCarat) caratQuery.$lte = parseFloat(maxCarat);
+        query.carat = caratQuery;
       }
 
       // Price range filter
       if (minPrice || maxPrice) {
-        query.price = {};
-        if (minPrice) query.price.$gte = parseFloat(minPrice);
-        if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+        const priceQuery: Record<string, number> = {};
+        if (minPrice) priceQuery.$gte = parseFloat(minPrice);
+        if (maxPrice) priceQuery.$lte = parseFloat(maxPrice);
+        query.price = priceQuery;
       }
 
       // Calculate pagination
       const skip = (page - 1) * limit;
 
       // Build sort object
-      const sort: Record<string, number> = {};
+      const sort: Record<string, 1 | -1> = {};
       sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
       // Execute queries
