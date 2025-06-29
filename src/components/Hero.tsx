@@ -222,6 +222,9 @@ export default function Hero() {
                   height: '100%',
                   objectFit: 'contain',
                   objectPosition: 'bottom center',
+                  opacity: transitioning ? 0.3 : 1,
+                  transform: transitioning ? 'scale(1.02)' : 'scale(1)',
+                  transition: 'opacity 500ms ease-in-out, transform 500ms ease-in-out',
                   ...(isMobile && {
                     maskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
                     WebkitMaskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
