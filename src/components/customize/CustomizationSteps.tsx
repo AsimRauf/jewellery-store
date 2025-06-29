@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface CustomizationStepsProps {
   currentStep: number;
   startWith: 'setting' | 'diamond' | 'gemstone';
@@ -53,8 +55,41 @@ const CustomizationSteps: React.FC<CustomizationStepsProps> = ({
   };
 
   return (
-    <div className="mb-8 bg-amber-50 p-6 rounded-lg">
-      <div className="flex items-center justify-center">
+    <div className="mb-4 sm:mb-8 bg-amber-50 p-3 sm:p-6 rounded-lg">
+      {/* Mobile: Vertical layout */}
+      <div className="flex flex-col sm:hidden">
+        {[1, 2, 3].map((step, index) => {
+          const status = getStepStatus(step);
+          const isLast = index === 2;
+          
+          return (
+            <div key={step} className="relative">
+              <div className="flex items-center py-2">
+                <div className={`rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center text-white font-bold text-sm z-10 ${
+                  status === 'completed' ? 'bg-amber-500' :
+                  status === 'current' ? 'bg-amber-500' :
+                  'bg-gray-300'
+                }`}>
+                  {getStepIcon(step, status)}
+                </div>
+                <span className={`ml-3 font-medium text-sm ${
+                  status === 'completed' || status === 'current' ? 'text-amber-700' : 'text-gray-500'
+                }`}>
+                  {getStepLabel(step)}
+                </span>
+              </div>
+              {!isLast && (
+                <div className={`absolute left-4 top-10 w-0.5 h-6 -mt-2 ${
+                  status === 'completed' ? 'bg-amber-200' : 'bg-gray-200'
+                }`}></div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop/Tablet: Horizontal layout */}
+      <div className="hidden sm:flex items-center justify-center">
         {[1, 2, 3].map((step, index) => {
           const status = getStepStatus(step);
           const isLast = index === 2;
@@ -62,21 +97,21 @@ const CustomizationSteps: React.FC<CustomizationStepsProps> = ({
           return (
             <div key={step} className="flex items-center">
               <div className="flex items-center">
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center text-white font-bold ${
+                <div className={`rounded-full h-8 w-8 md:h-10 md:w-10 flex items-center justify-center text-white font-bold text-sm md:text-base ${
                   status === 'completed' ? 'bg-amber-500' :
                   status === 'current' ? 'bg-amber-500' :
                   'bg-gray-300'
                 }`}>
                   {getStepIcon(step, status)}
                 </div>
-                <span className={`ml-2 font-medium ${
+                <span className={`ml-2 md:ml-3 font-medium text-sm md:text-base ${
                   status === 'completed' || status === 'current' ? 'text-amber-700' : 'text-gray-500'
                 }`}>
                   {getStepLabel(step)}
                 </span>
               </div>
               {!isLast && (
-                <div className={`mx-4 border-t-2 w-16 ${
+                <div className={`mx-2 sm:mx-4 border-t-2 w-8 sm:w-16 ${
                   status === 'completed' ? 'border-amber-200' : 'border-gray-200'
                 }`}></div>
               )}
