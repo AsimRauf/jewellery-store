@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
@@ -76,7 +76,8 @@ interface OrderData {
   updatedAt: string;
 }
 
-export default function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, loading } = useUser();
   const router = useRouter();
   
@@ -94,10 +95,8 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
 
   // Extract order ID from params
   useEffect(() => {
-    if (params?.id) {
-      setOrderId(params.id);
-    }
-  }, [params]);
+    setOrderId(id);
+  }, [id]);
 
   // Check authentication and admin status
   useEffect(() => {

@@ -1,15 +1,4 @@
-import Image from 'next/image';
 import { FilterState, AvailableFilters } from '@/types/wedding';
-
-// Style images mapping
-const STYLE_IMAGES: Record<string, string> = {
-  'Vintage': '/icons/styles/vintage.svg',
-  'Nature Inspired': '/icons/styles/nature-inspired.svg',
-  'Floral': '/icons/styles/floral.svg',
-  'Classic': '/icons/styles/classic.svg',
-  'Celtic': '/icons/styles/celtic.svg',
-  'Branch': '/icons/styles/branch.svg'
-};
 
 interface FilterBarProps {
   filters: FilterState;
@@ -330,7 +319,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
           </button>
         </div>
       )}
-    </div>
     </div>
   );
 }

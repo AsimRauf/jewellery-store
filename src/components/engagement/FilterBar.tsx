@@ -1,15 +1,4 @@
-import Image from 'next/image';
 import { FilterState, AvailableFilters } from '@/types/engagement';
-
-// Style images mapping
-const STYLE_IMAGES: Record<string, string> = {
-  'Vintage': '/icons/styles/vintage.svg',
-  'Nature Inspired': '/icons/styles/nature-inspired.svg',
-  'Floral': '/icons/styles/floral.svg',
-  'Classic': '/icons/styles/classic.svg',
-  'Celtic': '/icons/styles/celtic.svg',
-  'Branch': '/icons/styles/branch.svg'
-};
 
 interface FilterBarProps {
   filters: FilterState;
@@ -425,7 +414,6 @@ export default function FilterBar({
           </button>
         </div>
       )}
-    </div>
     </div>
   );
 }

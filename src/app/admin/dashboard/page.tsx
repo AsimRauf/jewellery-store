@@ -13,7 +13,7 @@ import {
   HiClock,
   HiCheckCircle,
   HiTruck,
-  HiExclamationTriangle
+  HiExclamationCircle
 } from "react-icons/hi";
 
 interface DashboardStats {
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
       case 'processing': return <HiClock className="w-4 h-4 text-orange-600" />;
       case 'shipped': return <HiTruck className="w-4 h-4 text-purple-600" />;
       case 'delivered': return <HiCheckCircle className="w-4 h-4 text-green-600" />;
-      default: return <HiExclamationTriangle className="w-4 h-4 text-gray-600" />;
+      default: return <HiExclamationCircle className="w-4 h-4 text-gray-600" />;
     }
   };
 
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-6 text-white">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="mt-2 opacity-80">Welcome back, {user.firstName}! Here's your store overview.</p>
+        <p className="mt-2 opacity-80">Welcome back, {user.firstName}! Here&apos;s your store overview.</p>
       </div>
 
       {/* Stats Grid */}

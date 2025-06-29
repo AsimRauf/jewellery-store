@@ -5,8 +5,9 @@ import jwt from 'jsonwebtoken';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // Get token from cookies
     const token = request.cookies.get('token')?.value;
@@ -27,7 +28,7 @@ export async function GET(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const order = await Order.findById(params.id).lean();
+    const order = await Order.findById(id).lean();
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -48,8 +49,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // Get token from cookies
     const token = request.cookies.get('token')?.value;
@@ -81,7 +83,7 @@ export async function PUT(
       'notes'
     ];
     
-    const filteredData: any = {};
+    const filteredData: Record<string, unknown> = {};
     Object.keys(updateData).forEach(key => {
       if (allowedFields.includes(key)) {
         filteredData[key] = updateData[key];
@@ -92,21 +94,21 @@ export async function PUT(
     const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded', 'disputed'];
     const validPaymentStatuses = ['pending', 'succeeded', 'failed', 'requires_action', 'refunded'];
     
-    if (filteredData.status && !validStatuses.includes(filteredData.status)) {
+    if (filteredData.status && !validStatuses.includes(filteredData.status as string)) {
       return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
     }
     
-    if (filteredData.paymentStatus && !validPaymentStatuses.includes(filteredData.paymentStatus)) {
+    if (filteredData.paymentStatus && !validPaymentStatuses.includes(filteredData.paymentStatus as string)) {
       return NextResponse.json({ error: 'Invalid payment status value' }, { status: 400 });
     }
 
     // Convert estimatedDelivery to Date if provided
     if (filteredData.estimatedDelivery) {
-      filteredData.estimatedDelivery = new Date(filteredData.estimatedDelivery);
+      filteredData.estimatedDelivery = new Date(filteredData.estimatedDelivery as string);
     }
 
     const order = await Order.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: filteredData },
       { new: true, runValidators: true }
     ).lean();
@@ -133,8 +135,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     // Get token from cookies
     const token = request.cookies.get('token')?.value;
@@ -155,7 +158,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const order = await Order.findByIdAndDelete(params.id);
+    const order = await Order.findByIdAndDelete(id);
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     
     if (status && status !== 'all') {
       query.status = status;
