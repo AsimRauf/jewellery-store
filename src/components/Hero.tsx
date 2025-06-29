@@ -226,7 +226,8 @@ export default function Hero() {
               <div 
                 className="absolute bottom-0 left-0 right-0 h-20 lg:hidden pointer-events-none"
                 style={{
-                  background: `linear-gradient(to top, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 30%, rgba(255, 255, 255, 0.4) 60%, transparent 100%)`
+                  background: `linear-gradient(to top, ${backgroundColor} 0%, ${backgroundColor}E6 20%, ${backgroundColor}B3 40%, ${backgroundColor}80 60%, ${backgroundColor}4D 80%, transparent 100%)`,
+                  transition: 'background 500ms ease-in-out'
                 }}
               />
             </div>
