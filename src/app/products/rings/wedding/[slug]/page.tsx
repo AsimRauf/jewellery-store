@@ -15,15 +15,10 @@ import ProductDescription from '@/components/wedding/ProductDescription';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import { BaseMetalOption } from '@/types/shared';
 
-// Define types for metal options and sizes
-interface MetalOption {
-  karat: string;
-  color: string;
-  price: number;
-  finish_type?: string | null;
-  isDefault?: boolean;
-}
+// Define types for sizes (metal options are now imported)
+type MetalOption = BaseMetalOption;
 
 interface SizeOption {
   size: number;
@@ -73,12 +68,34 @@ export default function WeddingRingDetailPage() {
         }
         
         const data = await response.json();
+        console.log('Wedding ring detail data:', data.product);
+        console.log('Metal options:', data.product.metalOptions);
+        console.log('Metal color images:', data.product.metalColorImages);
+        
+        // Validate data consistency
+        if (data.product.metalColorImages && data.product.metalOptions) {
+          const metalColors = data.product.metalOptions.map((m: MetalOption) => m.color);
+          const imageColors = Object.keys(data.product.metalColorImages);
+          
+          console.log('Available metal colors:', metalColors);
+          console.log('Available image colors:', imageColors);
+          
+          const orphanedImageColors = imageColors.filter((color: string) => !metalColors.includes(color));
+          if (orphanedImageColors.length > 0) {
+            console.warn('⚠️ Found images for metal colors that don\'t have metal options:', orphanedImageColors);
+            console.warn('This might indicate data inconsistency - some metal options may have been lost during editing');
+          }
+        }
+        
         setProduct(data.product);
         
         // Set default metal option
-        const defaultMetal = data.product.metalOptions.find((m: MetalOption) => m.isDefault) || 
-                            data.product.metalOptions[0];
-        setSelectedMetal(defaultMetal);
+        const defaultMetal = data.product.metalOptions?.find((m: MetalOption) => m.isDefault) || 
+                            data.product.metalOptions?.[0];
+        console.log('Selected default metal:', defaultMetal);
+        if (defaultMetal) {
+          setSelectedMetal(defaultMetal);
+        }
         
         // Check if there's a metal option in the URL
         const metalParam = searchParams?.get('metal');
@@ -86,7 +103,7 @@ export default function WeddingRingDetailPage() {
           const [karat, ...colorParts] = metalParam.split('-');
           const color = colorParts.join(' ');
           
-          const matchingMetal = data.product.metalOptions.find(
+          const matchingMetal = data.product.metalOptions?.find(
             (m: MetalOption) => m.karat === karat && m.color === color
           );
           
@@ -97,7 +114,7 @@ export default function WeddingRingDetailPage() {
         
         // Set default size
         if (data.product.sizes && data.product.sizes.length > 0) {
-          const defaultSize = data.product.sizes.find((s: SizeOption) => s.isAvailable);
+          const defaultSize = data.product.sizes?.find((s: SizeOption) => s.isAvailable);
           if (defaultSize) {
             setSelectedSize(defaultSize.size);
           }
@@ -138,7 +155,7 @@ export default function WeddingRingDetailPage() {
     
     // Add size additional price if applicable
     if (selectedSize) {
-      const sizeOption = product.sizes.find(s => s.size === selectedSize);
+      const sizeOption = product.sizes?.find(s => s.size === selectedSize);
       if (sizeOption) {
         price += sizeOption.additionalPrice;
       }
@@ -157,7 +174,7 @@ export default function WeddingRingDetailPage() {
     let imageUrl = '';
     if (product.metalColorImages && product.metalColorImages[selectedMetal.color]?.length > 0) {
       imageUrl = product.metalColorImages[selectedMetal.color][0].url;
-    } else if (product.media.images.length > 0) {
+    } else if (product.media?.images?.length > 0) {
       imageUrl = product.media.images[0].url;
     }
     
@@ -274,7 +291,7 @@ export default function WeddingRingDetailPage() {
     }
     
     // Otherwise, use the general product images
-    return product.media.images;
+    return product.media?.images || [];
   };
   
   if (loading) {

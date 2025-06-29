@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -78,8 +77,7 @@ interface OrderData {
 
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
   
   const [order, setOrder] = useState<OrderData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,18 +96,6 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     setOrderId(id);
   }, [id]);
 
-  // Check authentication and admin status
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
-
   // Fetch order details
   const fetchOrder = async () => {
     if (!orderId) return;
@@ -123,7 +109,6 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
       if (!response.ok) {
         if (response.status === 404) {
           toast.error('Order not found');
-          router.replace('/admin/orders');
           return;
         }
         throw new Error('Failed to fetch order');
@@ -150,7 +135,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
   };
 
   useEffect(() => {
-    if (user?.role === 'admin' && orderId) {
+    if (user && orderId) {
       fetchOrder();
     }
   }, [user, orderId]);
@@ -188,17 +173,12 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
   };
 
   // Handle loading state
-  if (loading || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
     );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
   }
 
   if (!order) {

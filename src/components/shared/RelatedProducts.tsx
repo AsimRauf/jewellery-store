@@ -127,7 +127,7 @@ export default function RelatedProducts({
     setAddingProductId(product._id);
     
     // Find the default metal option
-    const defaultMetal = product.metalOptions.find(m => m.isDefault) || product.metalOptions[0];
+    const defaultMetal = product.metalOptions?.find(m => m.isDefault) || product.metalOptions?.[0];
     
     if (!defaultMetal) {
       setAddingProductId(null);
@@ -188,13 +188,13 @@ export default function RelatedProducts({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {products.map((product) => {
           // Get default metal option
-          const defaultMetal = product.metalOptions.find(m => m.isDefault) || product.metalOptions[0];
+          const defaultMetal = product.metalOptions?.find(m => m.isDefault) || product.metalOptions?.[0];
           
           // Get image for the default metal
           let imageUrl = '';
-          if (product.metalColorImages && product.metalColorImages[defaultMetal.color]?.length > 0) {
+          if (product.metalColorImages && defaultMetal && product.metalColorImages[defaultMetal.color]?.length > 0) {
             imageUrl = product.metalColorImages[defaultMetal.color][0].url;
-          } else if (product.media.images.length > 0) {
+          } else if (product.media?.images?.length > 0) {
             imageUrl = product.media.images[0].url;
           }
           
@@ -249,14 +249,14 @@ export default function RelatedProducts({
                 
                 <div className="space-y-1">
                   <p className="text-amber-600 font-semibold text-lg">
-                    ${defaultMetal.price.toLocaleString()}
+                    ${defaultMetal?.price?.toLocaleString() || 'N/A'}
                   </p>
-                  <p className="text-gray-500 text-sm">{defaultMetal.karat} {defaultMetal.color}</p>
+                  <p className="text-gray-500 text-sm">{defaultMetal?.karat} {defaultMetal?.color}</p>
                 </div>
                 
                 {/* Metal Options */}
                 <div className="mt-3 flex flex-wrap gap-1">
-                  {product.metalOptions.slice(0, 3).map((metal) => (
+                  {product.metalOptions?.slice(0, 3).map((metal) => (
                     <Link 
                       key={`${metal.karat}-${metal.color}`}
                       href={`${productUrl}?metal=${encodeURIComponent(metal.karat)}-${encodeURIComponent(metal.color)}`}
@@ -264,19 +264,19 @@ export default function RelatedProducts({
                     >
                       {metal.karat} {metal.color}
                     </Link>
-                  ))}
-                  {product.metalOptions.length > 3 && (
+                  )) || []}
+                  {(product.metalOptions?.length || 0) > 3 && (
                     <span className="text-xs px-2 py-1 bg-gray-50 rounded-full text-gray-600">
-                      +{product.metalOptions.length - 3} more
+                      +{(product.metalOptions?.length || 0) - 3} more
                     </span>
                   )}
                 </div>
                 
                 {/* Display finish type if available (for wedding rings) */}
-                {defaultMetal.finish_type && (
+                {defaultMetal?.finish_type && (
                   <div className="mt-2 text-sm text-gray-600">
                     <span className="inline-block">
-                      {defaultMetal.finish_type} Finish
+                      {defaultMetal?.finish_type} Finish
                     </span>
                   </div>
                 )}

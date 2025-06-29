@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -49,8 +48,7 @@ interface PaginationData {
 }
 
 export default function WeddingRingsList() {
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
   
   const [rings, setRings] = useState<WeddingRing[]>([]);
   const [pagination, setPagination] = useState<PaginationData>({
@@ -63,18 +61,6 @@ export default function WeddingRingsList() {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  useEffect(() => {
-    // Check authentication and admin status
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
 
   const fetchRings = async () => {
     try {
@@ -107,7 +93,7 @@ export default function WeddingRingsList() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (user) {
       fetchRings();
     }
   }, [user, pagination.page, search, sortBy, sortOrder]);
@@ -164,20 +150,6 @@ export default function WeddingRingsList() {
       currency: 'USD'
     }).format(price);
   };
-
-  // Handle loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -285,35 +257,43 @@ export default function WeddingRingsList() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-16 w-16">
-                          {ring.media?.images?.[0] ? (
+                          {ring.media?.images?.[0]?.url ? (
                             <Image
                               src={ring.media.images[0].url}
-                              alt={ring.title}
+                              alt={ring.title || 'Wedding ring'}
                               width={64}
                               height={64}
                               className="h-16 w-16 rounded-lg object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = target.nextSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
                             />
-                          ) : (
-                            <div className="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center">
-                              <HiAdjustments className="w-8 h-8 text-gray-400" />
-                            </div>
-                          )}
+                          ) : null}
+                          <div 
+                            className="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center"
+                            style={{ display: ring.media?.images?.[0]?.url ? 'none' : 'flex' }}
+                          >
+                            <HiAdjustments className="w-8 h-8 text-gray-400" />
+                          </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{ring.title}</div>
-                          <div className="text-sm text-gray-500">SKU: {ring.SKU}</div>
+                          <div className="text-sm font-medium text-gray-900">{ring.title || 'Untitled'}</div>
+                          <div className="text-sm text-gray-500">SKU: {ring.SKU || 'N/A'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{ring.subcategory}</div>
+                      <div className="text-sm text-gray-900">{ring.subcategory || 'N/A'}</div>
                       <div className="text-sm text-gray-500">
                         {ring.metalOptions?.length || 0} metal options
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {formatPrice(ring.basePrice)}
+                        {formatPrice(ring.basePrice || 0)}
                       </div>
                       {ring.onSale && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">

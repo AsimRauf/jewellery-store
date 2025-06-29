@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import Diamond from '@/models/Diamond';
-import jwt from 'jsonwebtoken';
+import { withAdminAuth } from '@/utils/authMiddleware';
 
 // Define an interface for Mongoose validation errors
 interface MongooseValidationError extends Error {
@@ -36,25 +36,9 @@ interface DiamondImage {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Get token from cookies
-    const token = request.cookies.get('token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    await connectDB();
-
-    // Verify token and check admin role
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-      role: string;
-    };
-
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+  return withAdminAuth(request, async (_req, user) => {
+    try {
+      await connectDB();
 
     const data = await request.json();
     
@@ -75,8 +59,8 @@ export async function POST(request: NextRequest) {
     // Create the transformed data with user info
     const transformedData = {
       ...data,
-      createdBy: decoded.userId,
-      updatedBy: decoded.userId,
+      createdBy: user.id,
+      updatedBy: user.id,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -116,35 +100,20 @@ export async function POST(request: NextRequest) {
       data: diamond
     }, { status: 201 });
 
-  } catch (error) {
-    console.error('Diamond creation error:', error);
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Failed to create diamond' 
-    }, { status: 500 });
-  }
+    } catch (error) {
+      console.error('Diamond creation error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Failed to create diamond' 
+      }, { status: 500 });
+    }
+  });
 }
 
 // GET endpoint to list all diamonds
 export async function GET(request: NextRequest) {
-  try {
-    // Get token from cookies
-    const token = request.cookies.get('token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    await connectDB();
-
-    // Verify token and check admin role
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-      role: string;
-    };
-
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+  return withAdminAuth(request, async (req, user) => {
+    try {
+      await connectDB();
 
     // Parse query parameters
     const url = new URL(request.url);
@@ -187,10 +156,11 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error) {
-    console.error('Diamond listing error:', error);
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Failed to list diamonds' 
-    }, { status: 500 });
-  }
+    } catch (error) {
+      console.error('Diamond listing error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Failed to list diamonds' 
+      }, { status: 500 });
+    }
+  });
 }

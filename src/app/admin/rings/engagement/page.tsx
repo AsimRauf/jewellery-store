@@ -5,7 +5,6 @@ import { RingEnums } from '@/constants/ringEnums';
 import ImageUpload from '@/components/admin/ImageUpload';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext';
 import MetalOptionImageUpload from '@/components/admin/MetalOptionImageUpload';
 
 // Define type for condition function
@@ -680,7 +679,6 @@ function MetalOptionsMatrix({
 }
 
 export default function AddEngagementRing() {
-  const { user, loading } = useUser();
   const router = useRouter();
 
   // Initialize form state
@@ -728,32 +726,6 @@ export default function AddEngagementRing() {
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
   const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
   const [temporaryColorImages, setTemporaryColorImages] = useState<Record<string, File[]>>({});
-
-  useEffect(() => {
-    // Check authentication and admin status
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
-
-  // Handle loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
 
   const uploadImage = async (file: File, category: string) => {
     try {

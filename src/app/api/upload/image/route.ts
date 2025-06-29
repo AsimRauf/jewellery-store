@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import { jwtVerify } from 'jose';
+import { withAdminAuth } from '@/utils/authMiddleware';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,26 +8,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const verifyToken = async (token: string) => {
-  const encoder = new TextEncoder();
-  const secretKey = encoder.encode(process.env.JWT_SECRET!);
-  const { payload } = await jwtVerify(token, secretKey);
-  return payload as { userId: string; role: string };
-};
-
 export async function POST(request: NextRequest) {
-  try {
-    const token = request.cookies.get('token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+  return withAdminAuth(request, async (req, user) => {
+    try {
 
     const { file, category, index, colorKey } = await request.json();
 
@@ -94,12 +77,13 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-  } catch (error) {
-    console.error('Image upload error:', error);
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Upload failed' 
-    }, { status: 500 });
-  }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Upload failed' 
+      }, { status: 500 });
+    }
+  });
 }
 export const config = {
   api: {

@@ -48,20 +48,22 @@ export async function GET(request: NextRequest) {
         userId: user._id,
         role: user.role,
         email: user.email,
-        isAdmin: user.role === 'admin'
+        isAdmin: user.role === 'admin',
+        sessionId: `session_${user._id}_${Date.now()}`
       },
       process.env.JWT_SECRET!,
-      { expiresIn: '15m' }
+      { expiresIn: '2h' } // Extended to 2 hours
     );
     
     // Generate new refresh token (rotating refresh tokens for better security)
     const newRefreshToken = jwt.sign(
       { 
         userId: user._id,
-        role: user.role
+        role: user.role,
+        sessionId: `refresh_${user._id}_${Date.now()}`
       },
       process.env.REFRESH_TOKEN_SECRET!,
-      { expiresIn: '7d' }
+      { expiresIn: '15d' } // Extended to 15 days
     );
     
     // Update user's refresh token in database
@@ -85,7 +87,7 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 15 * 60, // 15 minutes
+      maxAge: 2 * 60 * 60, // 2 hours
       path: '/'
     });
     
@@ -93,7 +95,7 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 15 * 24 * 60 * 60, // 15 days
       path: '/'  // Make it available on all paths
     });
     

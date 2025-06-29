@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext';
 import ImageUpload from '@/components/admin/ImageUpload';
 // Import from types instead of models to avoid server-side code in client component
 import { 
@@ -110,7 +109,6 @@ const formSections: FormSection[] = [
 ];
 
 export default function AddGemstone() {
-  const { user, loading } = useUser();
   const router = useRouter();
   
   // Form state
@@ -140,32 +138,6 @@ export default function AddGemstone() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
-  
-  // Check authentication and admin status
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
-
-  // Handle loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
 
   // Handle field change
   const handleFieldChange = (name: keyof FormDataType, value: FormDataType[keyof FormDataType]) => {

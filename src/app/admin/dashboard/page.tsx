@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 import { 
@@ -40,23 +39,10 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Check authentication and admin status
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
 
   // Fetch dashboard stats
   const fetchDashboardStats = async () => {
@@ -98,23 +84,18 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (user) {
       fetchDashboardStats();
     }
   }, [user]);
 
   // Handle loading state
-  if (loading || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
     );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
   }
 
   const getStatusIcon = (status: string) => {
@@ -142,7 +123,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="mb-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-6 text-white">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="mt-2 opacity-80">Welcome back, {user.firstName}! Here&apos;s your store overview.</p>
+        <p className="mt-2 opacity-80">Welcome back, {user?.firstName}! Here&apos;s your store overview.</p>
       </div>
 
       {/* Stats Grid */}

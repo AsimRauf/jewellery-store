@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import jwt from 'jsonwebtoken';
+import { withAdminAuth } from '@/utils/authMiddleware';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -9,23 +9,8 @@ cloudinary.config({
 });
 
 export async function POST(request: NextRequest) {
-  try {
-    // Get token from cookies
-    const token = request.cookies.get('token')?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // Verify token and check admin role
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-      role: string;
-    };
-
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
+  return withAdminAuth(request, async (req, user) => {
+    try {
 
     const { file, category } = await request.json();
 
@@ -56,15 +41,13 @@ export async function POST(request: NextRequest) {
       publicId: result.public_id
     });
 
-  } catch (error) {
-    console.error('Video upload error:', error);
-    if (error instanceof jwt.JsonWebTokenError) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    } catch (error) {
+      console.error('Video upload error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Upload failed' 
+      }, { status: 500 });
     }
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Upload failed' 
-    }, { status: 500 });
-  }
+  });
 }
 
 export const config = {

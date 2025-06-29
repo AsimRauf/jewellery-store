@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { HiArrowLeft, HiTrash, HiPlus } from 'react-icons/hi';
 import { RingEnums } from '@/constants/ringEnums';
 import ImageUpload from '@/components/admin/ImageUpload';
+import MetalOptionImageUpload from '@/components/admin/MetalOptionImageUpload';
 
 interface MetalOption {
   karat: string;
@@ -31,6 +32,7 @@ interface WeddingRing {
   SKU: string;
   basePrice: number;
   metalOptions: MetalOption[];
+  metalColorImages?: Record<string, Array<{ url: string; publicId: string; }>>;
   sizes: Array<{
     size: number;
     isAvailable: boolean;
@@ -58,7 +60,7 @@ interface WeddingRing {
 
 export default function EditWeddingRing({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user, loading } = useUser();
+  const { user } = useUser();
   const router = useRouter();
   
   const [ring, setRing] = useState<WeddingRing | null>(null);
@@ -68,18 +70,8 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
   const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check authentication and admin status
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
+  const [metalColorTemporaryImages, setMetalColorTemporaryImages] = useState<Record<string, File[]>>({});
+  const [metalColorImagesToDelete, setMetalColorImagesToDelete] = useState<string[]>([]);
 
   const fetchRing = async () => {
     try {
@@ -93,6 +85,27 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
       }
 
       const result = await response.json();
+      console.log('Fetched ring data:', result.data);
+      console.log('Metal options:', result.data.metalOptions);
+      console.log('Metal color images:', result.data.metalColorImages);
+      
+      // Validate and clean up data inconsistencies
+      if (result.data.metalColorImages && result.data.metalOptions) {
+        const metalColors = result.data.metalOptions.map((m: MetalOption) => m.color);
+        const imageColors = Object.keys(result.data.metalColorImages);
+        
+        // Log inconsistencies
+        const orphanedImageColors = imageColors.filter((color: string) => !metalColors.includes(color));
+        const missingImageColors = metalColors.filter((color: string) => !imageColors.includes(color));
+        
+        if (orphanedImageColors.length > 0) {
+          console.warn('Found orphaned metal color images for:', orphanedImageColors);
+        }
+        if (missingImageColors.length > 0) {
+          console.warn('Missing metal color images for:', missingImageColors);
+        }
+      }
+      
       setRing(result.data);
     } catch (error) {
       toast.error('Failed to fetch ring details');
@@ -104,7 +117,7 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
   };
 
   useEffect(() => {
-    if (user?.role === 'admin' && id) {
+    if (user && id) {
       fetchRing();
     }
   }, [user, id]);
@@ -180,6 +193,52 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
     });
   };
 
+  // Handle metal color image deletion
+  const handleDeleteMetalColorImage = (color: string, publicId: string, index: number) => {
+    if (!ring) return;
+    
+    // Add to deletion list
+    setMetalColorImagesToDelete(prev => [...prev, publicId]);
+    
+    // Remove from ring metalColorImages
+    setRing(prev => {
+      if (!prev) return null;
+      const updatedMetalColorImages = { ...prev.metalColorImages };
+      if (updatedMetalColorImages[color]) {
+        updatedMetalColorImages[color] = updatedMetalColorImages[color].filter((_, i) => i !== index);
+        if (updatedMetalColorImages[color].length === 0) {
+          delete updatedMetalColorImages[color];
+        }
+      }
+      return {
+        ...prev,
+        metalColorImages: updatedMetalColorImages
+      };
+    });
+  };
+
+  // Handle metal color image selection
+  const handleMetalColorImagesSelect = (color: string, files: File[]) => {
+    setMetalColorTemporaryImages(prev => ({
+      ...prev,
+      [color]: files
+    }));
+  };
+
+  // Handle metal color image removal from temporary
+  const handleMetalColorImageRemove = (color: string, index: number) => {
+    setMetalColorTemporaryImages(prev => {
+      const newImages = { ...prev };
+      if (newImages[color]) {
+        newImages[color] = newImages[color].filter((_, i) => i !== index);
+        if (newImages[color].length === 0) {
+          delete newImages[color];
+        }
+      }
+      return newImages;
+    });
+  };
+
   // Handle metal option changes
   const handleMetalOptionChange = (index: number, field: keyof MetalOption, value: string | number | boolean) => {
     if (!ring) return;
@@ -204,18 +263,28 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
       finish_type: '',
       width_mm: 0,
       total_carat_weight: 0,
-      isDefault: ring.metalOptions.length === 0
+      isDefault: false // Never automatically set as default
     };
     
     setRing(prev => {
       if (!prev) return null;
-      return { ...prev, metalOptions: [...prev.metalOptions, newOption] };
+      const updatedOptions = [...prev.metalOptions, newOption];
+      
+      // If this is the first option being added, make it default
+      if (prev.metalOptions.length === 0) {
+        newOption.isDefault = true;
+      }
+      
+      return { ...prev, metalOptions: updatedOptions };
     });
   };
 
   // Remove metal option
   const handleRemoveMetalOption = (index: number) => {
-    if (!ring || ring.metalOptions.length <= 1) return;
+    if (!ring || ring.metalOptions.length <= 1) {
+      toast.error('At least one metal option must be available');
+      return;
+    }
     
     setRing(prev => {
       if (!prev) return null;
@@ -258,6 +327,17 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     if (!ring) return;
 
+    // Validate that there's exactly one default metal option
+    const defaultOptions = ring.metalOptions.filter(option => option.isDefault);
+    if (defaultOptions.length === 0) {
+      toast.error('Please select a default metal option');
+      return;
+    }
+    if (defaultOptions.length > 1) {
+      toast.error('Only one metal option can be set as default');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -273,6 +353,20 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
           });
         }
         toast.success('Old images deleted', { id: 'deleteImages' });
+      }
+
+      // Delete metal color images from Cloudinary
+      if (metalColorImagesToDelete.length > 0) {
+        toast.loading('Deleting old metal color images...', { id: 'deleteMetalColorImages' });
+        for (const publicId of metalColorImagesToDelete) {
+          await fetch('/api/upload/delete', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ publicId, resourceType: 'image' })
+          });
+        }
+        toast.success('Old metal color images deleted', { id: 'deleteMetalColorImages' });
       }
 
       // Delete video from Cloudinary
@@ -314,6 +408,40 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
         toast.success('New images uploaded', { id: 'uploadImages' });
       }
 
+      // Upload new metal color images
+      const newMetalColorImages: Record<string, Array<{ url: string; publicId: string }>> = {};
+      if (Object.keys(metalColorTemporaryImages).length > 0) {
+        toast.loading('Uploading new metal color images...', { id: 'uploadMetalColorImages' });
+        
+        for (const [color, files] of Object.entries(metalColorTemporaryImages)) {
+          if (files.length > 0) {
+            const colorImages = await Promise.all(
+              files.map(async (file) => {
+                const base64 = await convertToBase64(file);
+                const response = await fetch('/api/upload/image', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ 
+                    file: base64,
+                    category: `wedding/metal-colors/${color.toLowerCase()}`
+                  })
+                });
+                
+                if (!response.ok) {
+                  throw new Error('Failed to upload metal color image');
+                }
+                
+                return response.json();
+              })
+            );
+            
+            newMetalColorImages[color] = colorImages;
+          }
+        }
+        toast.success('New metal color images uploaded', { id: 'uploadMetalColorImages' });
+      }
+
       // Upload new video
       let newVideoData = ring.media.video;
       if (temporaryVideo) {
@@ -345,7 +473,23 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
         media: {
           images: [...ring.media.images, ...newUploadedImages],
           video: newVideoData
-        }
+        },
+        metalColorImages: (() => {
+          const mergedImages = { ...ring.metalColorImages };
+          
+          // Merge new images with existing ones for each color
+          Object.entries(newMetalColorImages).forEach(([color, newImages]) => {
+            if (mergedImages[color]) {
+              // Append new images to existing ones
+              mergedImages[color] = [...mergedImages[color], ...newImages];
+            } else {
+              // Add new color with its images
+              mergedImages[color] = newImages;
+            }
+          });
+          
+          return mergedImages;
+        })()
       };
 
       // Update ring
@@ -375,17 +519,12 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
   };
 
   // Handle loading state
-  if (loading || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
     );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
   }
 
   if (!ring) {
@@ -499,12 +638,21 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
                 {ring.media.images.map((image, index) => (
                   <div key={index} className="relative group">
                     <div className="aspect-square relative overflow-hidden rounded-lg border border-gray-200">
-                      <Image
-                        src={image.url}
-                        alt={`Ring image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                      {image.url ? (
+                        <Image
+                          src={image.url}
+                          alt={`Ring image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          onError={() => {
+                            console.error('Failed to load image:', image.url);
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full bg-gray-100">
+                          <p className="text-gray-500 text-sm">No image</p>
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleDeleteExistingImage(image.publicId, index)}
@@ -574,6 +722,80 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
             {temporaryVideo && (
               <p className="mt-2 text-sm text-green-600">New video selected: {temporaryVideo.name}</p>
             )}
+          </div>
+        </div>
+
+        {/* Metal Color Images */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Metal Color Images</h2>
+          
+          {/* Current Metal Color Images */}
+          {ring.metalColorImages && typeof ring.metalColorImages === 'object' && Object.keys(ring.metalColorImages).length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Current Metal Color Images</h3>
+              {Object.entries(ring.metalColorImages).map(([color, images]) => (
+                <div key={color} className="mb-4">
+                  <h4 className="text-md font-medium text-gray-700 mb-2">{color}</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Array.isArray(images) && images.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square relative overflow-hidden rounded-lg border border-gray-200">
+                          {image.url ? (
+                            <Image
+                              src={image.url}
+                              alt={`${color} image ${index + 1}`}
+                              fill
+                              className="object-cover"
+                              onError={() => {
+                                console.error('Failed to load metal color image:', image.url);
+                              }}
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center h-full bg-gray-100">
+                              <p className="text-gray-500 text-sm">No image</p>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMetalColorImage(color, image.publicId, index)}
+                            className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <HiTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Metal Color Images */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-3">Add New Metal Color Images</h3>
+            <div className="space-y-4">
+              {ring.metalOptions.map((metalOption, index) => {
+                const color = metalOption.color;
+                const existingImages = ring.metalColorImages?.[color] || [];
+                const tempImages = metalColorTemporaryImages[color] || [];
+                
+                return (
+                  <div key={`color-${color}-${index}`} className="p-4 border border-gray-200 rounded-lg">
+                    <h4 className="font-medium text-gray-800 mb-2">{color} Images</h4>
+                    <MetalOptionImageUpload
+                      metalIndex={index}
+                      colorKey={color}
+                      images={existingImages}
+                      temporaryImages={tempImages}
+                      onImagesSelect={(_, files) => handleMetalColorImagesSelect(color, files)}
+                      onImageRemove={(_, imageIndex) => handleMetalColorImageRemove(color, imageIndex)}
+                      maxImages={5}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -693,7 +915,8 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
                 
                 <div className="flex items-center">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="defaultMetalOption"
                     checked={option.isDefault}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -708,7 +931,7 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
                         });
                       }
                     }}
-                    className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 mr-2"
+                    className="rounded-full border-gray-300 text-purple-600 focus:ring-purple-500 mr-2"
                   />
                   <label className="text-sm font-medium text-gray-700">Set as default</label>
                 </div>

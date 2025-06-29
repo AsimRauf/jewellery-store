@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -58,23 +57,10 @@ interface WeddingRing {
 
 export default function WeddingRingDetails({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
   
   const [ring, setRing] = useState<WeddingRing | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check authentication and admin status
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
 
   const fetchRing = async () => {
     try {
@@ -90,73 +76,66 @@ export default function WeddingRingDetails({ params }: { params: Promise<{ id: s
       const result = await response.json();
       setRing(result.data);
     } catch (error) {
-      toast.error('Failed to fetch ring details');
-      console.error('Fetch error:', error);
-      router.push('/admin/rings/wedding/list');
+    toast.error('Failed to fetch ring details');
+    console.error('Fetch error:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+    };
 
-  useEffect(() => {
-    if (user?.role === 'admin' && id) {
+    useEffect(() => {
+      if (user && id) {
       fetchRing();
     }
-  }, [user, id]);
+    }, [user, id]);
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this ring?')) {
+    const handleDelete = async () => {
+      if (!confirm('Are you sure you want to delete this ring?')) {
       return;
     }
 
-    try {
+      try {
       const response = await fetch(`/api/admin/rings/wedding/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
+      method: 'DELETE',
+    credentials: 'include'
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete ring');
-      }
+        if (!response.ok) {
+      throw new Error('Failed to delete ring');
+    }
 
-      toast.success('Ring deleted successfully');
-      router.push('/admin/rings/wedding/list');
+        toast.success('Ring deleted successfully');
     } catch (error) {
-      toast.error('Failed to delete ring');
+    toast.error('Failed to delete ring');
       console.error('Delete error:', error);
     }
-  };
+    };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    const formatPrice = (price: number) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
       currency: 'USD'
     }).format(price);
-  };
+    };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
+    const formatDate = (dateString: string) => {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
     });
-  };
+    };
 
-  // Handle loading state
-  if (loading || isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
+    // Handle loading state
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
+    </div>
     );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+    }
 
   if (!ring) {
     return (

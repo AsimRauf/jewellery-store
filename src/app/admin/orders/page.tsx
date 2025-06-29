@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
 
@@ -80,8 +79,7 @@ interface OrderStats {
 }
 
 export default function AdminOrdersPage() {
-  const { user, loading } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
   
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [stats, setStats] = useState<OrderStats | null>(null);
@@ -95,18 +93,6 @@ export default function AdminOrdersPage() {
     sortBy: 'createdAt',
     sortOrder: 'desc'
   });
-
-  // Check authentication and admin status
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (user.role !== 'admin') {
-        toast.error('Admin access required');
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, loading, router]);
 
   // Fetch orders
   const fetchOrders = async () => {
@@ -139,24 +125,10 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (user) {
       fetchOrders();
     }
   }, [user, page, filters]);
-
-  // Handle loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  // Handle unauthorized access
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
