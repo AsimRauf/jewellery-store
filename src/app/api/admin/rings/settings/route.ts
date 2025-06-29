@@ -63,12 +63,54 @@ export async function GET(request: NextRequest) {
     try {
       await connectDB();
 
-    // Get all settings
-    const settings = await Setting.find({}).sort({ createdAt: -1 });
+    // Parse query parameters
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const search = url.searchParams.get('search') || '';
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc';
+
+    // Build search filter
+    const filter: any = {};
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { SKU: { $regex: search, $options: 'i' } },
+        { style: { $in: [new RegExp(search, 'i')] } },
+        { type: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Build sort object
+    const sort: any = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Execute queries
+    const [settings, total] = await Promise.all([
+      Setting.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Setting.countDocuments(filter)
+    ]);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limit);
 
     return NextResponse.json({
       success: true,
-      data: settings
+      data: settings,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
     });
 
     } catch (error) {
