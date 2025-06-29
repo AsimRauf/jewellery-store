@@ -3,6 +3,71 @@ import { connectDB } from '@/utils/db';
 import EngagementRing from '@/models/EngagementRing';
 import { withAdminAuth } from '@/utils/authMiddleware';
 
+// GET endpoint to list all engagement rings
+export async function GET(request: NextRequest) {
+  return withAdminAuth(request, async () => {
+    try {
+      await connectDB();
+
+    // Parse query parameters
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const search = url.searchParams.get('search') || '';
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc';
+
+    // Build search filter
+    const filter: any = {};
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { SKU: { $regex: search, $options: 'i' } },
+        { 'main_stone.type': { $regex: search, $options: 'i' } },
+        { 'main_stone.gemstone_type': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Build sort object
+    const sort: any = {};
+    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Execute queries
+    const [rings, total] = await Promise.all([
+      EngagementRing.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      EngagementRing.countDocuments(filter)
+    ]);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(total / limit);
+
+    return NextResponse.json({
+      success: true,
+      data: rings,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages
+      }
+    });
+
+    } catch (error) {
+      console.error('Error fetching engagement rings:', error);
+      return NextResponse.json({ 
+        error: 'Failed to fetch engagement rings' 
+      }, { status: 500 });
+    }
+  });
+}
+
 export async function POST(request: NextRequest) {
   return withAdminAuth(request, async () => {
     try {

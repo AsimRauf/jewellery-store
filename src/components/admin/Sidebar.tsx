@@ -1,123 +1,270 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  HiHome, 
-  HiShoppingCart
+import { useState } from "react";
+import {
+    HiHome,
+    HiShoppingCart,
+    HiChevronDown,
+    HiChevronRight,
+    HiViewList,
+    HiPlus
 } from "react-icons/hi";
 import { GiRing, GiDiamonds, GiCrystalGrowth } from "react-icons/gi";
 
-interface MenuItem {
-  title: string;
-  icon: React.ReactNode;
-  href: string;
-  isParent?: boolean;
-  submenu?: Array<{
+interface SubMenuItem {
     title: string;
     href: string;
-  }>;
+    type: 'list' | 'add';
+    icon: React.ReactNode;
+}
+
+interface MenuItem {
+    title: string;
+    icon: React.ReactNode;
+    href?: string;
+    category?: string;
+    submenu?: SubMenuItem[];
+}
+
+interface MenuSection {
+    title: string;
+    items: MenuItem[];
 }
 
 const Sidebar = () => {
-  const pathname = usePathname();
+    const pathname = usePathname();
+    const [expandedSections, setExpandedSections] = useState<string[]>(['products']);
 
-  const menuItems: MenuItem[] = [
-    {
-      title: "Dashboard",
-      icon: <HiHome className="w-6 h-6" />,
-      href: "/admin/dashboard"
-    },
-    {
-      title: "Rings",
-      icon: <GiRing className="w-6 h-6" />,
-      href: "/admin/rings",
-      isParent: true,
-      submenu: [
-        { title: "📋 Wedding Rings List", href: "/admin/rings/wedding/list" },
-        { title: "➕ Add Wedding Ring", href: "/admin/rings/wedding" },
-        { title: "📋 Engagement Rings List", href: "/admin/rings/engagement/list" },
-        { title: "➕ Add Engagement Ring", href: "/admin/rings/engagement" },
-        { title: "📋 Settings List", href: "/admin/rings/settings/list" },
-        { title: "➕ Add Setting", href: "/admin/rings/settings" },
-      ]
-    },
-    {
-      title: "Diamonds",
-      icon: <GiDiamonds className="w-6 h-6" />,
-      href: "/admin/diamonds",
-      isParent: true,
-      submenu: [
-        { title: "📋 Diamonds List", href: "/admin/diamonds/list" },
-        { title: "➕ Add Diamond", href: "/admin/diamonds" },
-      ]
-    },
-    {
-      title: "Gemstones",
-      icon: <GiCrystalGrowth className="w-6 h-6" />,
-      href: "/admin/gemstones",
-      isParent: true,
-      submenu: [
-        { title: "📋 Gemstones List", href: "/admin/gemstones/list" },
-        { title: "➕ Add Gemstone", href: "/admin/gemstones" },
-      ]
-    },
-    {
-      title: "Orders",
-      icon: <HiShoppingCart className="w-6 h-6" />,
-      href: "/admin/orders"
-    }
-  ];
+    const menuSections: MenuSection[] = [
+        {
+            title: "Overview",
+            items: [
+                {
+                    title: "Dashboard",
+                    icon: <HiHome className="w-5 h-5" />,
+                    href: "/admin/dashboard"
+                }
+            ]
+        },
+        {
+            title: "Products",
+            items: [
+                {
+                    title: "Wedding Rings",
+                    icon: <GiRing className="w-5 h-5" />,
+                    category: "rings-wedding",
+                    submenu: [
+                        {
+                            title: "View All",
+                            href: "/admin/rings/wedding/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/rings/wedding",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Engagement Rings",
+                    icon: <GiRing className="w-5 h-5" />,
+                    category: "rings-engagement",
+                    submenu: [
+                        {
+                            title: "View All",
+                            href: "/admin/rings/engagement/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/rings/engagement",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Settings",
+                    icon: <GiRing className="w-5 h-5" />,
+                    category: "settings",
+                    submenu: [
+                        {
+                            title: "View All",
+                            href: "/admin/rings/settings/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/rings/settings",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Diamonds",
+                    icon: <GiDiamonds className="w-5 h-5" />,
+                    category: "diamonds",
+                    submenu: [
+                        {
+                            title: "View All",
+                            href: "/admin/diamonds/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/diamonds",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Gemstones",
+                    icon: <GiCrystalGrowth className="w-5 h-5" />,
+                    category: "gemstones",
+                    submenu: [
+                        {
+                            title: "View All",
+                            href: "/admin/gemstones/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/gemstones",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: "Sales",
+            items: [
+                {
+                    title: "Orders",
+                    icon: <HiShoppingCart className="w-5 h-5" />,
+                    href: "/admin/orders"
+                }
+            ]
+        }
+    ];
 
-  const isActive = (path: string) => pathname === path;
-  const isSubActive = (path: string) => pathname?.startsWith(path) ?? false;
+    const isActive = (path: string) => pathname === path;
+    const isSubActive = (path: string) => pathname?.startsWith(path) ?? false;
 
-  return (
-    <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0">
-      <div className="p-6 border-b">
-        <h2 className="text-2xl font-bold text-purple-600">Admin Panel</h2>
-      </div>
+    const toggleSection = (category: string) => {
+        setExpandedSections(prev =>
+            prev.includes(category)
+                ? prev.filter(s => s !== category)
+                : [...prev, category]
+        );
+    };
 
-      <nav className="mt-6 px-4">
-        {menuItems.map((item) => (
-          <div key={item.href} className="mb-4">
-            {item.isParent ? (
-              <div className={`
-                flex items-center px-4 py-3 rounded-lg transition-colors
-                ${isSubActive(item.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-100'}
-              `}>
-                {item.icon}
-                <span className="ml-3">{item.title}</span>
-              </div>
-            ) : (
-              <Link href={item.href}>
-                <div className={`
-                  flex items-center px-4 py-3 rounded-lg transition-colors
-                  ${isActive(item.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-100'}
-                `}>
-                  {item.icon}
-                  <span className="ml-3">{item.title}</span>
-                </div>
-              </Link>
-            )}
+    const isSectionExpanded = (category: string) => {
+        if (!category) return false;
+        return expandedSections.includes(category) || isSubActive(`/admin/${category}`);
+    };
 
-            {item.submenu && (item.isParent || isSubActive(item.href)) && (
-              <div className="ml-8 mt-2 space-y-2">
-                {item.submenu.map((subItem) => (
-                  <Link key={subItem.href} href={subItem.href}>
-                    <div className={`
-                      px-4 py-2 rounded-md text-sm transition-colors
-                      ${isActive(subItem.href) ? 'bg-purple-100 text-purple-600' : 'hover:bg-gray-50'}
-                    `}>
-                      {subItem.title}
+    return (
+        <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 border-r border-gray-200">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
+                <p className="text-sm text-gray-500 mt-1">Jewelry Store</p>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto py-4">
+                {menuSections.map((section) => (
+                    <div key={section.title} className="mb-6">
+                        {/* Section Header */}
+                        <div className="px-6 mb-3">
+                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                {section.title}
+                            </h3>
+                        </div>
+
+                        {/* Section Items */}
+                        <div className="space-y-1 px-3">
+                            {section.items.map((item) => (
+                                <div key={item.title} className="space-y-1">
+                                    {/* Main Item */}
+                                    {item.href ? (
+                                        // Direct link item
+                                        <Link href={item.href}>
+                                            <div className={`
+                        flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                        ${isActive(item.href)
+                                                    ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                                }
+                      `}>
+                                                {item.icon}
+                                                <span className="ml-3">{item.title}</span>
+                                            </div>
+                                        </Link>
+                                    ) : (
+                                        // Expandable parent item
+                                        <button
+                                            onClick={() => toggleSection(item.category!)}
+                                            className={`
+                        w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                        ${isSectionExpanded(item.category!) || isSubActive(`/admin/${item.category}`)
+                                                    ? 'bg-gray-100 text-gray-900'
+                                                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                                                }
+                      `}
+                                        >
+                                            <div className="flex items-center">
+                                                {item.icon}
+                                                <span className="ml-3">{item.title}</span>
+                                            </div>
+                                            {isSectionExpanded(item.category!) ? (
+                                                <HiChevronDown className="w-4 h-4" />
+                                            ) : (
+                                                <HiChevronRight className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    )}
+
+                                    {/* Submenu */}
+                                    {item.submenu && isSectionExpanded(item.category!) && (
+                                        <div className="ml-6 pl-4 border-l border-gray-200 space-y-1">
+                                            {item.submenu.map((subItem) => (
+                                                <Link key={subItem.href} href={subItem.href}>
+                                                    <div className={`
+                            flex items-center px-3 py-2 rounded-md text-sm transition-colors
+                            ${isActive(subItem.href)
+                                                            ? 'bg-purple-50 text-purple-700 border-l-2 border-purple-500'
+                                                            : subItem.type === 'add'
+                                                                ? 'text-green-600 hover:bg-green-50'
+                                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                                        }
+                          `}>
+                                                        {subItem.icon}
+                                                        <span className="ml-2">{subItem.title}</span>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                  </Link>
                 ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-    </div>
-  );
+            </nav>
+        </div>
+    );
 };
 
 export default Sidebar;
