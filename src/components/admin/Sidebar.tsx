@@ -32,20 +32,33 @@ const Sidebar = () => {
       href: "/admin/rings",
       isParent: true,
       submenu: [
-        { title: "Wedding Rings", href: "/admin/rings/wedding" },
-        { title: "Engagement Rings", href: "/admin/rings/engagement" },
-        { title: "Ring Settings", href: "/admin/rings/settings" },
+        { title: "📋 Wedding Rings List", href: "/admin/rings/wedding/list" },
+        { title: "➕ Add Wedding Ring", href: "/admin/rings/wedding" },
+        { title: "📋 Engagement Rings List", href: "/admin/rings/engagement/list" },
+        { title: "➕ Add Engagement Ring", href: "/admin/rings/engagement" },
+        { title: "📋 Settings List", href: "/admin/rings/settings/list" },
+        { title: "➕ Add Setting", href: "/admin/rings/settings" },
       ]
     },
     {
       title: "Diamonds",
       icon: <GiDiamonds className="w-6 h-6" />,
-      href: "/admin/diamonds"
+      href: "/admin/diamonds",
+      isParent: true,
+      submenu: [
+        { title: "📋 Diamonds List", href: "/admin/diamonds/list" },
+        { title: "➕ Add Diamond", href: "/admin/diamonds" },
+      ]
     },
     {
       title: "Gemstones",
       icon: <GiCrystalGrowth className="w-6 h-6" />,
-      href: "/admin/gemstones"
+      href: "/admin/gemstones",
+      isParent: true,
+      submenu: [
+        { title: "📋 Gemstones List", href: "/admin/gemstones/list" },
+        { title: "➕ Add Gemstone", href: "/admin/gemstones" },
+      ]
     },
     {
       title: "Orders",
