@@ -8,6 +8,7 @@ export default function Hero() {
   const [marginTop, setMarginTop] = useState('0');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
 
   // Carousel slides data
@@ -66,11 +67,14 @@ export default function Hero() {
   ];
 
   useEffect(() => {
-    // Set initial margin based on screen width
-    const updateMargin = () => {
-      if (window.innerWidth < 768) {
+    // Set initial margin and mobile state based on screen width
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 1024);
+      
+      if (width < 768) {
         setMarginTop('0'); // Reset margin for mobile since we're changing layout
-      } else if (window.innerWidth < 1024) {
+      } else if (width < 1024) {
         setMarginTop('2rem'); // For tablet
       } else {
         setMarginTop('0'); // For desktop
@@ -78,13 +82,13 @@ export default function Hero() {
     };
 
     // Set initial value
-    updateMargin();
+    updateLayout();
 
     // Update on resize
-    window.addEventListener('resize', updateMargin);
+    window.addEventListener('resize', updateLayout);
     
     // Cleanup
-    return () => window.removeEventListener('resize', updateMargin);
+    return () => window.removeEventListener('resize', updateLayout);
   }, []);
 
   // Auto-slide effect
@@ -217,16 +221,11 @@ export default function Hero() {
                   maxWidth: 'none',
                   height: '100%',
                   objectFit: 'contain',
-                  objectPosition: 'bottom center', // center on mobile
-                  // right on desktop via Tailwind below
-                }}
-              />
-              
-              {/* Natural image fade - Mobile only */}
-              <div 
-                className="absolute bottom-0 left-0 right-0 h-24 lg:hidden pointer-events-none"
-                style={{
-                  background: `linear-gradient(to top, rgba(248, 240, 225, 0.95) 0%, rgba(248, 240, 225, 0.8) 25%, rgba(248, 240, 225, 0.6) 50%, rgba(248, 240, 225, 0.3) 75%, transparent 100%)`
+                  objectPosition: 'bottom center',
+                  ...(isMobile && {
+                    maskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
+                    WebkitMaskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
+                  })
                 }}
               />
             </div>
