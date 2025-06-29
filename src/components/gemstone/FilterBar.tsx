@@ -71,7 +71,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
     (filters.priceRange ? 1 : 0);
 
   return (
-    <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+    <div className="bg-white shadow-sm rounded-lg border border-gray-200 mb-8">
       {/* Filter Sections Tabs */}
       <div className="flex flex-wrap justify-center gap-2 p-4 border-b border-gray-200">
         <button 
@@ -162,7 +162,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           Source {filters.sources.length > 0 && `(${filters.sources.length})`}
         </button>
         
-                <button 
+        <button 
           onClick={() => toggleFilterSection('advanced')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             activeFilterSection === 'advanced' 

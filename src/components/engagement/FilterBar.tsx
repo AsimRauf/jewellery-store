@@ -42,520 +42,390 @@ export default function FilterBar({
   clearAllFilters,
   applyFilters
 }: FilterBarProps) {
+  // Count total active filters
+  const activeFilterCount = 
+    filters.styles.length + 
+    filters.types.length + 
+    filters.metalColors.length + 
+    filters.gemstoneTypes.length + 
+    filters.stoneTypes.length + 
+    (filters.caratRange ? 1 : 0) + 
+    (filters.priceRange ? 1 : 0);
+
   return (
-    <div className="mb-8 border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-wrap gap-4 justify-center">
+    <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+      {/* Filter Sections Tabs */}
+      <div className="flex flex-wrap justify-center gap-2 p-4 border-b border-gray-200">
+        <button 
+          onClick={() => toggleFilterSection('style')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeFilterSection === 'style' 
+              ? 'bg-amber-500 text-white' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } ${filters.styles.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
+        >
+          Style {filters.styles.length > 0 && `(${filters.styles.length})`}
+        </button>
+        
+        <button 
+          onClick={() => toggleFilterSection('type')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeFilterSection === 'type' 
+              ? 'bg-amber-500 text-white' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } ${filters.types.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
+        >
+          Type {filters.types.length > 0 && `(${filters.types.length})`}
+        </button>
+        
+        <button 
+          onClick={() => toggleFilterSection('carat')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeFilterSection === 'carat' 
+              ? 'bg-amber-500 text-white' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } ${filters.caratRange ? 'ring-2 ring-amber-300' : ''}`}
+        >
+          Carat {filters.caratRange && '(1)'}
+        </button>
+        
+        <button 
+          onClick={() => toggleFilterSection('price')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeFilterSection === 'price' 
+              ? 'bg-amber-500 text-white' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } ${filters.priceRange ? 'ring-2 ring-amber-300' : ''}`}
+        >
+          Price {filters.priceRange && '(1)'}
+        </button>
+        
+        {availableFilters.stoneTypes.length > 0 && (
           <button 
-            onClick={() => toggleFilterSection('style')}
-            className={`px-4 py-2 rounded-full border ${
-              activeFilterSection === 'style' 
-                ? 'bg-amber-500 text-white border-amber-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-            } transition-colors flex items-center gap-2`}
+            onClick={() => toggleFilterSection('stoneType')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeFilterSection === 'stoneType' 
+                ? 'bg-amber-500 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } ${filters.stoneTypes.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
           >
-            <span>Shop by Style</span>
-            <svg 
-              className={`h-4 w-4 transition-transform ${activeFilterSection === 'style' ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            Stone Type {filters.stoneTypes.length > 0 && `(${filters.stoneTypes.length})`}
           </button>
+        )}
         
+        {availableFilters.gemstoneTypes.length > 0 && (
           <button 
-            onClick={() => toggleFilterSection('type')}
-            className={`px-4 py-2 rounded-full border ${
-              activeFilterSection === 'type' 
-                ? 'bg-amber-500 text-white border-amber-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-            } transition-colors flex items-center gap-2`}
+            onClick={() => toggleFilterSection('gemstoneType')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeFilterSection === 'gemstoneType' 
+                ? 'bg-amber-500 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } ${filters.gemstoneTypes.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
           >
-            <span>Ring Type</span>
-            <svg 
-              className={`h-4 w-4 transition-transform ${activeFilterSection === 'type' ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            Gemstone {filters.gemstoneTypes.length > 0 && `(${filters.gemstoneTypes.length})`}
           </button>
+        )}
         
-          <button 
-            onClick={() => toggleFilterSection('price')}
-            className={`px-4 py-2 rounded-full border ${
-              activeFilterSection === 'price' 
-                ? 'bg-amber-500 text-white border-amber-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-            } transition-colors flex items-center gap-2`}
-          >
-            <span>Price Range</span>
-            <svg 
-              className={`h-4 w-4 transition-transform ${activeFilterSection === 'price' ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        
-          <button 
-            onClick={() => toggleFilterSection('carat')}
-            className={`px-4 py-2 rounded-full border ${
-              activeFilterSection === 'carat' 
-                ? 'bg-amber-500 text-white border-amber-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-            } transition-colors flex items-center gap-2`}
-          >
-            <span>Carat Weight</span>
-            <svg 
-              className={`h-4 w-4 transition-transform ${activeFilterSection === 'carat' ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        
-          {availableFilters.stoneTypes.length > 0 && (
-            <button 
-              onClick={() => toggleFilterSection('stoneType')}
-              className={`px-4 py-2 rounded-full border ${
-                activeFilterSection === 'stoneType' 
-                  ? 'bg-amber-500 text-white border-amber-500' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-              } transition-colors flex items-center gap-2`}
-            >
-              <span>Stone Type</span>
-              <svg 
-                className={`h-4 w-4 transition-transform ${activeFilterSection === 'stoneType' ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          )}
-        
-          {availableFilters.gemstoneTypes.length > 0 && (
-            <button 
-              onClick={() => toggleFilterSection('gemstoneType')}
-              className={`px-4 py-2 rounded-full border ${
-                activeFilterSection === 'gemstoneType' 
-                  ? 'bg-amber-500 text-white border-amber-500' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-              } transition-colors flex items-center gap-2`}
-            >
-              <span>Gemstone Type</span>
-              <svg 
-                className={`h-4 w-4 transition-transform ${activeFilterSection === 'gemstoneType' ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          )}
-        
-          <button 
-            onClick={() => toggleFilterSection('metal')}
-            className={`px-4 py-2 rounded-full border ${
-              activeFilterSection === 'metal' 
-                ? 'bg-amber-500 text-white border-amber-500' 
-                : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-            } transition-colors flex items-center gap-2`}
-          >
-                       <span>Metal Color</span>
-            <svg 
-              className={`h-4 w-4 transition-transform ${activeFilterSection === 'metal' ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
+        <button 
+          onClick={() => toggleFilterSection('metal')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeFilterSection === 'metal' 
+              ? 'bg-amber-500 text-white' 
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          } ${filters.metalColors.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
+        >
+          Metal {filters.metalColors.length > 0 && `(${filters.metalColors.length})`}
+        </button>
+      </div>
       
-        {activeFilterSection === 'style' && availableFilters.styles.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-6">
-              {availableFilters.styles.map((style) => (
-                <div 
-                  key={style} 
-                  onClick={() => toggleStyle(style)}
-                  className={`cursor-pointer flex flex-col items-center transition-all ${
-                    filters.styles.includes(style) 
-                      ? 'scale-110 text-amber-500' 
-                      : 'text-gray-700 hover:text-amber-400'
-                  }`}
-                >
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-2 border-2 ${
-                    filters.styles.includes(style) ? 'border-amber-500' : 'border-gray-200'
-                  }`}>
-                    <Image 
-                      src={STYLE_IMAGES[style] || '/icons/styles/classic.svg'} 
-                      alt={style} 
-                      width={50} 
-                      height={50}
-                      className="object-contain"
+      {/* Filter Content */}
+      {activeFilterSection && (
+        <div className="p-5 bg-gray-50 rounded-b-lg">
+          {activeFilterSection === 'style' && availableFilters.styles.length > 0 && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Ring Style</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {availableFilters.styles.map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => toggleStyle(style)}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.styles.includes(style)
+                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {style}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeFilterSection === 'type' && availableFilters.types.length > 0 && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Ring Type</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {availableFilters.types.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => toggleType(type)}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.types.includes(type)
+                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeFilterSection === 'carat' && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Carat Weight</h3>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {availableFilters.caratRanges.map((range, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCaratRange(filters.caratRange && 
+                      filters.caratRange[0] === range[0] && filters.caratRange[1] === range[1] 
+                        ? null 
+                        : range
+                    )}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.caratRange && 
+                      filters.caratRange[0] === range[0] && 
+                      filters.caratRange[1] === range[1]
+                        ? 'bg-amber-500 text-white shadow-md'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {range[0]} - {range[1]} ct
+                  </button>
+                ))}
+              </div>
+              
+              {/* Custom carat range input */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Custom Carat Range</h4>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Min Carat</label>
+                    <input 
+                      type="number" 
+                      placeholder="Min" 
+                      min="0.1" 
+                      step="0.1"
+                      value={filters.caratRange ? filters.caratRange[0] : ''}
+                      onChange={(e) => {
+                        const min = parseFloat(e.target.value);
+                        const max = filters.caratRange ? filters.caratRange[1] : 10;
+                        if (!isNaN(min)) {
+                          setCaratRange([min, max]);
+                        }
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                     />
                   </div>
-                  <span className="text-sm text-center">{style}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'type' && availableFilters.types.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              {availableFilters.types.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => toggleType(type)}
-                  className={`px-4 py-2 rounded-full border ${
-                    filters.types.includes(type) 
-                      ? 'bg-amber-500 text-white border-amber-500' 
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                  } transition-colors`}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'price' && availableFilters.priceRanges.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => setPriceRange([0, 1000])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.priceRange && filters.priceRange[0] === 0 && filters.priceRange[1] === 1000
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                Under $1,000
-              </button>
-              <button
-                onClick={() => setPriceRange([1000, 2500])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.priceRange && filters.priceRange[0] === 1000 && filters.priceRange[1] === 2500
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                $1,000 - $2,500
-              </button>
-              <button
-                onClick={() => setPriceRange([2500, 5000])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.priceRange && filters.priceRange[0] === 2500 && filters.priceRange[1] === 5000
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                $2,500 - $5,000
-              </button>
-              <button
-                onClick={() => setPriceRange([5000, 10000])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.priceRange && filters.priceRange[0] === 5000 && filters.priceRange[1] === 10000
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                $5,000 - $10,000
-              </button>
-              <button
-                onClick={() => setPriceRange([10000, 1000000])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.priceRange && filters.priceRange[0] === 10000 && filters.priceRange[1] === 1000000
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                $10,000+
-              </button>
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'carat' && availableFilters.caratRanges.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => setCaratRange([0, 0.5])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.caratRange && filters.caratRange[0] === 0 && filters.caratRange[1] === 0.5
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                Under 0.5 ct
-              </button>
-              <button
-                onClick={() => setCaratRange([0.5, 1])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.caratRange && filters.caratRange[0] === 0.5 && filters.caratRange[1] === 1
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                0.5 - 1 ct
-              </button>
-              <button
-                onClick={() => setCaratRange([1, 2])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.caratRange && filters.caratRange[0] === 1 && filters.caratRange[1] === 2
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                1 - 2 ct
-              </button>
-              <button
-                onClick={() => setCaratRange([2, 3])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.caratRange && filters.caratRange[0] === 2 && filters.caratRange[1] === 3
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                2 - 3 ct
-              </button>
-              <button
-                onClick={() => setCaratRange([3, 100])}
-                className={`px-4 py-2 rounded-full border ${
-                  filters.caratRange && filters.caratRange[0] === 3 && filters.caratRange[1] === 100
-                    ? 'bg-amber-500 text-white border-amber-500' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                } transition-colors`}
-              >
-                3+ ct
-              </button>
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'stoneType' && availableFilters.stoneTypes.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              {availableFilters.stoneTypes.map((stoneType) => (
-                <button
-                  key={stoneType}
-                  onClick={() => toggleStoneType(stoneType)}
-                  className={`px-4 py-2 rounded-full border ${
-                    filters.stoneTypes.includes(stoneType) 
-                      ? 'bg-amber-500 text-white border-amber-500' 
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                  } transition-colors`}
-                >
-                  {stoneType}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'gemstoneType' && availableFilters.gemstoneTypes.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              {availableFilters.gemstoneTypes.map((gemstoneType) => (
-                <button
-                  key={gemstoneType}
-                  onClick={() => toggleGemstoneType(gemstoneType)}
-                  className={`px-4 py-2 rounded-full border ${
-                    filters.gemstoneTypes.includes(gemstoneType) 
-                      ? 'bg-amber-500 text-white border-amber-500' 
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                  } transition-colors`}
-                >
-                  {gemstoneType}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      
-        {activeFilterSection === 'metal' && availableFilters.metalColors.length > 0 && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap justify-center gap-4">
-              {availableFilters.metalColors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => toggleMetalColor(color)}
-                  className={`px-4 py-2 rounded-full border ${
-                    filters.metalColors.includes(color) 
-                      ? 'bg-amber-500 text-white border-amber-500' 
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
-                  } transition-colors`}
-                >
-                  {color}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      
-        {(filters.styles.length > 0 || 
-          filters.types.length > 0 || 
-          filters.priceRange || 
-          filters.caratRange || 
-          filters.gemstoneTypes.length > 0 || 
-          filters.stoneTypes.length > 0 ||
-          filters.metalColors.length > 0) && (
-          <div className="mt-4 p-4 border-t border-gray-200">
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-gray-700 font-medium">Active Filters:</span>
-            
-              {filters.styles.map(style => (
-                <span 
-                  key={`style-${style}`}
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {style}
-                  <button 
-                    onClick={() => toggleStyle(style)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-            
-              {filters.types.map(type => (
-                <span 
-                  key={`type-${type}`}
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {type}
-                  <button 
-                    onClick={() => toggleType(type)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-            
-              {filters.metalColors.map(color => (
-                <span 
-                  key={`color-${color}`}
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {color}
-                  <button 
-                    onClick={() => toggleMetalColor(color)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  </span>
-              ))}
-            
-              {filters.priceRange && (
-                <span 
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {`$${filters.priceRange[0].toLocaleString()} - $${filters.priceRange[1].toLocaleString()}`}
-                  <button 
-                    onClick={() => setPriceRange(null)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              )}
-            
-              {filters.caratRange && (
-                <span 
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {`${filters.caratRange[0]} - ${filters.caratRange[1]} ct`}
-                  <button 
+                  <span className="text-gray-400">to</span>
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Max Carat</label>
+                    <input 
+                      type="number" 
+                      placeholder="Max" 
+                      min="0.1" 
+                      step="0.1"
+                      value={filters.caratRange ? filters.caratRange[1] : ''}
+                      onChange={(e) => {
+                        const max = parseFloat(e.target.value);
+                        const min = filters.caratRange ? filters.caratRange[0] : 0.1;
+                        if (!isNaN(max)) {
+                          setCaratRange([min, max]);
+                        }
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                    />
+                  </div>
+                  <button
                     onClick={() => setCaratRange(null)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
+                    className="px-3 py-2 text-amber-500 hover:text-amber-600 text-sm font-medium"
                   >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    Clear
                   </button>
-                </span>
-              )}
-            
-              {filters.gemstoneTypes.map(gemstoneType => (
-                <span 
-                  key={`gemstone-${gemstoneType}`}
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {gemstoneType}
-                  <button 
-                    onClick={() => toggleGemstoneType(gemstoneType)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-            
-              {filters.stoneTypes.map(stoneType => (
-                <span 
-                  key={`stone-${stoneType}`}
-                  className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm flex items-center gap-1"
-                >
-                  {stoneType}
-                  <button 
-                    onClick={() => toggleStoneType(stoneType)}
-                    className="ml-1 text-amber-800 hover:text-amber-900"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-            
-              <button 
-                onClick={clearAllFilters}
-                className="px-3 py-1 text-gray-600 text-sm hover:text-amber-500 transition-colors"
-              >
-                Clear All
-              </button>
+                </div>
+              </div>
             </div>
+          )}
           
-            <div className="flex justify-center">
-              <button 
-                onClick={applyFilters}
-                className="px-6 py-2 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors"
-              >
-                Apply Filters
-              </button>
+          {activeFilterSection === 'price' && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Price Range</h3>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {availableFilters.priceRanges.map((range, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setPriceRange(filters.priceRange && 
+                      filters.priceRange[0] === range[0] && filters.priceRange[1] === range[1] 
+                        ? null 
+                        : range
+                    )}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.priceRange && 
+                      filters.priceRange[0] === range[0] && 
+                      filters.priceRange[1] === range[1]
+                        ? 'bg-amber-500 text-white shadow-md'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    ${range[0].toLocaleString()} - ${range[1].toLocaleString()}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Custom price range input */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Custom Price Range</h4>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Min Price ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Min" 
+                      min="0" 
+                      step="100"
+                      value={filters.priceRange ? filters.priceRange[0] : ''}
+                      onChange={(e) => {
+                        const min = parseInt(e.target.value);
+                        const max = filters.priceRange ? filters.priceRange[1] : 100000;
+                        if (!isNaN(min)) {
+                          setPriceRange([min, max]);
+                        }
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                    />
+                  </div>
+                  <span className="text-gray-400">to</span>
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Max Price ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Max" 
+                      min="0" 
+                      step="100"
+                      value={filters.priceRange ? filters.priceRange[1] : ''}
+                      onChange={(e) => {
+                        const max = parseInt(e.target.value);
+                        const min = filters.priceRange ? filters.priceRange[0] : 0;
+                        if (!isNaN(max)) {
+                          setPriceRange([min, max]);
+                        }
+                      }}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setPriceRange(null)}
+                    className="px-3 py-2 text-amber-500 hover:text-amber-600 text-sm font-medium"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+          
+          {activeFilterSection === 'stoneType' && availableFilters.stoneTypes.length > 0 && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Stone Type</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {availableFilters.stoneTypes.map((stoneType) => (
+                  <button
+                    key={stoneType}
+                    onClick={() => toggleStoneType(stoneType)}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.stoneTypes.includes(stoneType)
+                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {stoneType}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeFilterSection === 'gemstoneType' && availableFilters.gemstoneTypes.length > 0 && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Gemstone Type</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {availableFilters.gemstoneTypes.map((gemstoneType) => (
+                  <button
+                    key={gemstoneType}
+                    onClick={() => toggleGemstoneType(gemstoneType)}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.gemstoneTypes.includes(gemstoneType)
+                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {gemstoneType}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeFilterSection === 'metal' && availableFilters.metalColors.length > 0 && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-3">Metal Color</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {availableFilters.metalColors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => toggleMetalColor(color)}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                      filters.metalColors.includes(color)
+                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Filter Actions */}
+      {activeFilterCount > 0 && (
+        <div className="flex justify-between items-center p-4 border-t border-gray-200 bg-white rounded-b-lg">
+          <button
+            onClick={clearAllFilters}
+            className="text-amber-500 hover:text-amber-600 font-medium text-sm flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Clear All Filters ({activeFilterCount})
+          </button>
+          <button
+            onClick={applyFilters}
+            className="px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors shadow-sm font-medium text-sm flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Apply Filters
+          </button>
+        </div>
+      )}
+    </div>
     </div>
   );
 }

@@ -574,27 +574,25 @@ export default function GemstoneCategoryPage() {
       </div>
       
       {/* Desktop Filters */}
-      <div className="hidden lg:block mb-8">
-        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <FilterBar
-            filters={filters}
-            availableFilters={availableFilters}
-            activeFilterSection={activeFilterSection}
-            toggleFilterSection={toggleFilterSection}
-            toggleType={toggleType}
-            toggleShape={toggleShape}
-            toggleColor={toggleColor}
-            toggleClarity={toggleClarity}
-            toggleCut={toggleCut}
-            toggleSource={toggleSource}
-            toggleOrigin={toggleOrigin}
-            toggleTreatment={toggleTreatment}
-            setCaratRange={setCaratRange}
-            setPriceRange={setPriceRange}
-            clearAllFilters={clearAllFilters}
-            applyFilters={applyFilters}
-          />
-        </div>
+      <div className="hidden lg:block">
+        <FilterBar
+          filters={filters}
+          availableFilters={availableFilters}
+          activeFilterSection={activeFilterSection}
+          toggleFilterSection={toggleFilterSection}
+          toggleType={toggleType}
+          toggleShape={toggleShape}
+          toggleColor={toggleColor}
+          toggleClarity={toggleClarity}
+          toggleCut={toggleCut}
+          toggleSource={toggleSource}
+          toggleOrigin={toggleOrigin}
+          toggleTreatment={toggleTreatment}
+          setCaratRange={setCaratRange}
+          setPriceRange={setPriceRange}
+          clearAllFilters={clearAllFilters}
+          applyFilters={applyFilters}
+        />
       </div>
       
       {/* Mobile Filters */}
