@@ -55,7 +55,60 @@ export async function PUT(
         }, { status: 500 });
       }
 
-      const updateData = await request.json();
+      const contentType = request.headers.get('content-type');
+      let updateData: Record<string, unknown>;
+
+      if (contentType?.includes('application/json')) {
+        // Handle JSON updates (simple field updates)
+        updateData = await request.json();
+      } else {
+        // Handle FormData updates (with potential image uploads)
+        const formData = await request.formData();
+        updateData = {};
+
+        // Process all form fields
+        for (const [key, value] of formData.entries()) {
+          if (key === 'newImages') continue; // Skip image files for now
+          if (key === 'imagesToDelete') continue; // Skip deletion list for now
+          if (key === 'images') {
+            // Parse existing images
+            try {
+              updateData[key] = JSON.parse(value as string);
+            } catch {
+              updateData[key] = [];
+            }
+          } else if (typeof value === 'string') {
+            // Convert string values to appropriate types
+            if (key === 'carat' || key === 'price' || key === 'salePrice' || key === 'discountPercentage' || key === 'hardness' || key === 'refractive_index') {
+              updateData[key] = value === '' ? 0 : parseFloat(value);
+            } else if (key === 'isAvailable') {
+              updateData[key] = value === 'true';
+            } else {
+              updateData[key] = value;
+            }
+          }
+        }
+
+        // Handle image uploads if any
+        const newImages = formData.getAll('newImages') as File[];
+        if (newImages.length > 0 && newImages[0].size > 0) {
+          // Here you would typically upload to Cloudinary and get URLs
+          // For now, we'll skip this and just update other fields
+          console.log('New images detected:', newImages.length);
+        }
+
+        // Handle image deletions
+        const imagesToDelete = formData.get('imagesToDelete');
+        if (imagesToDelete) {
+          try {
+            const deleteList = JSON.parse(imagesToDelete as string);
+            console.log('Images to delete:', deleteList);
+            // Here you would typically delete from Cloudinary
+          } catch (e) {
+            console.error('Error parsing images to delete:', e);
+          }
+        }
+      }
       
       // Add update metadata
       updateData.updatedAt = new Date();
