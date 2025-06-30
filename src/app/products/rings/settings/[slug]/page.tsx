@@ -10,6 +10,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
 import CustomizationSteps from '@/components/customize/CustomizationSteps';
+import MetalSelector from '@/components/wedding/MetalSelector';
+import SizeSelector from '@/components/wedding/SizeSelector';
 
 // Define types for metal options and sizes
 interface MetalOption {
@@ -480,73 +482,22 @@ export default function SettingDetailPage() {
           
           {/* Metal Options */}
           <div className="mb-6">
-            <h2 className="text-lg font-medium mb-3">Metal Options</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {product.metalOptions.map((metal) => (
-                <button
-                  key={`${metal.karat}-${metal.color}`}
-                  onClick={() => handleMetalChange(metal)}
-                  className={`p-3 border rounded-lg flex items-center justify-between ${
-                    selectedMetal && selectedMetal.karat === metal.karat && selectedMetal.color === metal.color
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'border-gray-200 hover:border-amber-300'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <div 
-                      className="w-6 h-6 rounded-full mr-3"
-                      style={{
-                        background: 
-                          metal.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
-                          metal.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
-                          metal.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
-                          metal.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
-                          metal.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
-                          'gray'
-                      }}
-                    ></div>
-                    <div className="text-left">
-                      <div className="font-medium">{metal.karat} {metal.color}</div>
-                      <div className="text-sm text-gray-500">${metal.price.toLocaleString()}</div>
-                    </div>
-                  </div>
-                  {selectedMetal && selectedMetal.karat === metal.karat && selectedMetal.color === metal.color && (
-                    <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
+            <h2 className="text-lg font-semibold mb-2">Metal Options</h2>
+            <MetalSelector
+              options={product.metalOptions}
+              selectedMetal={selectedMetal}
+              onChange={handleMetalChange}
+            />
           </div>
-          
-          {/* Ring Size */}
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-3">Ring Size</h2>
-            <div className="grid grid-cols-5 gap-2">
-              {product.sizes.map((sizeOption) => (
-                <button
-                  key={sizeOption._id}
-                  onClick={() => handleSizeChange(sizeOption.size)}
-                  disabled={!sizeOption.isAvailable}
-                  className={`p-2 border rounded-lg text-center ${
-                    !sizeOption.isAvailable
-                      ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : selectedSize === sizeOption.size
-                      ? 'border-amber-500 bg-amber-50 text-amber-700'
-                      : 'border-gray-200 hover:border-amber-300'
-                  }`}
-                >
-                  <div className="font-medium">{sizeOption.size}</div>
-                  {sizeOption.additionalPrice > 0 && (
-                    <div className="text-xs text-gray-500">+${sizeOption.additionalPrice}</div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-gray-500 mt-2">
-              Not sure about your ring size? <Link href="/ring-size-guide" className="text-amber-600 hover:underline">View our ring size guide</Link>
-            </p>
+  
+          {/* Size Options */}
+          <div className="mb-6 relative z-20">
+            <h2 className="text-lg font-semibold mb-2">Ring Size</h2>
+            <SizeSelector
+              sizes={product.sizes}
+              selectedSize={selectedSize}
+              onChange={handleSizeChange}
+            />
           </div>
           
           {/* Quantity */}

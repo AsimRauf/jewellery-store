@@ -173,11 +173,11 @@ export default function SizeSelector({ sizes, selectedSize, onChange }: SizeSele
       {/* Ring Size Guide Modal */}
       {isGuideModalOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-opacity-20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setIsGuideModalOpen(false)}
         >
           <div 
-            className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-auto"
+            className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -222,14 +222,6 @@ export default function SizeSelector({ sizes, selectedSize, onChange }: SizeSele
                 </div>
               </div>
               
-              <div className="relative aspect-[4/3] w-full">
-                <Image 
-                  src="/images/ring-size-guide.jpg" 
-                  alt="Ring Size Chart" 
-                  fill
-                  className="object-contain"
-                />
-              </div>
               
               <div className="mt-6 overflow-x-auto">
                 <table className="min-w-full border-collapse">
