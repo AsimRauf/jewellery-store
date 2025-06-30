@@ -224,8 +224,17 @@ export async function DELETE(
         );
       }
 
-      // TODO: Delete associated images from Cloudinary
-      // This could be done here or in a separate cleanup job
+      // Delete associated images from Cloudinary
+      if (necklace.images && necklace.images.length > 0) {
+        for (const image of necklace.images) {
+          try {
+            await cloudinary.uploader.destroy(image.publicId);
+          } catch (deleteError) {
+            console.error('Error deleting image from Cloudinary:', image.publicId, deleteError);
+            // Continue with other deletions even if one fails
+          }
+        }
+      }
 
       return NextResponse.json({
         success: true,
