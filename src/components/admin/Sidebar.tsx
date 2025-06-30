@@ -7,7 +7,8 @@ import {
     HiChevronDown,
     HiChevronRight,
     HiViewList,
-    HiPlus
+    HiPlus,
+    HiSparkles
 } from "react-icons/hi";
 import { GiRing, GiDiamonds, GiCrystalGrowth } from "react-icons/gi";
 
