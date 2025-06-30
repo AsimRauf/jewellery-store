@@ -2,12 +2,14 @@
 import Stripe from 'stripe';
 
 // Validate secret key presence
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim();
+
+if (!stripeSecretKey) {
+  throw new Error('STRIPE_SECRET_KEY is not set or is empty');
 }
 
-// Initialize Stripe client with latest config
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+// Initialize Stripe client with the trimmed key and a valid API version
+export const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2025-05-28.basil',
 });
 

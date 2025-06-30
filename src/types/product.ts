@@ -26,11 +26,16 @@ export interface BaseProduct {
   imageUrl: string;
 }
 export interface ProductSuggestion {
+  _id: string;
   name: string;
   slug: string;
   imageUrl: string;
   productType: string;
   price: number;
+  metal?: {
+    karat: string;
+    color: string;
+  };
 }
 
 // Interface for Ring products (Engagement, Wedding, Settings)
