@@ -1,4 +1,23 @@
+import Image from 'next/image';
 import { FilterState, AvailableFilters } from '@/types/engagement';
+
+// Style images mapping
+const STYLE_IMAGES: Record<string, string> = {
+  'Vintage': '/icons/styles/vintage.svg',
+  'Nature Inspired': '/icons/styles/nature-inspired.svg',
+  'Floral': '/icons/styles/floral.svg',
+  'Classic': '/icons/styles/classic.svg',
+  'Celtic': '/icons/styles/celtic.svg',
+  'Branch': '/icons/styles/branch.svg'
+};
+
+const METAL_ICONS: Record<string, string> = {
+  'Yellow Gold': '/icons/metals/yellow-gold.svg',
+  'White Gold': '/icons/metals/white-gold.svg',
+  'Rose Gold': '/icons/metals/rose-gold.svg',
+  'Platinum': '/icons/metals/platinum.svg',
+  'Two Tone': '/icons/metals/two-tone.svg'
+};
 
 interface FilterBarProps {
   filters: FilterState;
@@ -47,13 +66,14 @@ export default function FilterBar({
       <div className="flex flex-wrap justify-center gap-2 p-4 border-b border-gray-200">
         <button 
           onClick={() => toggleFilterSection('style')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
             activeFilterSection === 'style' 
               ? 'bg-amber-500 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           } ${filters.styles.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
         >
-          Style {filters.styles.length > 0 && `(${filters.styles.length})`}
+          {filters.styles.length > 0 && <Image src={STYLE_IMAGES[filters.styles[0]]} alt="Style" width={20} height={20} />}
+          <span>Style {filters.styles.length > 0 && `(${filters.styles.length})`}</span>
         </button>
         
         <button 
@@ -117,13 +137,27 @@ export default function FilterBar({
         
         <button 
           onClick={() => toggleFilterSection('metal')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
             activeFilterSection === 'metal' 
               ? 'bg-amber-500 text-white' 
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           } ${filters.metalColors.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
         >
-          Metal {filters.metalColors.length > 0 && `(${filters.metalColors.length})`}
+          {filters.metalColors.length > 0 && (
+            <span 
+              className="w-5 h-5 rounded-full"
+              style={{
+                background: 
+                  filters.metalColors[0].includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                  filters.metalColors[0].includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                  filters.metalColors[0].includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                  filters.metalColors[0].includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                  filters.metalColors[0].includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                  'gray'
+              }}
+            ></span>
+          )}
+          <span>Metal {filters.metalColors.length > 0 && `(${filters.metalColors.length})`}</span>
         </button>
       </div>
       
@@ -376,12 +410,24 @@ export default function FilterBar({
                   <button
                     key={color}
                     onClick={() => toggleMetalColor(color)}
-                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                    className={`p-3 rounded-lg transition-all flex items-center ${
                       filters.metalColors.includes(color)
-                        ? 'bg-amber-500 text-white shadow-md transform scale-105'
+                        ? 'bg-amber-500 text-white shadow-md'
                         : 'bg-white text-gray-700 border border-gray-200 hover:border-amber-300 hover:shadow'
                     }`}
                   >
+                    <span 
+                      className="w-6 h-6 rounded-full mr-2"
+                      style={{
+                        background: 
+                          color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                          color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                          color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                          color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                          color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                          'gray'
+                      }}
+                    ></span>
                     {color}
                   </button>
                 ))}
@@ -417,4 +463,3 @@ export default function FilterBar({
     </div>
   );
 }
-

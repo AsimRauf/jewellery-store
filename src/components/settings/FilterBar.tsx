@@ -11,6 +11,14 @@ const STYLE_IMAGES: Record<string, string> = {
   'Branch': '/icons/styles/branch.svg'
 };
 
+const METAL_ICONS: Record<string, string> = {
+  'Yellow Gold': '/icons/metals/yellow-gold.svg',
+  'White Gold': '/icons/metals/white-gold.svg',
+  'Rose Gold': '/icons/metals/rose-gold.svg',
+  'Platinum': '/icons/metals/platinum.svg',
+  'Two Tone': '/icons/metals/two-tone.svg'
+};
+
 interface FilterBarProps {
   filters: FilterState;
   availableFilters: AvailableFilters;
@@ -58,6 +66,7 @@ export default function FilterBar({
                 : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
             } transition-colors flex items-center gap-2 ${filters.styles.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
           >
+            {filters.styles.length > 0 && <Image src={STYLE_IMAGES[filters.styles[0]]} alt="Style" width={20} height={20} />}
             <span>Shop by Style</span>
             {filters.styles.length > 0 && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs">{filters.styles.length}</span>}
             <svg 
@@ -98,6 +107,20 @@ export default function FilterBar({
                 : 'bg-white text-gray-700 border-gray-300 hover:border-amber-500'
             } transition-colors flex items-center gap-2 ${filters.metalColors.length > 0 ? 'ring-2 ring-amber-300' : ''}`}
           >
+            {filters.metalColors.length > 0 && (
+              <span 
+                className="w-5 h-5 rounded-full"
+                style={{
+                  background: 
+                    filters.metalColors[0].includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                    filters.metalColors[0].includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                    filters.metalColors[0].includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                    filters.metalColors[0].includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                    filters.metalColors[0].includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                    'gray'
+                }}
+              ></span>
+            )}
             <span>Metal</span>
             {filters.metalColors.length > 0 && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-xs">{filters.metalColors.length}</span>}
             <svg 
