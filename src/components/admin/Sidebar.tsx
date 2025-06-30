@@ -147,6 +147,83 @@ const Sidebar = () => {
             ]
         },
         {
+            title: "Fine Jewelry",
+            items: [
+                {
+                    title: "Necklaces",
+                    icon: <HiSparkles className="w-5 h-5" />,
+                    subItems: [
+                        {
+                            title: "All Necklaces",
+                            href: "/admin/necklaces/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/necklaces",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Earrings",
+                    icon: <HiSparkles className="w-5 h-5" />,
+                    subItems: [
+                        {
+                            title: "All Earrings",
+                            href: "/admin/earrings/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/earrings",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Bracelets",
+                    icon: <HiSparkles className="w-5 h-5" />,
+                    subItems: [
+                        {
+                            title: "All Bracelets",
+                            href: "/admin/bracelets/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/bracelets",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                },
+                {
+                    title: "Men's Jewelry",
+                    icon: <HiSparkles className="w-5 h-5" />,
+                    subItems: [
+                        {
+                            title: "All Men's Jewelry",
+                            href: "/admin/mens-jewelry/list",
+                            type: 'list',
+                            icon: <HiViewList className="w-4 h-4" />
+                        },
+                        {
+                            title: "Add New",
+                            href: "/admin/mens-jewelry",
+                            type: 'add',
+                            icon: <HiPlus className="w-4 h-4" />
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             title: "Sales",
             items: [
                 {

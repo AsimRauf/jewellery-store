@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from '@/utils/db';
+import EarringModel from '@/models/Earring';
+import { withAdminAuth } from '@/utils/authMiddleware';
+
+export async function POST(request: NextRequest) {
+  return withAdminAuth(request, async () => {
+    try {
+      await connectDB();
+
+      // Check if model is available (it should be in API routes)
+      if (!EarringModel) {
+        return NextResponse.json({ 
+          error: 'Database model not available' 
+        }, { status: 500 });
+      }
+
+      const data = await request.json();
+      
+      // Create the earring
+      const earring = new EarringModel(data);
+      await earring.save();
+
+      return NextResponse.json({
+        success: true,
+        data: earring
+      }, { status: 201 });
+
+    } catch (error) {
+      console.error('Earring creation error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Failed to create earring' 
+      }, { status: 500 });
+    }
+  });
+}
+
+export async function GET(request: NextRequest) {
+  return withAdminAuth(request, async () => {
+    try {
+      await connectDB();
+
+      // Check if model is available
+      if (!EarringModel) {
+        return NextResponse.json({ 
+          error: 'Database model not available' 
+        }, { status: 500 });
+      }
+
+      const { searchParams } = new URL(request.url);
+      
+      // Parse query parameters
+      const page = parseInt(searchParams.get('page') || '1');
+      const limit = parseInt(searchParams.get('limit') || '10');
+      const search = searchParams.get('search') || '';
+      const type = searchParams.get('type') || '';
+      const backType = searchParams.get('backType') || '';
+      const metal = searchParams.get('metal') || '';
+      const style = searchParams.get('style') || '';
+      const minPrice = searchParams.get('minPrice');
+      const maxPrice = searchParams.get('maxPrice');
+      const sortBy = searchParams.get('sortBy') || 'createdAt';
+      const sortOrder = searchParams.get('sortOrder') || 'desc';
+
+      // Build query
+      const query: Record<string, unknown> = {};
+
+      // Search across multiple fields
+      if (search) {
+        query.$or = [
+          { sku: new RegExp(search, 'i') },
+          { productNumber: new RegExp(search, 'i') },
+          { name: new RegExp(search, 'i') },
+          { type: new RegExp(search, 'i') },
+          { metal: new RegExp(search, 'i') },
+          { description: new RegExp(search, 'i') }
+        ];
+      }
+
+      // Filter by earring properties
+      if (type) query.type = type;
+      if (backType) query.backType = backType;
+      if (metal) query.metal = metal;
+      if (style) query.style = style;
+
+      // Price range filter
+      if (minPrice || maxPrice) {
+        const priceQuery: Record<string, number> = {};
+        if (minPrice) priceQuery.$gte = parseFloat(minPrice);
+        if (maxPrice) priceQuery.$lte = parseFloat(maxPrice);
+        query.price = priceQuery;
+      }
+
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+
+      // Build sort object
+      const sort: Record<string, 1 | -1> = {};
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+      // Execute queries
+      const [earrings, totalCount] = await Promise.all([
+        EarringModel.find(query)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        EarringModel.countDocuments(query)
+      ]);
+
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return NextResponse.json({
+        success: true,
+        data: earrings,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCount,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
+
+    } catch (error) {
+      console.error('Earrings fetch error:', error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch earrings' 
+      }, { status: 500 });
+    }
+  });
+}
