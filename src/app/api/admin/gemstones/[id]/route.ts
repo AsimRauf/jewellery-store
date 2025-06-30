@@ -127,17 +127,14 @@ export async function PUT(
           const uploadedImages = [];
           for (const file of newImages) {
             try {
-              // Convert to base64
-              const base64 = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = error => reject(error);
-              });
+              // Convert File to buffer, then to base64
+              const bytes = await file.arrayBuffer();
+              const buffer = Buffer.from(bytes);
+              const base64 = `data:${file.type};base64,${buffer.toString('base64')}`;
 
               // Upload to Cloudinary directly
               const folderPath = `jewelry-store/rings/gemstones/${updateData.source || 'natural'}`;
-              const publicId = `image_${Date.now()}`;
+              const publicId = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
               
               const result = await cloudinary.uploader.upload(base64, {
                 folder: folderPath,
