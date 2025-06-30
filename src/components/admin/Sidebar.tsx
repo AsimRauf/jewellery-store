@@ -153,6 +153,7 @@ const Sidebar = () => {
                 {
                     title: "Necklaces",
                     icon: <HiSparkles className="w-5 h-5" />,
+                    category: "necklaces",
                     submenu: [
                         {
                             title: "All Necklaces",
@@ -171,6 +172,7 @@ const Sidebar = () => {
                 {
                     title: "Earrings",
                     icon: <HiSparkles className="w-5 h-5" />,
+                    category: "earrings",
                     submenu: [
                         {
                             title: "All Earrings",
@@ -189,6 +191,7 @@ const Sidebar = () => {
                 {
                     title: "Bracelets",
                     icon: <HiSparkles className="w-5 h-5" />,
+                    category: "bracelets",
                     submenu: [
                         {
                             title: "All Bracelets",
@@ -207,6 +210,7 @@ const Sidebar = () => {
                 {
                     title: "Men's Jewelry",
                     icon: <HiSparkles className="w-5 h-5" />,
+                    category: "mens-jewelry",
                     submenu: [
                         {
                             title: "All Men's Jewelry",
