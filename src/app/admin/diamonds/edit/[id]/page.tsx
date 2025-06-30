@@ -200,13 +200,52 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/admin/diamonds/${resolvedParams.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      // Check if we have image changes (uploads or deletions)
+      const hasImageChanges = temporaryImages.length > 0 || imagesToDelete.length > 0;
 
-      if (!response.ok) throw new Error('Failed to update diamond');
+      if (hasImageChanges) {
+        // Use FormData for image updates
+        const submitData = new FormData();
+        
+        // Add all form fields
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key === 'images') {
+            submitData.append(key, JSON.stringify(value));
+          } else if (value !== null && value !== undefined) {
+            submitData.append(key, value.toString());
+          }
+        });
+
+        // Add new images
+        temporaryImages.forEach((file) => {
+          submitData.append('newImages', file);
+        });
+
+        // Add images to delete
+        if (imagesToDelete.length > 0) {
+          submitData.append('imagesToDelete', JSON.stringify(imagesToDelete));
+        }
+
+        const response = await fetch(`/api/admin/diamonds/${resolvedParams.id}`, {
+          method: 'PUT',
+          body: submitData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update diamond');
+        }
+      } else {
+        // Use JSON for simple updates without images
+        const response = await fetch(`/api/admin/diamonds/${resolvedParams.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) throw new Error('Failed to update diamond');
+      }
       
       toast.success('Diamond updated successfully');
       router.push('/admin/diamonds/list');
