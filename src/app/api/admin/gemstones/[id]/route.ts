@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/utils/db';
 import GemstoneModel from '@/models/Gemstone';
 import { withAdminAuth } from '@/utils/authMiddleware';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // GET single gemstone
 export async function GET(
@@ -89,23 +97,71 @@ export async function PUT(
           }
         }
 
-        // Handle image uploads if any
-        const newImages = formData.getAll('newImages') as File[];
-        if (newImages.length > 0 && newImages[0].size > 0) {
-          // Here you would typically upload to Cloudinary and get URLs
-          // For now, we'll skip this and just update other fields
-          console.log('New images detected:', newImages.length);
-        }
-
-        // Handle image deletions
+        // Handle image deletions first
         const imagesToDelete = formData.get('imagesToDelete');
         if (imagesToDelete) {
           try {
             const deleteList = JSON.parse(imagesToDelete as string);
             console.log('Images to delete:', deleteList);
-            // Here you would typically delete from Cloudinary
+            
+            // Delete from Cloudinary
+            for (const publicId of deleteList) {
+              try {
+                await cloudinary.uploader.destroy(publicId);
+              } catch (deleteError) {
+                console.error('Error deleting image from Cloudinary:', publicId, deleteError);
+                // Continue with other deletions even if one fails
+              }
+            }
           } catch (e) {
             console.error('Error parsing images to delete:', e);
+          }
+        }
+
+        // Handle image uploads if any
+        const newImages = formData.getAll('newImages') as File[];
+        if (newImages.length > 0 && newImages[0].size > 0) {
+          console.log('New images detected:', newImages.length);
+          
+          // Convert files to base64 and upload to Cloudinary
+          const uploadedImages = [];
+          for (const file of newImages) {
+            try {
+              // Convert to base64
+              const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = error => reject(error);
+              });
+
+              // Upload to Cloudinary directly
+              const folderPath = `jewelry-store/rings/gemstones/${updateData.source || 'natural'}`;
+              const publicId = `image_${Date.now()}`;
+              
+              const result = await cloudinary.uploader.upload(base64, {
+                folder: folderPath,
+                allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+                transformation: [
+                  { quality: 'auto:good' },
+                  { fetch_format: 'auto' }
+                ],
+                public_id: publicId
+              });
+
+              uploadedImages.push({
+                url: result.secure_url,
+                publicId: result.public_id
+              });
+            } catch (uploadError) {
+              console.error('Error uploading image:', uploadError);
+            }
+          }
+
+          // Add new images to existing images
+          if (uploadedImages.length > 0) {
+            const currentImages = updateData.images as Array<{ url: string; publicId: string }> || [];
+            updateData.images = [...currentImages, ...uploadedImages];
           }
         }
       }
