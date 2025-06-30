@@ -49,16 +49,9 @@ export const MensJewelryFinish = {
   ANTIQUED: 'Antiqued'
 };
 
-export const CertificateLab = {
-  GIA: 'GIA',
-  AGS: 'AGS',
-  IGI: 'IGI',
-  GCAL: 'GCAL',
-  HRD: 'HRD',
-  NONE: 'None'
-};
+import { CertificateLab } from '../constants/sharedEnums';
 
-export interface IMensJewelry extends Document {
+export interface IMensJewelry {
   sku: string;
   slug: string;
   productNumber: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import SearchResults from '../../components/search/SearchResults';
 import SearchFiltersComponent from '../../components/search/SearchFilters';
@@ -68,7 +68,7 @@ export interface SearchResponse {
   };
 }
 
-export default function SearchPage() {
+function SearchPageComponent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -333,5 +333,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPageComponent />
+    </Suspense>
   );
 }

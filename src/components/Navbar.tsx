@@ -26,6 +26,19 @@ interface Category {
   bannerLink?: string;
 }
 
+interface ProductSuggestion {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  productType: string;
+  price: number;
+  metal?: {
+    karat: string;
+    color: string;
+  };
+}
+
 // Define the styles array once at the top level
 const RING_STYLES = [
   {
@@ -394,6 +407,7 @@ export default function Navbar() {
   const { user, logout } = useUser();
   const { items, itemCount, removeItem, updateQuantity, subtotal } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<ProductSuggestion[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const [isCartSidebarOpen, setIsCartSidebarOpen] = useState(false);
@@ -401,13 +415,43 @@ export default function Navbar() {
   const accountDropdownRef = useRef<HTMLDivElement>(null);
   const cartSidebarRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      setSuggestions([]);
     }
   };
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setSuggestions([]);
+      return;
+    }
+
+    const fetchSuggestions = async () => {
+      try {
+        const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(searchQuery)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        setSuggestions([]);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      fetchSuggestions();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -422,6 +466,10 @@ export default function Navbar() {
 
       if (megaMenuRef.current && !megaMenuRef.current.contains(event.target as Node)) {
         setActiveMegaMenu(null);
+      }
+      
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
       }
     }
 
@@ -458,6 +506,45 @@ export default function Navbar() {
     }
   };
 
+  const getProductLink = (product: ProductSuggestion): string => {
+    let baseUrl = '';
+    if (product.slug) {
+      switch (product.productType) {
+        case 'Setting':
+          baseUrl = `/products/rings/settings/${product.slug}`;
+          break;
+        case 'Wedding Ring':
+          baseUrl = `/wedding/detail/${product.slug}`;
+          break;
+        case 'Engagement Ring':
+          baseUrl = `/engagement/detail/${product.slug}`;
+          break;
+        case 'Diamond':
+          return `/diamond/detail/${product.slug}`;
+        case 'Gemstone':
+          return `/gemstone/detail/${product.slug}`;
+        case 'Bracelet':
+          return `/fine-jewellery/bracelets/detail/${product.slug}`;
+        case 'Earring':
+          return `/fine-jewellery/earrings/detail/${product.slug}`;
+        case 'Necklace':
+          return `/fine-jewellery/necklaces/detail/${product.slug}`;
+        case 'Mens Jewelry':
+          return `/fine-jewellery/mens/detail/${product.slug}`;
+        default:
+          return `/products/${product._id}`;
+      }
+
+      if (product.metal && (product.productType === 'Setting' || product.productType === 'Wedding Ring' || product.productType === 'Engagement Ring')) {
+        const metalQuery = encodeURIComponent(`${product.metal.karat}-${product.metal.color}`);
+        return `${baseUrl}?metal=${metalQuery}`;
+      }
+
+      return baseUrl;
+    }
+    return `/products/${product._id}`;
+  };
+
   return (
     <>
       <nav className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full">
@@ -489,7 +576,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Search */}
-          <div className="hidden lg:block flex-grow max-w-md mx-8">
+          <div className="hidden lg:block flex-grow max-w-md mx-8" ref={searchContainerRef}>
             <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
@@ -497,12 +584,47 @@ export default function Navbar() {
                 className="w-full py-2 pl-4 pr-10 rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim()) {
+                    // Re-fetch suggestions on focus if there's a query
+                  }
+                }}
               />
               <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
+              {suggestions.length > 0 && (
+                <ul className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                  {suggestions.map((suggestion) => (
+                    <li key={suggestion._id} className="border-b last:border-b-0">
+                      <Link
+                        href={getProductLink(suggestion)}
+                        className="flex items-center p-3 hover:bg-gray-100 transition-colors"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSuggestions([]);
+                        }}
+                      >
+                        <div className="w-16 h-16 mr-4 flex-shrink-0">
+                          <Image
+                            src={suggestion.imageUrl}
+                            alt={suggestion.name}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-800">{suggestion.name}</div>
+                          <div className="text-sm text-gray-600">{formatPrice(suggestion.price)}</div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </form>
           </div>
 

@@ -3,7 +3,7 @@ import { RingEnums } from '../constants/ringEnums';
 import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define interface for EngagementRing document
-interface IEngagementRing {
+export interface IEngagementRing extends Document {
   title: string;
   slug: string;
   category: string;

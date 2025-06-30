@@ -48,16 +48,9 @@ export const BraceletStyle = {
   EDGY: 'Edgy'
 };
 
-export const CertificateLab = {
-  GIA: 'GIA',
-  AGS: 'AGS',
-  IGI: 'IGI',
-  GCAL: 'GCAL',
-  HRD: 'HRD',
-  NONE: 'None'
-};
+import { CertificateLab } from '../constants/sharedEnums';
 
-export interface IBracelet extends Document {
+export interface IBracelet {
   sku: string;
   slug: string;
   productNumber: string;

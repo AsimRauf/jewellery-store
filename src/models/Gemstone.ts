@@ -119,7 +119,7 @@ export const CertificateLab = {
   NONE: 'None'
 };
 
-export interface IGemstone extends Document {
+export interface IGemstone {
   sku: string;
   slug: string;
   productNumber: string;

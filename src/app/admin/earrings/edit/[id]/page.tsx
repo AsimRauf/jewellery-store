@@ -8,13 +8,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { HiArrowLeft, HiTrash } from 'react-icons/hi';
 import ImageUpload from '@/components/admin/ImageUpload';
-import { 
-  EarringType, 
-  EarringBack, 
-  EarringMetal, 
-  EarringStyle, 
-  CertificateLab 
+import {
+  EarringType,
+  EarringBack,
+  EarringMetal,
+  EarringStyle,
 } from '@/models/Earring';
+import { CertificateLab } from '@/constants/sharedEnums';
 
 interface Earring {
   _id: string;

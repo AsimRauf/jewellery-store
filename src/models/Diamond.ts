@@ -80,13 +80,7 @@ export enum DiamondFluorescence {
   STG = 'STG' // As seen in your example
 }
 
-export enum CertificateLab {
-  GIA = 'GIA',
-  IGI = 'IGI',
-  AGS = 'AGS',
-  HRD = 'HRD',
-  GCAL = 'GCAL'
-}
+import { CertificateLab } from '../constants/sharedEnums';
 
 // Add this enum for fancy colors
 export enum DiamondFancyColor {
@@ -103,7 +97,7 @@ export enum DiamondFancyColor {
   WHITE = 'White'
 }
 
-export interface IDiamond extends Document {
+export interface IDiamond {
   sku: string;
   slug: string;
   productNumber: string;

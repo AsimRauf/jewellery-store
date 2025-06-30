@@ -46,16 +46,9 @@ export const NecklaceStyle = {
   EDGY: 'Edgy'
 };
 
-export const CertificateLab = {
-  GIA: 'GIA',
-  AGS: 'AGS',
-  IGI: 'IGI',
-  GCAL: 'GCAL',
-  HRD: 'HRD',
-  NONE: 'None'
-};
+import { CertificateLab } from '../constants/sharedEnums';
 
-export interface INecklace extends Document {
+export interface INecklace {
   sku: string;
   slug: string;
   productNumber: string;

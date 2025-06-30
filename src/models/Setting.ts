@@ -3,7 +3,7 @@ import { RingEnums } from '../constants/ringEnums';
 import { generateProductSlug, generateUniqueSlug } from '../utils/slugify';
 
 // Define interface for Setting document
-interface ISetting {
+export interface ISetting extends Document {
   title: string;
   slug: string;
   category: string;

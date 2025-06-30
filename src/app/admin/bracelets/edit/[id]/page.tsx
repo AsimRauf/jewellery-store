@@ -8,13 +8,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { HiArrowLeft, HiTrash } from 'react-icons/hi';
 import ImageUpload from '@/components/admin/ImageUpload';
-import { 
-  BraceletType, 
-  BraceletClosure, 
-  BraceletMetal, 
-  BraceletStyle, 
-  CertificateLab 
+import {
+  BraceletType,
+  BraceletClosure,
+  BraceletMetal,
+  BraceletStyle,
 } from '@/models/Bracelet';
+import { CertificateLab } from '@/constants/sharedEnums';
 
 interface Bracelet {
   _id: string;

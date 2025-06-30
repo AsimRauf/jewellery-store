@@ -5,13 +5,13 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import ImageUpload from '@/components/admin/ImageUpload';
-import { 
-  EarringType, 
-  EarringBack, 
-  EarringMetal, 
-  EarringStyle, 
-  CertificateLab 
+import {
+  EarringType,
+  EarringBack,
+  EarringMetal,
+  EarringStyle,
 } from '@/models/Earring';
+import { CertificateLab } from '@/constants/sharedEnums';
 
 // Define form data type
 interface FormDataType {
