@@ -192,9 +192,9 @@ export default function AddNecklace() {
       const finalData = {
         ...formData,
         images: uploadedImages,
-        features: Array.isArray(formData.features) ? formData.features : 
-                 typeof formData.features === 'string' ? 
-                 formData.features.split(',').map(f => f.trim()).filter(f => f) : []
+        features: Array.isArray(formData.features) ? formData.features :
+        formData.features && typeof formData.features === 'string' ?
+        (formData.features as string).split(',').map(f => f.trim()).filter(f => f) : []
       };
 
       // Save necklace data

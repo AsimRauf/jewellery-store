@@ -10,7 +10,7 @@ export interface CartItem {
     color: string;
   };
   size?: number;
-  productType?: 'engagement' | 'wedding' | 'setting' | 'diamond' | 'gemstone';
+  productType?: 'engagement' | 'wedding' | 'setting' | 'diamond' | 'gemstone' | 'necklace' | 'earring' | 'bracelet' | 'mens-jewelry';
   cartItemId?: string;
   customization?: {
     isCustomized: boolean;
@@ -41,6 +41,22 @@ export interface CartItem {
         metalType: string;
         settingType: string;
         price?: number;
+      };
+      metal?: string;
+      style?: string;
+      type?: string;
+      length?: string;
+      backType?: string;
+      adjustable?: boolean;
+      finish?: string;
+      size?: string;
+      width?: string;
+      thickness?: string;
+      weight?: number;
+      engraving?: {
+        text: string;
+        font?: string;
+        placement?: string;
       };
     };
   };

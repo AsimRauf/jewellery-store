@@ -268,9 +268,9 @@ export default function AddMensJewelry() {
         ...formData,
         images: uploadedImages,
         gemstones: gemstoneFields.filter(g => g.type),
-        features: Array.isArray(formData.features) ? formData.features : 
-                 typeof formData.features === 'string' ? 
-                 formData.features.split(',').map(f => f.trim()).filter(f => f) : []
+        features: Array.isArray(formData.features) ? formData.features :
+        formData.features && typeof formData.features === 'string' ?
+        (formData.features as string).split(',').map(f => f.trim()).filter(f => f) : []
       };
 
       // Save data

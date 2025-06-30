@@ -204,8 +204,8 @@ export default function AddBracelet() {
         ...formData,
         images: uploadedImages,
         features: Array.isArray(formData.features) ? formData.features : 
-                 typeof formData.features === 'string' ? 
-                 formData.features.split(',').map(f => f.trim()).filter(f => f) : []
+                 formData.features && typeof formData.features === 'string' ? 
+                 (formData.features as string).split(',').map(f => f.trim()).filter(f => f) : []
       };
 
       // Save bracelet data

@@ -61,7 +61,7 @@ interface IEngagementRing {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
-  isNew?: boolean;
+  isNewProduct?: boolean;
   onSale?: boolean;
   originalPrice?: number;
 }
@@ -273,7 +273,7 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
     type: Boolean, 
     default: false 
   },
-  isNew: {
+  isNewProduct: {
     type: Boolean,
     default: false
   },
@@ -285,7 +285,8 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
     type: Number
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  suppressReservedKeysWarning: true
 });
 
 function arrayMinLength(val: unknown[]): boolean {

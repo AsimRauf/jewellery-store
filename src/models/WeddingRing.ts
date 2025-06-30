@@ -52,7 +52,7 @@ interface IWeddingRing {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
-  isNew?: boolean;
+  isNewProduct?: boolean;
   onSale?: boolean;
   originalPrice?: number;
 }
@@ -227,7 +227,7 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
     type: Boolean, 
     default: false 
   },
-  isNew: {
+  isNewProduct: {
     type: Boolean,
     default: false
   },
@@ -239,7 +239,8 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
     type: Number
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  suppressReservedKeysWarning: true
 });
 
 function arrayMinLength(val: unknown[]): boolean {

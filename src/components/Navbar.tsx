@@ -456,9 +456,6 @@ export default function Navbar() {
     }
   };
 
-  
-  console.log("Metal icons paths:", CATEGORIES[0].metals?.map(m => m.icon));
-
   return (
     <>
       <nav className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full">

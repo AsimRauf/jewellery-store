@@ -51,7 +51,7 @@ interface ISetting {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
-  isNew?: boolean;
+  isNewProduct?: boolean;
   onSale?: boolean;
   originalPrice?: number;
   canAcceptStone: boolean; // New field to indicate if this setting can accept a stone
@@ -225,7 +225,7 @@ const SettingSchema = new mongoose.Schema<ISetting, SettingModel, ISettingMethod
     type: Boolean, 
     default: false 
   },
-  isNew: {
+  isNewProduct: {
     type: Boolean,
     default: false
   },
@@ -252,7 +252,8 @@ const SettingSchema = new mongoose.Schema<ISetting, SettingModel, ISettingMethod
     type: Number
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  suppressReservedKeysWarning: true
 });
 
 function arrayMinLength(val: unknown[]): boolean {
