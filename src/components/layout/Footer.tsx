@@ -117,18 +117,18 @@ const Footer = () => {
               Subscribe to our newsletter for exclusive offers, new arrivals, and jewelry care tips.
             </p>
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
                   required
-                  className="flex-grow px-4 py-2 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="flex-grow px-4 py-2 rounded-md sm:rounded-l-md sm:rounded-r-none border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 mb-2 sm:mb-0"
                 />
                 <button
                   type="submit"
-                  className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-r-md transition-colors"
+                  className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-md sm:rounded-r-md sm:rounded-l-none transition-colors"
                 >
                   Subscribe
                 </button>
