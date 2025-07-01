@@ -89,14 +89,14 @@ const CATEGORIES: Category[] = [
         return {
           name: "Two Tone Gold",
           path: `/engagement/metal-two-tone-gold`,
-          icon: "/icons/metals/two-tone.webp"
+          icon: "/icons/metals/two-tone.svg"
         };
       }
       const baseName = color.toLowerCase().replace(' gold', '');
       return {
         name: color,
         path: `/engagement/metal-${baseName}`,
-        icon: `/icons/metals/${baseName}.webp`
+        icon: `/icons/metals/${baseName}.svg`
       };
     }),
     featured: [
@@ -112,12 +112,12 @@ const CATEGORIES: Category[] = [
       },
       {
         name: 'Create Your Own',
-        path: '/customize',
+        path: '/settings/all?start=setting',
         icon: '/icons/featured/custom.svg'
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/customize'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Settings',
@@ -158,14 +158,14 @@ const CATEGORIES: Category[] = [
         return {
           name: "Two Tone Gold",
           path: `/settings/metal-two-tone-gold?start=setting`,
-          icon: "/icons/metals/two-tone.webp"
+          icon: "/icons/metals/two-tone.svg"
         };
       }
       const baseName = color.toLowerCase().replace(' gold', '');
       return {
         name: color,
         path: `/settings/metal-${baseName}?start=setting`,
-        icon: `/icons/metals/${baseName}.webp`
+        icon: `/icons/metals/${baseName}.svg`
       };
     }),
     featured: [
@@ -181,7 +181,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/settings/custom'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Wedding',
@@ -227,7 +227,7 @@ const CATEGORIES: Category[] = [
         return {
           name: "Two Tone Gold",
           path: `/wedding/metal-two-tone-gold`,
-          icon: "/icons/metals/two-tone.webp" // Hardcoded path
+          icon: "/icons/metals/two-tone.svg" // Hardcoded path
         };
       }
 
@@ -238,7 +238,7 @@ const CATEGORIES: Category[] = [
       return {
         name: color,
         path: `/wedding/metal-${urlPath}`,
-        icon: `/icons/metals/${baseName}.webp`
+        icon: `/icons/metals/${baseName}.svg`
       };
     }),
     featured: [
@@ -254,7 +254,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/wedding/custom'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Diamond',
@@ -277,7 +277,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/diamond/custom'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Gemstone',
@@ -332,7 +332,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/gemstone/custom'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Fine Jewellery',
@@ -360,7 +360,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/fine-jewellery/custom'
+    bannerLink: '/settings/all?start=setting'
   },
   {
     name: 'Customize',
@@ -393,7 +393,7 @@ const CATEGORIES: Category[] = [
       }
     ],
     bannerImage: '/icons/banner/megamenu-banner.webp',
-    bannerLink: '/customize/bespoke'
+    bannerLink: '/settings/all?start=setting'
   }
 ];
 
@@ -722,12 +722,13 @@ export default function Navbar() {
       <div className="hidden lg:block border-t border-gray-200 w-full relative">
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
-            {CATEGORIES.map((category) => (
-              <MenuCategory 
-                key={category.path} 
-                category={category} 
+            {CATEGORIES.map((category, index) => (
+              <MenuCategory
+                key={category.path}
+                category={category}
                 isActive={activeMegaMenu === category.name}
-                onToggle={() => toggleMegaMenu(category.name, 0)}
+                onToggle={() => toggleMegaMenu(category.name, index)}
+                setActiveMegaMenu={setActiveMegaMenu}
               />
             ))}
           </ul>
@@ -1103,14 +1104,16 @@ export default function Navbar() {
   );
 }
 
-const MenuCategory = ({ 
-  category, 
-  isActive, 
-  onToggle 
-}: { 
+const MenuCategory = ({
+  category,
+  isActive,
+  onToggle,
+  setActiveMegaMenu
+}: {
   category: Category;
   isActive: boolean;
   onToggle: () => void;
+  setActiveMegaMenu: (name: string | null) => void;
 }) => {
   // Create a ref for the menu item
   const menuItemRef = useRef<HTMLLIElement>(null);
@@ -1127,16 +1130,21 @@ const MenuCategory = ({
   }, [isActive]);
 
   return (
-    <li className="relative" ref={menuItemRef}>
-      <button 
+    <li
+      className="relative"
+      ref={menuItemRef}
+      onMouseEnter={() => setActiveMegaMenu(category.name)}
+      onMouseLeave={() => setActiveMegaMenu(null)}
+    >
+      <button
         onClick={onToggle}
         className="flex items-center w-full text-gray-600 hover:text-amber-500 py-4 px-2"
       >
         {category.name}
-        <svg 
+        <svg
           className={`ml-2 h-4 w-4 transition-transform duration-200 ${isActive ? 'rotate-180' : ''}`}
           fill="none"
-          stroke="currentColor" 
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1220,9 +1228,19 @@ const MenuCategory = ({
                         className="flex items-center text-gray-600 hover:text-amber-500"
                         onClick={onToggle}
                       >
-                        {metal.icon && (
-                          <Image src={metal.icon} alt="" width={20} height={20} className="mr-3" />
-                        )}
+                        <span
+                          className="w-5 h-5 rounded-full mr-3"
+                          style={{
+                            background:
+                              metal.name.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                              metal.name.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                              metal.name.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                              metal.name.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                              metal.name.includes('Palladium') ? 'linear-gradient(135deg, #D3D3D3, #B0B0B0)' :
+                              metal.name.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                              'gray'
+                          }}
+                        ></span>
                         <span>{metal.name}</span>
                       </Link>
                     ))}

@@ -16,6 +16,7 @@ const METAL_ICONS: Record<string, string> = {
   'White Gold': '/icons/metals/white-gold.svg',
   'Rose Gold': '/icons/metals/rose-gold.svg',
   'Platinum': '/icons/metals/platinum.svg',
+  'Palladium': '/icons/metals/palladium.svg',
   'Two Tone': '/icons/metals/two-tone.svg'
 };
 
@@ -424,6 +425,7 @@ export default function FilterBar({
                           color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
                           color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
                           color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                          color.includes('Palladium') ? 'linear-gradient(135deg, #D3D3D3, #B0B0B0)' :
                           color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
                           'gray'
                       }}

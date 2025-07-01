@@ -22,11 +22,11 @@ export default function Hero() {
       imagePosition: "right", // Image on the right
       primaryButton: {
         text: "Explore Collections",
-        href: "/collections"
+        href: "/engagement"
       },
       secondaryButton: {
         text: "Customize Ring",
-        href: "/customize"
+        href: "/settings/all?start=setting"
       },
       backgroundColor: '#f0d4a4', // Default background color
     },
@@ -39,7 +39,7 @@ export default function Hero() {
       imagePosition: "right", // Image in the center
       primaryButton: {
         text: "Shop Diamonds",
-        href: "/diamonds"
+        href: "/diamond/all?start=diamond"
       },
       secondaryButton: {
         text: "Learn More",
@@ -56,7 +56,7 @@ export default function Hero() {
       imagePosition: "right", // Image on the left
       primaryButton: {
         text: "Luxury Collection",
-        href: "/luxury"
+        href: "/wedding"
       },
       secondaryButton: {
         text: "Book Consultation",
