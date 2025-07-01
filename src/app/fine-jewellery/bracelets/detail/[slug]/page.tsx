@@ -9,15 +9,17 @@ import { useCart } from '@/context/CartContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import { getBraceletTitle } from '@/utils/product-helper';
+import { BraceletProduct } from '@/types/product';
 
-interface BraceletDetail {
-  _id: string;
-  slug?: string;
-  sku: string;
-  productNumber: string;
-  title: string;
-  type: string;
-  closure?: string;
+ interface BraceletDetail {
+   _id: string;
+   slug: string;
+   sku: string;
+   productNumber: string;
+   name: string;
+   type: string;
+   closure?: string;
   metal: string;
   style: string;
   length?: string;
@@ -99,9 +101,20 @@ export default function BraceletDetailPage() {
     setAddingToCart(true);
     
     try {
+      const { length, width, ...rest } = bracelet;
+      const braceletProduct: BraceletProduct = {
+        ...rest,
+        length: parseFloat(length || '0'),
+        width: parseFloat(width || '0'),
+        productType: 'bracelet',
+        title: bracelet.name, // Pass name to title for the helper
+        imageUrl: bracelet.images?.[0]?.url || '',
+        closure: bracelet.closure || '',
+      };
+
       const cartItem: CartItem = {
         _id: bracelet._id,
-        title: bracelet.title,
+        title: getBraceletTitle(braceletProduct),
         price: bracelet.salePrice || bracelet.price,
         quantity: quantity,
         image: bracelet.images?.[0]?.url || '',
@@ -162,7 +175,7 @@ export default function BraceletDetailPage() {
           </li>
           <li className="text-gray-500">/</li>
           <li className="text-amber-600 font-medium">
-            {bracelet.title}
+            {bracelet.name}
           </li>
         </ol>
       </nav>
@@ -175,7 +188,7 @@ export default function BraceletDetailPage() {
             {bracelet.images && bracelet.images.length > 0 ? (
               <Image
                 src={bracelet.images[activeImageIndex].url}
-                alt={bracelet.title}
+                alt={bracelet.name}
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -200,7 +213,7 @@ export default function BraceletDetailPage() {
                 >
                   <Image
                     src={image.url}
-                    alt={`${bracelet.title} Thumbnail ${index + 1}`}
+                    alt={`${bracelet.name} Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 20vw, 10vv"
@@ -214,7 +227,7 @@ export default function BraceletDetailPage() {
         {/* Right Column: Details */}
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {bracelet.title}
+            {bracelet.name}
           </h1>
           
           <p className="text-gray-600 mb-4">

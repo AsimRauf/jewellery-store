@@ -9,18 +9,20 @@ import { useCart } from '@/context/CartContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import { getNecklaceTitle } from '@/utils/product-helper';
+import { NecklaceProduct } from '@/types/product';
 
 interface NecklaceDetail {
   _id: string;
-  slug?: string;
+  slug: string;
   sku: string;
   productNumber: string;
-  title: string;
+  name: string;
   type: string;
-  length?: string;
+  length: string;
   metal: string;
   style: string;
-  chainWidth?: string;
+  chainWidth?: number;
   claspType?: string;
   gemstones?: Array<{
     type: string;
@@ -98,9 +100,16 @@ export default function NecklaceDetailPage() {
     setAddingToCart(true);
     
     try {
+      const necklaceProduct: NecklaceProduct = {
+        ...necklace,
+        productType: 'necklace',
+        title: necklace.name, // Pass name to title for the helper
+        imageUrl: necklace.images?.[0]?.url || '',
+      };
+
       const cartItem: CartItem = {
         _id: necklace._id,
-        title: necklace.title,
+        title: getNecklaceTitle(necklaceProduct),
         price: necklace.salePrice || necklace.price,
         quantity: quantity,
         image: necklace.images?.[0]?.url || '',
@@ -160,7 +169,7 @@ export default function NecklaceDetailPage() {
           </li>
           <li className="text-gray-500">/</li>
           <li className="text-amber-600 font-medium">
-            {necklace.title}
+            {necklace.name}
           </li>
         </ol>
       </nav>
@@ -173,7 +182,7 @@ export default function NecklaceDetailPage() {
             {necklace.images && necklace.images.length > 0 ? (
               <Image
                 src={necklace.images[activeImageIndex].url}
-                alt={necklace.title}
+                alt={necklace.name}
                 fill
                 className="object-contain"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -198,7 +207,7 @@ export default function NecklaceDetailPage() {
                 >
                   <Image
                     src={image.url}
-                    alt={`${necklace.title} Thumbnail ${index + 1}`}
+                    alt={`${necklace.name} Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 20vw, 10vw"
@@ -212,7 +221,7 @@ export default function NecklaceDetailPage() {
         {/* Right Column: Details */}
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {necklace.title}
+            {necklace.name}
           </h1>
           
           <p className="text-gray-600 mb-4">

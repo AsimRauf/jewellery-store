@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { CartItem } from '@/types/cart';
+import { getCartItemTitle } from '@/utils/product-helper';
 
 interface OrderSummaryItemProps {
   item: CartItem;
@@ -13,9 +14,9 @@ export default function OrderSummaryItem({ item, sizeOption }: OrderSummaryItemP
     return (
       <div className="mt-2">
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-          {item.customization.customizationType === 'setting-diamond' && 'Custom Diamond Ring'}
-          {item.customization.customizationType === 'setting-gemstone' && 'Custom Gemstone Ring'}
-          {item.customization.customizationType === 'preset' && 'Pre-set Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'setting-diamond' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Diamond Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'setting-gemstone' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Gemstone Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'preset' && 'Pre-set Ring'}
         </span>
 
         {item.customization.customizationDetails && (
@@ -54,7 +55,7 @@ export default function OrderSummaryItem({ item, sizeOption }: OrderSummaryItemP
         <div className="w-20 h-20 relative flex-shrink-0 rounded-lg overflow-hidden">
           <Image
             src={item.image}
-            alt={item.title}
+            alt={getCartItemTitle(item)}
             fill
             sizes="80px"
             className="object-cover"
@@ -75,7 +76,7 @@ export default function OrderSummaryItem({ item, sizeOption }: OrderSummaryItemP
         )}
 
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
+          <h3 className="text-sm font-medium text-gray-900">{getCartItemTitle(item)}</h3>
           <p className="text-sm text-gray-500 mt-1">
             {item.metalOption && `${item.metalOption.karat} ${item.metalOption.color}`}
             {item.size && ` • Size ${item.size}`}

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 import { CartItem } from '@/types/cart';
+import { getCartItemTitle } from '@/utils/product-helper';
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/lib/stripe-client';
 import StripeCheckoutForm from '@/components/checkout/StripeCheckoutForm';
@@ -117,9 +118,9 @@ const renderCustomizationDetails = (item: CartItem) => {
   return (
     <div className="mt-2 text-sm">
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-        {item.customization.customizationType === 'setting-diamond' && 'Custom Diamond Ring'}
-        {item.customization.customizationType === 'setting-gemstone' && 'Custom Gemstone Ring'}
-        {item.customization.customizationType === 'preset' && 'Pre-set Ring'}
+        {item.customization?.isCustomized && item.customization.customizationType === 'setting-diamond' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Diamond Ring'}
+        {item.customization?.isCustomized && item.customization.customizationType === 'setting-gemstone' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Gemstone Ring'}
+        {item.customization?.isCustomized && item.customization.customizationType === 'preset' && 'Pre-set Ring'}
       </span>
 
       {/* Display detailed customization info */}
@@ -435,7 +436,7 @@ export default function CheckoutPage() {
       items: items.map(item => ({
         productId: item._id,
         productType: item.productType || 'jewelry',
-        title: item.title,
+        title: getCartItemTitle(item),
         image: item.image,
         price: item.price,
         quantity: item.quantity,
@@ -621,14 +622,14 @@ export default function CheckoutPage() {
                 <div className="w-16 h-16 relative flex-shrink-0">
                   <Image
                     src={item.image}
-                    alt={item.title}
+                    alt={getCartItemTitle(item)}
                     fill
                     sizes="64px"
                     className="object-cover rounded-md"
                   />
                 </div>
                 <div className="ml-4 flex-1">
-                  <h3 className="text-sm font-medium">{item.title}</h3>
+                  <h3 className="text-sm font-medium">{getCartItemTitle(item)}</h3>
                   <p className="text-xs text-gray-500">
                     {item.metalOption && `${item.metalOption.karat} ${item.metalOption.color}`}
                   </p>
@@ -681,7 +682,7 @@ export default function CheckoutPage() {
                       <div className="w-16 h-16 relative flex-shrink-0">
                         <Image
                           src={item.image}
-                          alt={item.title}
+                          alt={getCartItemTitle(item)}
                           fill
                           sizes="64px"
                           className="object-cover rounded-md"
@@ -1019,9 +1020,10 @@ export default function CheckoutPage() {
                         tax,
                         items: items.map(item => ({
                           productId: item._id,
-                          title: item.title,
+                          title: getCartItemTitle(item),
                           price: item.price,
-                          quantity: item.quantity
+                          quantity: item.quantity,
+                          productType: item.productType
                         }))
                       }}
                     />

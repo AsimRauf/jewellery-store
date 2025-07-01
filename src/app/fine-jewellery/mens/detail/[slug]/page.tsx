@@ -9,15 +9,17 @@ import { useCart } from '@/context/CartContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import { getMensJewelryTitle } from '@/utils/product-helper';
+import { MensJewelryProduct } from '@/types/product';
 
-interface MensJewelryDetail {
-  _id: string;
-  slug?: string;
-  sku: string;
-  productNumber: string;
-  title: string;
-  type: string;
-  metal: string;
+ interface MensJewelryDetail {
+   _id: string;
+   slug: string;
+   sku: string;
+   productNumber: string;
+   name: string;
+   type: string;
+   metal: string;
   style: string;
   finish: string;
   size?: string;
@@ -122,9 +124,21 @@ export default function MensJewelryDetailPage() {
       return;
     }
 
+    const { size, length, width, thickness, ...rest } = product;
+    const mensProduct: MensJewelryProduct = {
+      ...rest,
+      size: size || '',
+      length: parseFloat(length || '0'),
+      width: parseFloat(width || '0'),
+      thickness: parseFloat(thickness || '0'),
+      productType: 'mens-jewelry',
+      title: product.name, // Pass name to title for the helper
+      imageUrl: product.images?.[0]?.url || '',
+    };
+
     const cartItem: CartItem = {
       _id: product._id,
-      title: product.title,
+      title: getMensJewelryTitle(mensProduct),
       price: product.salePrice || product.price,
       quantity,
       image: product.images?.[0]?.url || '',
@@ -197,10 +211,10 @@ export default function MensJewelryDetailPage() {
         <span className="mx-2">/</span>
         <Link href="/fine-jewellery/mens/all" className="hover:text-gray-900">Men's Jewelry</Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">{product.title}</span>
+        <span className="text-gray-900">{product.name}</span>
       </nav>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+ 
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Product Images */}
         <div className="space-y-4">
           {/* Main Image */}
@@ -208,7 +222,7 @@ export default function MensJewelryDetailPage() {
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[selectedImageIndex].url}
-                alt={product.title}
+                alt={product.name}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -233,7 +247,7 @@ export default function MensJewelryDetailPage() {
                 >
                   <Image
                     src={image.url}
-                    alt={`${product.title} ${index + 1}`}
+                    alt={`${product.name} ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="80px"
@@ -247,7 +261,7 @@ export default function MensJewelryDetailPage() {
         {/* Product Details */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
             <p className="text-gray-600">SKU: {product.sku}</p>
           </div>
 

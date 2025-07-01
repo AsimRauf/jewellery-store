@@ -20,6 +20,7 @@ interface OrderData {
     title: string;
     price: number;
     quantity: number;
+    productType?: string;
   }>;
 }
 

@@ -6,6 +6,7 @@ import { useUser } from '@/context/UserContext';
 import { useCart } from '@/context/CartContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
+import { getCartItemTitle } from '@/utils/product-helper';
 
 
 // Add these interfaces at the top of your file
@@ -1018,7 +1019,7 @@ export default function Navbar() {
                     <div className="ml-4 flex-1">
                       <div className="flex justify-between">
                         <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
-                        <button 
+                        <button
                           onClick={() => removeItem(item.cartItemId || '')}
                           className="text-gray-400 hover:text-red-500"
                         >

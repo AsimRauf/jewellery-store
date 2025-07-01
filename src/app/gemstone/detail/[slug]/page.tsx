@@ -64,7 +64,6 @@ export default function GemstoneDetailPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
-  const isCustomizationFlow = Boolean(settingId || startWith === 'gemstone');
   
   // Fetch gemstone data
   useEffect(() => {
@@ -111,7 +110,7 @@ export default function GemstoneDetailPage() {
         quantity: quantity,
         image: gemstone.images?.[0]?.url || '',
         productType: 'gemstone',
-        customization: isCustomizationFlow ? {
+        customization: (settingId && gemstone._id) ? {
           isCustomized: true,
           customizationType: 'setting-gemstone',
           gemstoneId: gemstone._id,

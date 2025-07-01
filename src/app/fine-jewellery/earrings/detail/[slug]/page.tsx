@@ -9,15 +9,17 @@ import { useCart } from '@/context/CartContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorDisplay from '@/components/ui/ErrorDisplay';
 import { CartItem } from '@/types/cart';
+import { getEarringTitle } from '@/utils/product-helper';
+import { EarringProduct } from '@/types/product';
 
-interface EarringDetail {
-  _id: string;
-  slug?: string;
-  sku: string;
-  productNumber: string;
-  title: string;
-  type: string;
-  backType?: string;
+ interface EarringDetail {
+   _id: string;
+   slug: string;
+   sku: string;
+   productNumber: string;
+   name: string;
+   type: string;
+   backType?: string;
   metal: string;
   style: string;
   length?: string;
@@ -99,9 +101,20 @@ export default function EarringDetailPage() {
     try {
       setAddingToCart(true);
       
+      const { length, width, ...rest } = earring;
+      const earringProduct: EarringProduct = {
+        ...rest,
+        length: parseFloat(length || '0'),
+        width: parseFloat(width || '0'),
+        productType: 'earring',
+        title: earring.name, // Pass name to title for the helper
+        imageUrl: earring.images?.[0]?.url || '',
+        backType: earring.backType || '',
+      };
+
       const cartItem: CartItem = {
         _id: earring._id,
-        title: earring.title,
+        title: getEarringTitle(earringProduct),
         price: earring.salePrice || earring.price,
         quantity: quantity,
         image: earring.images?.[0]?.url || '',
@@ -118,7 +131,7 @@ export default function EarringDetailPage() {
       };
 
       addItem(cartItem);
-      toast.success(`${earring.title} added to cart!`);
+      toast.success(`${earring.name} added to cart!`);
       
     } catch (err) {
       toast.error('Failed to add to cart');
@@ -184,17 +197,17 @@ export default function EarringDetailPage() {
         <span>/</span>
         <Link href="/fine-jewellery/earrings/all" className="hover:text-amber-500">Earrings</Link>
         <span>/</span>
-        <span className="text-gray-900">{earring.title}</span>
+        <span className="text-gray-900">{earring.name}</span>
       </nav>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+ 
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Image Gallery */}
         <div className="space-y-4">
           {/* Main Image */}
           <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
             <Image
               src={getImageUrl(earring, selectedImageIndex)}
-              alt={earring.title}
+              alt={earring.name}
               width={600}
               height={600}
               className="w-full h-full object-cover"
@@ -217,7 +230,7 @@ export default function EarringDetailPage() {
                 >
                   <Image
                     src={image.url}
-                    alt={`${earring.title} - Image ${index + 1}`}
+                    alt={`${earring.name} - Image ${index + 1}`}
                     width={150}
                     height={150}
                     className="w-full h-full object-cover"
@@ -242,7 +255,7 @@ export default function EarringDetailPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{earring.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">{earring.name}</h1>
             <div className="flex items-center gap-4">
               {earring.salePrice && earring.salePrice < earring.price ? (
                 <>

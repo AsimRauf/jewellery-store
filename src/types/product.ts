@@ -9,6 +9,8 @@ import {
   INecklace,
   IMensJewelry,
 } from '@/models';
+import { DiamondShape } from '@/models/Diamond';
+import { GemstoneType } from '@/models/Gemstone';
 
 export interface MetalOption {
   karat: string;
@@ -20,6 +22,7 @@ export interface MetalOption {
 export interface BaseProduct {
   _id: string;
   name: string;
+  title: string;
   slug: string;
   price: number;
   productType: string;
@@ -42,10 +45,16 @@ export interface ProductSuggestion {
 export interface RingProduct extends BaseProduct, IEngagementRing, IWeddingRing, ISetting {}
 
 // Interface for Diamond products
-export interface DiamondProduct extends BaseProduct, IDiamond {}
+export interface DiamondProduct extends BaseProduct, IDiamond {
+  shape: DiamondShape;
+  carat: number;
+}
 
 // Interface for Gemstone products
-export interface GemstoneProduct extends BaseProduct, IGemstone {}
+export interface GemstoneProduct extends BaseProduct, IGemstone {
+  type: typeof GemstoneType[keyof typeof GemstoneType];
+  carat: number;
+}
 
 // Interface for Bracelet products
 export interface BraceletProduct extends BaseProduct, IBracelet {}

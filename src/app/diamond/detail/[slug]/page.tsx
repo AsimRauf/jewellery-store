@@ -103,7 +103,7 @@ export default function DiamondDetailPage() {
     
     try {
       // Check if this is part of a customization flow
-      const isCustomized = Boolean(settingId || startWith === 'diamond');
+      const isCustomized = Boolean(settingId && diamond._id);
       
       const cartItem: CartItem = {
         _id: diamond._id,

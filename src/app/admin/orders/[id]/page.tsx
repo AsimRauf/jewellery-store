@@ -214,9 +214,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="mt-2 p-3 bg-blue-50 rounded-lg">
         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mb-2">
-          {item.customization.customizationType === 'setting-diamond' && 'Custom Diamond Ring'}
-          {item.customization.customizationType === 'setting-gemstone' && 'Custom Gemstone Ring'}
-          {item.customization.customizationType === 'preset' && 'Pre-set Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'setting-diamond' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Diamond Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'setting-gemstone' && item.customization.customizationDetails?.setting && item.customization.customizationDetails?.stone && 'Custom Gemstone Ring'}
+          {item.customization?.isCustomized && item.customization.customizationType === 'preset' && 'Pre-set Ring'}
         </span>
 
         {item.customization.customizationDetails && (
@@ -300,6 +300,12 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                       {item.metalOption && `${item.metalOption.karat} ${item.metalOption.color}`}
                       {item.size && ` • Size ${item.size}`}
                       {item.quantity > 1 && ` • Qty: ${item.quantity}`}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Product Type: {item.productType}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Customized: {item.customization?.isCustomized ? 'Yes' : 'No'}
                     </p>
                     
                     {renderCustomizationDetails(item)}
