@@ -567,8 +567,8 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="Jewelry Store"
-                  width={120} // Increased width
-                  height={45} // Increased height
+                  width={80} // Increased width
+                  height={30} // Increased height
                   style={{ paddingLeft: 10 }}
                   className="object-contain " // Added shadow
                 />
