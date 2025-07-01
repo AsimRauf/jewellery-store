@@ -63,10 +63,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   const handleAddToCart = (e: React.MouseEvent, product: MensJewelry) => {
     e.stopPropagation(); // Prevent triggering product click
     onAddToCart(product);
-    toast.success(`${product.title} added to cart`);
+    toast.success(`${product.name} added to cart`);
   };
-
-  const formatPrice = (price: number) => {
+ 
+   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -148,7 +148,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                     )}
                     <Image
                       src={product.images[0].url}
-                      alt={product.title}
+                      alt={product.name}
                       fill
                       className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
                         imageLoadingStates[product._id] ? 'opacity-0' : 'opacity-100'
@@ -192,10 +192,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               <div className="p-4 space-y-3">
                 {/* Title */}
                 <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                  {product.title}
+                  {product.name}
                 </h3>
-
-                {/* Product Details */}
+ 
+                 {/* Product Details */}
                 <div className="text-sm text-gray-600 space-y-1">
                   <div className="flex justify-between">
                     <span>Type:</span>
@@ -227,17 +227,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 )}
 
                 {/* Price */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-bold text-gray-900">
-                      {formatPrice(currentPrice)}
-                    </span>
-                    {hasDiscount && (
-                      <span className="text-sm text-gray-500 line-through">
-                        {formatPrice(product.price)}
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-center">
+                  {product.salePrice ? (
+                    <>
+                      <span className="text-red-600 font-medium">${formatPrice(product.salePrice)}</span>
+                      <span className="ml-2 text-gray-500 line-through text-sm">${formatPrice(product.price)}</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-900 font-medium">${formatPrice(product.price)}</span>
+                  )}
                 </div>
 
                 {/* Add to Cart Button */}

@@ -1,8 +1,9 @@
 export interface Bracelet {
   _id: string;
-  slug?: string;
+  slug: string;
   sku: string;
   productNumber: string;
+  name: string;
   title: string;
   type: string; // Tennis, Chain, Bangle, Charm, Cuff, Link, Beaded, Wrap, Tennis Diamond, Pearl
   closure?: string; // Lobster Clasp, Spring Ring, Toggle, Magnetic, Hook & Eye, Box Clasp, Slide, None

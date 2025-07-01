@@ -9,8 +9,10 @@ import ProductGrid from '@/components/earring/ProductGrid';
 import { Earring } from '@/types/earring';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/types/cart';
-
-// Define available filter options
+import { getEarringTitle } from '@/utils/product-helper';
+import { EarringProduct } from '@/types/product';
+ 
+ // Define available filter options
 const availableFilters = {
   types: ['Stud', 'Drop', 'Dangle', 'Hoop', 'Huggie', 'Chandelier', 'Cluster', 'Climber', 'Threader', 'Jacket'],
   backTypes: ['Push Back', 'Screw Back', 'Lever Back', 'French Wire', 'Clip On', 'Magnetic', 'Threader'],
@@ -388,9 +390,20 @@ export default function EarringCategoryPage() {
   };
 
   const handleAddToCart = (earring: Earring) => {
+    const { length, width, ...rest } = earring;
+    const earringProduct: EarringProduct = {
+      ...rest,
+      productType: 'earring',
+      title: earring.name, // Pass name to title for the helper
+      imageUrl: earring.images?.[0]?.url || '',
+      length: parseFloat(length || '0'),
+      width: parseFloat(width || '0'),
+      backType: earring.backType || '',
+    };
+
     const cartItem: CartItem = {
       _id: earring._id,
-      title: earring.title,
+      title: getEarringTitle(earringProduct),
       price: earring.salePrice || earring.price,
       quantity: 1,
       image: earring.images?.[0]?.url || '',

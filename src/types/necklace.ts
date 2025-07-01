@@ -1,8 +1,9 @@
 export interface Necklace {
   _id: string;
-  slug?: string;
+  slug: string;
   sku: string;
   productNumber: string;
+  name: string;
   title: string;
   type: string; // Pendant, Chain, Choker, Statement, Layered, Lariat, Collar, Tennis, Pearl, Charm
   length?: string; // 14", 16", 18", 20", 22", 24", 26", 28", Custom

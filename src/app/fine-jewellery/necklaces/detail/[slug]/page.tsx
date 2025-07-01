@@ -231,19 +231,20 @@ export default function NecklaceDetailPage() {
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-amber-600">
-                ${(necklace.salePrice || necklace.price).toLocaleString()}
-              </span>
-              {necklace.salePrice && necklace.salePrice < necklace.price ? (
+              {necklace.salePrice ? (
                 <>
+                  <span className="text-2xl font-bold text-red-600">
+                    ${necklace.salePrice.toLocaleString()}
+                  </span>
                   <span className="ml-3 text-gray-500 line-through">
                     ${necklace.price.toLocaleString()}
                   </span>
-                  <span className="ml-3 bg-red-100 text-red-700 px-2 py-1 rounded text-sm">
-                    Sale
-                  </span>
                 </>
-              ) : null}
+              ) : (
+                <span className="text-2xl font-bold text-amber-600">
+                  ${necklace.price.toLocaleString()}
+                </span>
+              )}
             </div>
           </div>
           

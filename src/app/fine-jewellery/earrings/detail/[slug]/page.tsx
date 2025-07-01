@@ -257,16 +257,13 @@ export default function EarringDetailPage() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{earring.name}</h1>
             <div className="flex items-center gap-4">
-              {earring.salePrice && earring.salePrice < earring.price ? (
+              {earring.salePrice ? (
                 <>
                   <span className="text-3xl font-bold text-red-600">
                     {formatPrice(earring.salePrice)}
                   </span>
                   <span className="text-xl text-gray-500 line-through">
                     {formatPrice(earring.price)}
-                  </span>
-                  <span className="inline-block px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">
-                    {earring.discountPercentage}% OFF
                   </span>
                 </>
               ) : (

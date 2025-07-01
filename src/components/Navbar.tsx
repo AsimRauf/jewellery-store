@@ -6,7 +6,6 @@ import { useUser } from '@/context/UserContext';
 import { useCart } from '@/context/CartContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
-import { getCartItemTitle } from '@/utils/product-helper';
 
 
 // Add these interfaces at the top of your file
@@ -34,6 +33,7 @@ interface ProductSuggestion {
   imageUrl: string;
   productType: string;
   price: number;
+  salePrice?: number;
   metal?: {
     karat: string;
     color: string;
@@ -619,7 +619,16 @@ export default function Navbar() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-gray-800">{suggestion.name}</div>
-                          <div className="text-sm text-gray-600">{formatPrice(suggestion.price)}</div>
+                          <div className="text-sm text-gray-600">
+                            {suggestion.salePrice ? (
+                              <>
+                                <span className="text-red-600 font-medium">{formatPrice(suggestion.salePrice)}</span>
+                                <span className="ml-2 text-gray-500 line-through">{formatPrice(suggestion.price)}</span>
+                              </>
+                            ) : (
+                              formatPrice(suggestion.price)
+                            )}
+                          </div>
                         </div>
                       </Link>
                     </li>

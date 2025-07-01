@@ -266,19 +266,20 @@ export default function MensJewelryDetailPage() {
           </div>
 
           {/* Price */}
-          <div className="flex items-center space-x-4">
-            <span className="text-3xl font-bold text-gray-900">
-              ${currentPrice.toLocaleString()}
-            </span>
-            {hasDiscount && (
+          <div className="flex items-center">
+            {product.salePrice ? (
               <>
-                <span className="text-xl text-gray-500 line-through">
+                <span className="text-3xl font-bold text-red-600">
+                  ${product.salePrice.toLocaleString()}
+                </span>
+                <span className="ml-3 text-gray-500 line-through">
                   ${product.price.toLocaleString()}
                 </span>
-                <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">
-                  {product.discountPercentage}% OFF
-                </span>
               </>
+            ) : (
+              <span className="text-3xl font-bold text-gray-900">
+                ${product.price.toLocaleString()}
+              </span>
             )}
           </div>
 

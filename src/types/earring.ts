@@ -1,8 +1,9 @@
 export interface Earring {
   _id: string;
-  slug?: string;
+  slug: string;
   sku: string;
   productNumber: string;
+  name: string;
   title: string;
   type: string; // Stud, Drop, Dangle, Hoop, Huggie, Chandelier, Cluster, Climber, Threader, Jacket
   backType?: string; // Push Back, Screw Back, Lever Back, French Wire, Clip On, Magnetic, Threader

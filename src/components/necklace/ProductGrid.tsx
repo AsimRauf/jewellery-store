@@ -126,7 +126,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               <div className="relative aspect-square overflow-hidden rounded-lg mb-3 bg-gray-100">
                 <Image
                   src={getImageUrl(product)}
-                  alt={product.title}
+                  alt={product.name}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -158,13 +158,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               
               <div>
                 <h3 className="font-medium text-gray-900 truncate">
-                  {product.title}
+                  {product.name}
                 </h3>
                 <p className="text-sm text-gray-500 mb-1">
                   {product.metal} • {product.style}
                 </p>
                 <div className="flex items-center">
-                  {product.salePrice && product.salePrice < product.price ? (
+                  {product.salePrice ? (
                     <>
                       <span className="text-red-600 font-medium">${formatPrice(product.salePrice)}</span>
                       <span className="ml-2 text-gray-500 line-through text-sm">${formatPrice(product.price)}</span>

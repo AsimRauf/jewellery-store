@@ -231,9 +231,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  {product.salePrice && product.salePrice < product.price ? (
+                  {product.salePrice ? (
                     <>
-                      <span className="text-amber-600 font-semibold text-xl">
+                      <span className="text-red-600 font-semibold text-xl">
                         {formatPrice(product.salePrice)}
                       </span>
                       <span className="text-gray-400 line-through text-sm">

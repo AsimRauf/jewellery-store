@@ -13,6 +13,7 @@ interface User {
 
 interface UserContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   loading: boolean;
   login: (credentials: { email: string; password: string; isAdmin?: boolean }) => Promise<User>;
   logout: () => void;
@@ -215,7 +216,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []); // Empty dependency array means this only runs once on mount
   
   return (
-    <UserContext.Provider value={{ user, loading, login, logout, checkAuth, error }}>
+    <UserContext.Provider value={{ user, setUser, loading, login, logout, checkAuth, error }}>
       {children}
     </UserContext.Provider>
   );

@@ -43,20 +43,11 @@ const getImageUrl = (item: any, color?: string, productType?: string): string =>
 };
 
 // Helper function to get the appropriate price for a product
-const getProductPrice = (item: any, metalOption?: any): number => {
-    if (metalOption && metalOption.price) {
-        return metalOption.price;
-    }
-    if (item.price) {
-        return item.price;
-    }
-    if (item.basePrice) {
-        return item.basePrice;
-    }
-    if (item.salePrice) {
-        return item.salePrice;
-    }
-    return 0;
+const getProductPrice = (item: any, metalOption?: any): { price: number, salePrice?: number } => {
+    const price = metalOption?.price || item.price || item.basePrice || 0;
+    const salePrice = item.salePrice;
+
+    return { price, salePrice };
 };
 
 export async function GET(request: NextRequest) {
@@ -278,7 +269,8 @@ export async function GET(request: NextRequest) {
                     _id: `${item._id.toString()}-${variant.karat}-${variant.color}-${variantIndex}`, // Unique ID for each variant
                     name: `${item.title || item.name} - ${variant.karat} ${variant.color}`,
                     imageUrl: getImageUrl(item, variant.color, item.productType),
-                    price: getProductPrice(item, variant),
+                    price: getProductPrice(item, variant).price,
+                    salePrice: getProductPrice(item, variant).salePrice,
                     slug: item.slug || '',
                     metal: {
                         karat: variant.karat,
@@ -294,7 +286,8 @@ export async function GET(request: NextRequest) {
                     ...baseSuggestion,
                     name,
                     imageUrl: getImageUrl(item, undefined, item.productType),
-                    price: getProductPrice(item),
+                    price: getProductPrice(item).price,
+                    salePrice: getProductPrice(item).salePrice,
                 }];
             }
 
@@ -304,7 +297,8 @@ export async function GET(request: NextRequest) {
                     ...baseSuggestion,
                     name,
                     imageUrl: getImageUrl(item, undefined, item.productType),
-                    price: getProductPrice(item),
+                    price: getProductPrice(item).price,
+                    salePrice: getProductPrice(item).salePrice,
                 }];
             }
 
@@ -313,7 +307,8 @@ export async function GET(request: NextRequest) {
                 ...baseSuggestion,
                 name: item.name || item.title || '',
                 imageUrl: getImageUrl(item, undefined, item.productType),
-                price: getProductPrice(item),
+                price: getProductPrice(item).price,
+                salePrice: getProductPrice(item).salePrice,
             }];
         });
 

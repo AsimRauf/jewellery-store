@@ -9,8 +9,10 @@ import ProductGrid from '@/components/mens-jewelry/ProductGrid';
 import { MensJewelry } from '@/types/mens-jewelry';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/types/cart';
-
-// Define available filter options
+import { getMensJewelryTitle } from '@/utils/product-helper';
+import { MensJewelryProduct } from '@/types/product';
+ 
+ // Define available filter options
 const availableFilters = {
   types: ['Ring', 'Necklace', 'Bracelet', 'Watch', 'Cufflinks', 'Tie Clip', 'Chain', 'Pendant', 'Signet Ring', 'Wedding Band'],
   metals: ['14K Gold', '18K Gold', 'White Gold', 'Rose Gold', 'Yellow Gold', 'Platinum', 'Sterling Silver', 'Titanium', 'Stainless Steel', 'Tungsten', 'Palladium'],
@@ -494,9 +496,21 @@ export default function MensJewelryCategoryPage() {
   };
 
   const handleAddToCart = (product: MensJewelry) => {
+    const { size, length, width, thickness, ...rest } = product;
+    const mensProduct: MensJewelryProduct = {
+      ...rest,
+      productType: 'mens-jewelry',
+      title: product.name, // Pass name to title for the helper
+      imageUrl: product.images?.[0]?.url || '',
+      size: size || '',
+      length: parseFloat(length || '0'),
+      width: parseFloat(width || '0'),
+      thickness: parseFloat(thickness || '0'),
+    };
+
     const cartItem: CartItem = {
       _id: product._id,
-      title: product.title,
+      title: getMensJewelryTitle(mensProduct),
       price: product.salePrice || product.price,
       quantity: 1,
       image: product.images?.[0]?.url || '',

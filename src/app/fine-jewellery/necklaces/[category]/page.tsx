@@ -9,8 +9,10 @@ import ProductGrid from '@/components/necklace/ProductGrid';
 import { Necklace } from '@/types/necklace';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/types/cart';
-
-// Define available filter options
+import { getNecklaceTitle } from '@/utils/product-helper';
+import { NecklaceProduct } from '@/types/product';
+ 
+ // Define available filter options
 const availableFilters = {
   types: ['Pendant', 'Chain', 'Choker', 'Statement', 'Layered', 'Lariat', 'Collar', 'Tennis', 'Pearl', 'Charm'],
   lengths: ['14"', '16"', '18"', '20"', '22"', '24"', '26"', '28"', 'Custom'],
@@ -388,9 +390,19 @@ export default function NecklaceCategoryPage() {
   };
 
   const handleAddToCart = (necklace: Necklace) => {
+    const { chainWidth, ...rest } = necklace;
+    const necklaceProduct: NecklaceProduct = {
+      ...rest,
+      productType: 'necklace',
+      title: necklace.name,
+      imageUrl: necklace.images?.[0]?.url || '',
+      length: necklace.length || '',
+      chainWidth: chainWidth ? parseFloat(chainWidth) : undefined,
+    };
+
     const cartItem: CartItem = {
       _id: necklace._id,
-      title: necklace.title,
+      title: getNecklaceTitle(necklaceProduct),
       price: necklace.salePrice || necklace.price,
       quantity: 1,
       image: necklace.images?.[0]?.url || '',

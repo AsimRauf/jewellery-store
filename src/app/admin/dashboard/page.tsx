@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useUser } from '@/context/UserContext';
 import Link from 'next/link';
-import { 
-  HiShoppingCart, 
+import {
+  HiShoppingCart,
   HiCurrencyDollar, 
   HiUsers, 
   HiTrendingUp,
@@ -88,9 +88,9 @@ export default function AdminDashboard() {
       fetchDashboardStats();
     }
   }, [user]);
-
-  // Handle loading state
-  if (isLoading) {
+  
+    // Handle loading state
+    if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>

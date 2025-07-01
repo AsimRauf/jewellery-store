@@ -9,8 +9,10 @@ import ProductGrid from '@/components/bracelet/ProductGrid';
 import { Bracelet } from '@/types/bracelet';
 import { useCart } from '@/context/CartContext';
 import { CartItem } from '@/types/cart';
-
-// Define available filter options
+import { getBraceletTitle } from '@/utils/product-helper';
+import { BraceletProduct } from '@/types/product';
+ 
+ // Define available filter options
 const availableFilters = {
   types: ['Tennis', 'Chain', 'Bangle', 'Charm', 'Cuff', 'Link', 'Beaded', 'Wrap', 'Tennis Diamond', 'Pearl'],
   closures: ['Lobster Clasp', 'Spring Ring', 'Toggle', 'Magnetic', 'Hook & Eye', 'Box Clasp', 'Slide', 'None'],
@@ -414,9 +416,20 @@ export default function BraceletCategoryPage() {
   };
 
   const handleAddToCart = (bracelet: Bracelet) => {
+    const { length, width, ...rest } = bracelet;
+    const braceletProduct: BraceletProduct = {
+      ...rest,
+      productType: 'bracelet',
+      title: bracelet.name, // Pass name to title for the helper
+      imageUrl: bracelet.images?.[0]?.url || '',
+      closure: bracelet.closure || '',
+      length: parseFloat(length || '0'),
+      width: parseFloat(width || '0'),
+    };
+
     const cartItem: CartItem = {
       _id: bracelet._id,
-      title: bracelet.title,
+      title: getBraceletTitle(braceletProduct),
       price: bracelet.salePrice || bracelet.price,
       quantity: 1,
       image: bracelet.images?.[0]?.url || '',

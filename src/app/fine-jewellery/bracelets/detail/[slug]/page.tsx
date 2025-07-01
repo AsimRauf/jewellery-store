@@ -238,19 +238,20 @@ export default function BraceletDetailPage() {
           {/* Price */}
           <div className="mb-6">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-amber-600">
-                ${(bracelet.salePrice || bracelet.price).toLocaleString()}
-              </span>
-              {bracelet.salePrice && bracelet.salePrice < bracelet.price ? (
+              {bracelet.salePrice ? (
                 <>
+                  <span className="text-2xl font-bold text-red-600">
+                    ${bracelet.salePrice.toLocaleString()}
+                  </span>
                   <span className="ml-3 text-gray-500 line-through">
                     ${bracelet.price.toLocaleString()}
                   </span>
-                  <span className="ml-3 bg-red-100 text-red-700 px-2 py-1 rounded text-sm">
-                    Sale
-                  </span>
                 </>
-              ) : null}
+              ) : (
+                <span className="text-2xl font-bold text-amber-600">
+                  ${bracelet.price.toLocaleString()}
+                </span>
+              )}
             </div>
           </div>
           

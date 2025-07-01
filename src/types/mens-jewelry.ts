@@ -1,8 +1,9 @@
 export interface MensJewelry {
     _id: string;
-    slug?: string;
+    slug: string;
     sku: string;
     productNumber: string;
+    name: string;
     title: string;
     type: string; // Ring, Necklace, Bracelet, Watch, Cufflinks, Tie Clip, Chain, Pendant, Signet Ring, Wedding Band
     metal: string; // 14K Gold, 18K Gold, White Gold, Rose Gold, Yellow Gold, Platinum, Sterling Silver, Titanium, Stainless Steel, Tungsten, Palladium

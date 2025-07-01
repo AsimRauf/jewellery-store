@@ -68,8 +68,10 @@ export async function POST(request: Request) {
     user.lastLogin = new Date();
 
     // Generate tokens with role-specific claims
+    const isAdminLogin = isAdmin && user.role === 'admin';
+    const accessTokenExpiration = isAdminLogin ? '7d' : '2h';
     const accessToken = jwt.sign(
-      { 
+      {
         userId: user._id,
         role: user.role,
         email: user.email,
@@ -77,7 +79,7 @@ export async function POST(request: Request) {
         sessionId: `session_${user._id}_${Date.now()}`
       },
       process.env.JWT_SECRET!,
-      { expiresIn: '2h' } // Extended to 2 hours for better UX
+      { expiresIn: accessTokenExpiration }
     );
 
     const refreshToken = jwt.sign(
@@ -117,7 +119,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 2 * 60 * 60, // 2 hours
+      maxAge: isAdminLogin ? 7 * 24 * 60 * 60 : 2 * 60 * 60, // 7 days for admin, 2 hours for others
       path: '/'
     });
 

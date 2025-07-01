@@ -35,6 +35,7 @@ export interface ProductSuggestion {
   imageUrl: string;
   productType: string;
   price: number;
+  salePrice?: number;
   metal?: {
     karat: string;
     color: string;
