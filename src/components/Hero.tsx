@@ -67,6 +67,12 @@ export default function Hero() {
   ];
 
   useEffect(() => {
+    // Preload images
+    slides.forEach(slide => {
+      const img = new window.Image();
+      img.src = slide.image;
+    });
+
     // Set initial margin and mobile state based on screen width
     const updateLayout = () => {
       const width = window.innerWidth;
@@ -89,7 +95,7 @@ export default function Hero() {
     
     // Cleanup
     return () => window.removeEventListener('resize', updateLayout);
-  }, []);
+  }, [slides]);
 
   // Auto-slide effect
   useEffect(() => {
