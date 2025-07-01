@@ -17,6 +17,7 @@ export default function RootLayout({
         <link href="https://db.onlinewebfonts.com/c/0928a012dc26f49ac4fbc90fa9f7460a?family=Monomakh+Unicode" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="Elegance Jewels - Fine jewelry for life's precious moments" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className="font-poppins">
         <UserProvider>

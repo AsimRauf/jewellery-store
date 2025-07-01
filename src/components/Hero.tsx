@@ -66,11 +66,12 @@ export default function Hero() {
     }
   ];
 
-  useEffect(() => {
-    // Preload images
+    useEffect(() => {
+    // Preload images with high priority
     slides.forEach(slide => {
       const img = new window.Image();
       img.src = slide.image;
+      img.loading = 'eager';
     });
 
     // Set initial margin and mobile state based on screen width
@@ -104,7 +105,7 @@ export default function Hero() {
       setTimeout(() => {
         setCurrentSlide((prev) => (prev + 1) % slides.length);
         setTransitioning(false);
-      }, 500); // Match the transition duration
+      }, 300); // Reduced transition duration for smoother change
     }, 5000); // Change slide every 5 seconds
 
     return () => clearInterval(interval);
@@ -116,7 +117,7 @@ export default function Hero() {
     setTimeout(() => {
       setCurrentSlide(index);
       setTransitioning(false);
-    }, 500); // Match the transition duration
+    }, 300); // Reduced transition duration for smoother change
   };
 
   const currentSlideData = slides[currentSlide];
@@ -216,21 +217,22 @@ export default function Hero() {
           >
             <div className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[75vh] xl:h-[80vh] w-full flex items-end 
                             justify-center lg:justify-end relative overflow-visible">
-              <Image
+                <Image
                 src={currentSlideData.image}
                 alt={`${currentSlideData.title} - Elegant Jewelry Model`}
                 width={771}
                 height={1066}
-                className="h-full w-auto max-h-full object-contain object-bottom transition-all duration-500 ease-in-out"
-                priority={currentSlide === 0}
+                className="h-full w-auto max-h-full object-contain object-bottom transition-all duration-300 ease-in-out"
+                priority={true}
+                sizes="(max-width: 1024px) 100vw, 65vw"
                 style={{
                   maxWidth: 'none',
                   height: '100%',
                   objectFit: 'contain',
                   objectPosition: 'bottom center',
-                  opacity: transitioning ? 0.3 : 1,
-                  transform: transitioning ? 'scale(1.02)' : 'scale(1)',
-                  transition: 'opacity 500ms ease-in-out, transform 500ms ease-in-out',
+                  opacity: transitioning ? 0 : 1,
+                  transform: transitioning ? 'scale(1)' : 'scale(1)',
+                  transition: 'opacity 300ms ease-in-out',
                   ...(isMobile && {
                     maskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
                     WebkitMaskImage: 'linear-gradient(to top, transparent 0%, rgba(0,0,0,0.1) 8%, rgba(0,0,0,0.5) 15%, rgba(0,0,0,0.8) 25%, black 35%)',
