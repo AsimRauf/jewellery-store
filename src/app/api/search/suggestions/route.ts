@@ -65,12 +65,13 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q');
-
-        if (!query || query.trim().length < 2) {
-            return NextResponse.json([]);
-        }
-
-        const searchRegex = new RegExp(query, 'i');
+ 
+         if (!query || query.trim().length < 2) {
+             return NextResponse.json([]);
+         }
+ 
+         const searchRegex = new RegExp(query, 'i');
+        const lowerCaseQuery = query.toLowerCase().trim();
         const limit = 10;
 
         // Search across all product collections with proper error handling
@@ -90,104 +91,162 @@ export async function GET(request: NextRequest) {
         };
 
         // Engagement Rings
-        addSearchPromise(EngagementRing, {
-            $or: [
-                { title: searchRegex },
-                { category: searchRegex },
-                { style: { $in: [searchRegex] } },
-                { type: { $in: [searchRegex] } },
-            ],
-            isActive: true
-        }, 'Engagement Ring');
+        let engagementRingQuery;
+        if (['ring', 'rings', 'engagement ring', 'engagement rings'].includes(lowerCaseQuery)) {
+            engagementRingQuery = { isActive: true };
+        } else {
+            engagementRingQuery = {
+                $or: [
+                    { title: searchRegex },
+                    { category: searchRegex },
+                    { style: { $in: [searchRegex] } },
+                    { type: { $in: [searchRegex] } },
+                ],
+                isActive: true
+            };
+        }
+        addSearchPromise(EngagementRing, engagementRingQuery, 'Engagement Ring');
 
         // Wedding Rings
-        addSearchPromise(WeddingRing, {
-            $or: [
-                { title: searchRegex },
-                { category: searchRegex },
-                { subcategory: searchRegex },
-                { style: { $in: [searchRegex] } },
-                { type: { $in: [searchRegex] } },
-            ],
-            isActive: true
-        }, 'Wedding Ring');
+        let weddingRingQuery;
+        if (['ring', 'rings', 'wedding ring', 'wedding rings', 'wedding band', 'wedding bands'].includes(lowerCaseQuery)) {
+            weddingRingQuery = { isActive: true };
+        } else {
+            weddingRingQuery = {
+                $or: [
+                    { title: searchRegex },
+                    { category: searchRegex },
+                    { subcategory: searchRegex },
+                    { style: { $in: [searchRegex] } },
+                    { type: { $in: [searchRegex] } },
+                ],
+                isActive: true
+            };
+        }
+        addSearchPromise(WeddingRing, weddingRingQuery, 'Wedding Ring');
 
         // Settings
-        addSearchPromise(Setting, {
-            $or: [
-                { title: searchRegex },
-                { category: searchRegex },
-                { style: { $in: [searchRegex] } },
-                { type: { $in: [searchRegex] } },
-            ],
-            isActive: true
-        }, 'Setting');
+        let settingQuery;
+        if (['setting', 'settings'].includes(lowerCaseQuery)) {
+            settingQuery = { isActive: true };
+        } else {
+            settingQuery = {
+                $or: [
+                    { title: searchRegex },
+                    { category: searchRegex },
+                    { style: { $in: [searchRegex] } },
+                    { type: { $in: [searchRegex] } },
+                ],
+                isActive: true
+            };
+        }
+        addSearchPromise(Setting, settingQuery, 'Setting');
 
         // Diamonds
-        addSearchPromise(Diamond, {
-            $or: [
-                { type: searchRegex },
-                { shape: searchRegex },
-                { color: searchRegex },
-                { clarity: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Diamond');
+        let diamondQuery;
+        if (['diamond', 'diamonds'].includes(lowerCaseQuery)) {
+            diamondQuery = { isAvailable: true };
+        } else {
+            diamondQuery = {
+                $or: [
+                    { type: searchRegex },
+                    { shape: searchRegex },
+                    { color: searchRegex },
+                    { clarity: searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(Diamond, diamondQuery, 'Diamond');
 
         // Gemstones
-        addSearchPromise(Gemstone, {
-            $or: [
-                { type: searchRegex },
-                { shape: searchRegex },
-                { color: searchRegex },
-                { source: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Gemstone');
+        let gemstoneQuery;
+        if (['gemstone', 'gemstones'].includes(lowerCaseQuery)) {
+            gemstoneQuery = { isAvailable: true };
+        } else {
+            gemstoneQuery = {
+                $or: [
+                    { type: searchRegex },
+                    { shape: searchRegex },
+                    { color: searchRegex },
+                    { source: searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(Gemstone, gemstoneQuery, 'Gemstone');
 
         // Bracelets
-        addSearchPromise(Bracelet, {
-            $or: [
-                { name: searchRegex },
-                { type: searchRegex },
-                { metal: searchRegex },
-                { style: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Bracelet');
+        let braceletQuery;
+        if (['bracelet', 'bracelets'].includes(lowerCaseQuery)) {
+            braceletQuery = { isAvailable: true };
+        } else {
+            braceletQuery = {
+                $or: [
+                    { name: searchRegex },
+                    { type: searchRegex },
+                    { metal: searchRegex },
+                    { style: searchRegex },
+                    { 'gemstones.type': searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(Bracelet, braceletQuery, 'Bracelet');
 
         // Earrings
-        addSearchPromise(Earring, {
-            $or: [
-                { name: searchRegex },
-                { type: searchRegex },
-                { metal: searchRegex },
-                { style: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Earring');
+        let earringQuery;
+        if (['earring', 'earrings'].includes(lowerCaseQuery)) {
+            earringQuery = { isAvailable: true };
+        } else {
+            earringQuery = {
+                $or: [
+                    { name: searchRegex },
+                    { type: searchRegex },
+                    { metal: searchRegex },
+                    { style: searchRegex },
+                    { 'gemstones.type': searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(Earring, earringQuery, 'Earring');
 
         // Necklaces
-        addSearchPromise(Necklace, {
-            $or: [
-                { name: searchRegex },
-                { type: searchRegex },
-                { metal: searchRegex },
-                { style: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Necklace');
+        let necklaceQuery;
+        if (['necklace', 'necklaces'].includes(lowerCaseQuery)) {
+            necklaceQuery = { isAvailable: true };
+        } else {
+            necklaceQuery = {
+                $or: [
+                    { name: searchRegex },
+                    { type: searchRegex },
+                    { metal: searchRegex },
+                    { style: searchRegex },
+                    { 'gemstones.type': searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(Necklace, necklaceQuery, 'Necklace');
 
         // Men's Jewelry
-        addSearchPromise(MensJewelry, {
-            $or: [
-                { name: searchRegex },
-                { type: searchRegex },
-                { metal: searchRegex },
-                { style: searchRegex },
-            ],
-            isAvailable: true
-        }, 'Mens Jewelry');
+        let mensJewelryQuery;
+        if (["men's jewelry", "mens jewelry", "men's", "mens"].includes(lowerCaseQuery)) {
+            mensJewelryQuery = { isAvailable: true };
+        } else {
+            mensJewelryQuery = {
+                $or: [
+                    { name: searchRegex },
+                    { type: searchRegex },
+                    { metal: searchRegex },
+                    { style: searchRegex },
+                    { 'gemstones.type': searchRegex },
+                ],
+                isAvailable: true
+            };
+        }
+        addSearchPromise(MensJewelry, mensJewelryQuery, 'Mens Jewelry');
 
         // Execute all search promises
         const results = await Promise.allSettled(searchPromises.map(item => item.promise));

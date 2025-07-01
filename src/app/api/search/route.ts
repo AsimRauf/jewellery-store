@@ -68,20 +68,23 @@ export async function GET(request: NextRequest) {
     // Create advanced search terms with synonyms and related terms
     const searchTerms = createAdvancedSearchTerms(query);
     const searchRegex = searchTerms.length > 0 ? new RegExp(searchTerms.join('|'), 'i') : null;
-
-    // Search Settings (Ring Settings)
-    if (!categories.length || categories.includes('Settings') || categories.includes('Rings')) {
-      try {
-        let settingQuery: any = { isActive: true };
-        
-        if (searchRegex) {
-          settingQuery.$or = [
-            { title: searchRegex },
-            { description: searchRegex },
-            { style: { $in: [searchRegex] } },
-            { type: { $in: [searchRegex] } }
-          ];
-        }
+    const lowerCaseQuery = query.toLowerCase().trim();
+ 
+     // Search Settings (Ring Settings)
+     if (!categories.length || categories.includes('Settings') || categories.includes('Rings')) {
+       try {
+         let settingQuery: any = { isActive: true };
+         
+        if (['setting', 'settings'].includes(lowerCaseQuery)) {
+            // No additional query needed, will fetch all settings
+        } else if (searchRegex) {
+           settingQuery.$or = [
+             { title: searchRegex },
+             { description: searchRegex },
+             { style: { $in: [searchRegex] } },
+             { type: { $in: [searchRegex] } }
+           ];
+         }
 
         if (styles.length) {
           settingQuery.style = { $in: styles };
@@ -134,7 +137,9 @@ export async function GET(request: NextRequest) {
       try {
         let weddingQuery: any = { isActive: true };
         
-        if (searchRegex) {
+        if (['ring', 'rings', 'wedding ring', 'wedding rings', 'wedding band', 'wedding bands'].includes(lowerCaseQuery)) {
+            // No additional query needed, will fetch all wedding rings
+        } else if (searchRegex) {
           weddingQuery.$or = [
             { title: searchRegex },
             { description: searchRegex },
@@ -193,7 +198,9 @@ export async function GET(request: NextRequest) {
       try {
         let engagementQuery: any = { isActive: true };
         
-        if (searchRegex) {
+        if (['ring', 'rings', 'engagement ring', 'engagement rings'].includes(lowerCaseQuery)) {
+            // No additional query needed, will fetch all engagement rings
+        } else if (searchRegex) {
           engagementQuery.$or = [
             { title: searchRegex },
             { description: searchRegex },
@@ -251,7 +258,9 @@ export async function GET(request: NextRequest) {
       try {
         let diamondQuery: any = { isAvailable: true };
         
-        if (searchRegex) {
+        if (['diamond', 'diamonds'].includes(lowerCaseQuery)) {
+            // No additional query needed, will fetch all diamonds
+        } else if (searchRegex) {
           diamondQuery.$or = [
             { shape: searchRegex },
             { color: searchRegex },
@@ -306,7 +315,9 @@ export async function GET(request: NextRequest) {
       try {
         let gemstoneQuery: any = { isAvailable: true };
         
-        if (searchRegex) {
+        if (['gemstone', 'gemstones'].includes(lowerCaseQuery)) {
+            // No additional query needed, will fetch all gemstones
+        } else if (searchRegex) {
           gemstoneQuery.$or = [
             { type: searchRegex },
             { shape: searchRegex },
@@ -375,13 +386,21 @@ export async function GET(request: NextRequest) {
           
           let jewelryQuery: any = { isAvailable: true };
           
-          if (searchRegex) {
+          if (
+            (category === 'Bracelet' && ['bracelet', 'bracelets'].includes(lowerCaseQuery)) ||
+            (category === 'Earring' && ['earring', 'earrings'].includes(lowerCaseQuery)) ||
+            (category === 'Necklace' && ['necklace', 'necklaces'].includes(lowerCaseQuery)) ||
+            (category === 'Men\'s Jewelry' && ["men's jewelry", "mens jewelry", "men's", "mens"].includes(lowerCaseQuery))
+          ) {
+            // No additional query needed, will fetch all items of this type
+          } else if (searchRegex) {
             jewelryQuery.$or = [
               { name: searchRegex },
               { type: searchRegex },
               { metal: searchRegex },
               { style: searchRegex },
-              { description: searchRegex }
+              { description: searchRegex },
+              { 'gemstones.type': searchRegex }
             ];
           }
 
