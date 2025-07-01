@@ -49,31 +49,48 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   };
 
   const getProductUrl = (product: SearchProduct): string => {
+    let url = '';
+    const metalQuery = product.metalOption
+      ? `?metal=${product.metalOption.karat}-${product.metalOption.color.replace(/ /g, '+')}`
+      : '';
+
     if (product.slug) {
       switch (product.productType) {
         case 'setting':
-          return `/products/rings/settings/${product.slug}`;
+          url = `/products/rings/settings/${product.slug}${metalQuery}`;
+          break;
         case 'wedding':
-          return `/wedding/detail/${product.slug}`;
+          url = `/wedding/detail/${product.slug}${metalQuery}`;
+          break;
         case 'engagement':
-          return `/engagement/detail/${product.slug}`;
+          url = `/engagement/detail/${product.slug}${metalQuery}`;
+          break;
         case 'diamond':
-          return `/diamond/detail/${product.slug}`;
+          url = `/diamond/detail/${product.slug}`;
+          break;
         case 'gemstone':
-          return `/gemstone/detail/${product.slug}`;
+          url = `/gemstone/detail/${product.slug}`;
+          break;
         case 'bracelet':
-          return `/fine-jewellery/bracelets/${product.slug}`;
+          url = `/fine-jewellery/bracelets/detail/${product.slug}`;
+          break;
         case 'earring':
-          return `/fine-jewellery/earrings/${product.slug}`;
+          url = `/fine-jewellery/earrings/detail/${product.slug}`;
+          break;
         case 'necklace':
-          return `/fine-jewellery/necklaces/${product.slug}`;
+          url = `/fine-jewellery/necklaces/detail/${product.slug}`;
+          break;
         case 'mens-jewelry':
-          return `/fine-jewellery/mens/${product.slug}`;
+          url = `/fine-jewellery/mens/detail/${product.slug}`;
+          break;
         default:
-          return `/products/${product._id}`;
+          url = `/products/${product._id}`;
+          break;
       }
+    } else {
+      url = `/products/${product._id}`;
     }
-    return `/products/${product._id}`;
+    return url;
   };
 
   const handleAddToCart = (product: SearchProduct) => {
