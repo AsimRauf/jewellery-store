@@ -11,7 +11,7 @@ module.exports = {
     extend: {
       fontFamily: {
         monomakh: ['"Monomakh Unicode"', 'serif'],
-        raleway: ['var(--font-raleway)', 'sans-serif'],
+        poppins: ['var(--font-poppins)', 'sans-serif'],
       },
     },
   },
