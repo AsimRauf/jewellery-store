@@ -198,9 +198,15 @@ export default function ProductGrid({
         });
         
         // If no variants were added (because of filters) and there are no active metal filters,
-        // add the default variant
+        // add the prioritized variant (14K if available, else 18K, else first available)
         if (expandedProducts.filter(ep => ep.product._id === product._id).length === 0 && activeMetalFilters.length === 0) {
-          const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
+          let defaultMetal = product.metalOptions.find(option => option.karat === "14K");
+          if (!defaultMetal) {
+            defaultMetal = product.metalOptions.find(option => option.karat === "18K");
+          }
+          if (!defaultMetal) {
+            defaultMetal = product.metalOptions[0];
+          }
           
           expandedProducts.push({
             product,
@@ -213,8 +219,14 @@ export default function ProductGrid({
           });
         }
       } else {
-        // If no metalColorImages, just use the default metal option
-        const defaultMetal = product.metalOptions.find(option => option.isDefault) || product.metalOptions[0];
+        // If no metalColorImages, prioritize 14K, then 18K, then first available
+        let defaultMetal = product.metalOptions.find(option => option.karat === "14K");
+        if (!defaultMetal) {
+          defaultMetal = product.metalOptions.find(option => option.karat === "18K");
+        }
+        if (!defaultMetal) {
+          defaultMetal = product.metalOptions[0];
+        }
         
         // Only add if there are no metal filters or if the default metal matches the filters
         if (activeMetalFilters.length === 0 || activeMetalFilters.includes(defaultMetal.color)) {
@@ -304,26 +316,12 @@ export default function ProductGrid({
                 </div>
               </Link>
               
-              {/* ADD TO CART BUTTON */}
-              <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAddToCart(item.product._id, item.metalOption);
-                }}
-                disabled={addingProductId === item.product._id}
-                className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition-colors shadow-md"
-                aria-label="Add to cart"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
+              {/* Add to Cart button removed as per user request */}
             </div>
             
             <div className="p-2 sm:p-4">
               <Link href={getProductUrl(item.product, item.metalOption)}>
-                <h3 className="font-cinzel text-sm sm:text-lg mb-1 sm:mb-2 text-gray-800 line-clamp-2 hover:text-amber-500 transition-colors">
+                <h3 className="font-cinzel text-sm sm:text-lg mb-1 sm:mb-2 text-gray-800 line-clamp-2 hover:text-amber-500 transition-colors capitalize">
                   {item.product.title}
                 </h3>
               </Link>
@@ -332,30 +330,72 @@ export default function ProductGrid({
                 <p className="text-amber-600 font-semibold text-base sm:text-xl">
                   ${formatPrice(item.metalOption.price)}
                 </p>
-                <p className="text-gray-500 text-xs sm:text-sm">{item.metalOption.karat} {item.metalOption.color}</p>
+                <p className="text-gray-500 text-xs sm:text-sm">
+                  {(() => {
+                    const has14K = item.product.metalOptions.some(opt => opt.color === item.metalOption.color && opt.karat === "14K");
+                    const has18K = item.product.metalOptions.some(opt => opt.color === item.metalOption.color && opt.karat === "18K");
+                    if (has14K && has18K) {
+                      return "14K/18K";
+                    } else if (has14K) {
+                      return "14K";
+                    } else if (has18K) {
+                      return "18K";
+                    } else {
+                      return item.metalOption.karat;
+                    }
+                  })()} {item.metalOption.color}
+                </p>
               </div>
               
-              {/* Metal Options */}
-              <div className="mt-2 sm:mt-3 flex flex-wrap gap-1">
-                {item.product.metalOptions.slice(0, 3).map((metal) => (
-                  <Link 
-                    key={`${metal.karat}-${metal.color}`}
-                    href={getProductUrl(item.product, {karat: metal.karat, color: metal.color})}
-                    className={`text-xs px-2 py-1 rounded-full transition-colors ${
-                      metal.color === item.metalOption.color
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-gray-50 text-gray-600 hover:bg-amber-50 hover:text-amber-700'
-                    }`}
-                  >
-                    {metal.karat} {metal.color}
-                  </Link>
-                ))}
-                {item.product.metalOptions.length > 3 && (
+              {/* Metal Options as Gradient Circles */}
+              <div className="mt-2 sm:mt-3 flex flex-wrap gap-2">
+                {(() => {
+                  // Group metal options by color and prioritize 14K over 18K
+                  const uniqueMetalColors: { karat: string; color: string; price: number }[] = [];
+                  const seenColors = new Set();
+                  for (const metal of item.product.metalOptions) {
+                    if (!seenColors.has(metal.color)) {
+                      seenColors.add(metal.color);
+                      uniqueMetalColors.push(metal);
+                    } else if (metal.karat === "14K") {
+                      // If 14K, replace any existing option for this color
+                      const index = uniqueMetalColors.findIndex(m => m.color === metal.color);
+                      if (index !== -1) {
+                        uniqueMetalColors[index] = metal;
+                      }
+                    }
+                  }
+                  
+                  return uniqueMetalColors.slice(0, 4).map((metal) => (
+                    <Link 
+                      key={`${metal.karat}-${metal.color}`}
+                      href={getProductUrl(item.product, {karat: metal.karat, color: metal.color})}
+                      className={`w-6 h-6 rounded-full border-2 border-white shadow-sm transition-transform transform ${
+                        metal.color === item.metalOption.color
+                          ? 'scale-110 border-amber-600'
+                          : 'hover:scale-105 border-gray-200'
+                      }`}
+                      style={{
+                        background: 
+                          metal.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                          metal.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                          metal.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                          metal.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                          metal.color.includes('Palladium') ? 'linear-gradient(135deg, #D3D3D3, #B0B0B0)' :
+                          metal.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                          'gray'
+                      }}
+                      title={`${metal.karat} ${metal.color}`}
+                    />
+                  ));
+                })()}
+                {item.product.metalOptions.length > 4 && (
                   <Link 
                     href={getProductUrl(item.product, item.metalOption)}
-                    className="text-xs px-2 py-1 bg-gray-50 rounded-full text-gray-600 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    className="w-6 h-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-medium transition-transform transform hover:scale-105"
+                    title={`+${item.product.metalOptions.length - 4} more options`}
                   >
-                    +{item.product.metalOptions.length - 3} more
+                    +{item.product.metalOptions.length - 4}
                   </Link>
                 )}
               </div>

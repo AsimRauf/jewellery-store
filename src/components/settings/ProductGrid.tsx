@@ -53,9 +53,16 @@ export default function ProductGrid({
     if (node) observer.current.observe(node);
   }, [loading, loadingMore, hasMore, onLoadMore]);
 
-  // Get default metal option for a product
+  // Get default metal option for a product, prioritizing 14K over 18K
   const getDefaultMetalOption = (product: Setting): MetalOption => {
-    return product.metalOptions.find(m => m.isDefault) || product.metalOptions[0];
+    let defaultMetal = product.metalOptions.find(option => option.karat === "14K");
+    if (!defaultMetal) {
+      defaultMetal = product.metalOptions.find(option => option.karat === "18K");
+    }
+    if (!defaultMetal) {
+      defaultMetal = product.metalOptions.find(m => m.isDefault) || product.metalOptions[0];
+    }
+    return defaultMetal;
   };
 
   if (loading) {
@@ -132,8 +139,22 @@ export default function ProductGrid({
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-medium text-gray-800 mb-1 truncate">{product.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{metalOption.color}</p>
+                  <h3 className="font-medium text-gray-800 mb-1 truncate capitalize">{product.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {(() => {
+                      const has14K = product.metalOptions.some(opt => opt.color === metalOption.color && opt.karat === "14K");
+                      const has18K = product.metalOptions.some(opt => opt.color === metalOption.color && opt.karat === "18K");
+                      if (has14K && has18K) {
+                        return "14K/18K";
+                      } else if (has14K) {
+                        return "14K";
+                      } else if (has18K) {
+                        return "18K";
+                      } else {
+                        return metalOption.karat;
+                      }
+                    })()} {metalOption.color}
+                  </p>
                   <div className="flex justify-between items-center">
                     <span className="text-amber-600 font-medium">${metalOption.price.toLocaleString()}</span>
                     <div className="text-xs text-gray-500">
@@ -142,20 +163,54 @@ export default function ProductGrid({
                       )}
                     </div>
                   </div>
-                  <div className="mt-2">
-                    <div 
-                      className="w-5 h-5 rounded-full border border-gray-300"
-                      style={{
-                        background: 
-                          metalOption.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
-                          metalOption.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
-                          metalOption.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
-                          metalOption.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
-                          metalOption.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
-                          'gray'
-                      }}
-                      title={metalOption.color}
-                    ></div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {(() => {
+                      // Group metal options by color and prioritize 14K over 18K
+                      const uniqueMetalColors: MetalOption[] = [];
+                      const seenColors = new Set();
+                      for (const metal of product.metalOptions) {
+                        if (!seenColors.has(metal.color)) {
+                          seenColors.add(metal.color);
+                          uniqueMetalColors.push(metal);
+                        } else if (metal.karat === "14K") {
+                          // If 14K, replace any existing option for this color
+                          const index = uniqueMetalColors.findIndex(m => m.color === metal.color);
+                          if (index !== -1) {
+                            uniqueMetalColors[index] = metal;
+                          }
+                        }
+                      }
+                      
+                      return uniqueMetalColors.slice(0, 4).map((metal) => (
+                        <div 
+                          key={`${metal.karat}-${metal.color}`}
+                          className={`w-5 h-5 rounded-full border-2 border-white shadow-sm transition-transform transform ${
+                            metal.color === metalOption.color
+                              ? 'scale-110 border-amber-600'
+                              : 'hover:scale-105 border-gray-200'
+                          }`}
+                          style={{
+                            background: 
+                              metal.color.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                              metal.color.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                              metal.color.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                              metal.color.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                              metal.color.includes('Palladium') ? 'linear-gradient(135deg, #D3D3D3, #B0B0B0)' :
+                              metal.color.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                              'gray'
+                          }}
+                          title={`${metal.karat} ${metal.color}`}
+                        />
+                      ));
+                    })()}
+                    {product.metalOptions.length > 4 && (
+                      <div 
+                        className="w-5 h-5 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-medium transition-transform transform hover:scale-105"
+                        title={`+${product.metalOptions.length - 4} more options`}
+                      >
+                        +{product.metalOptions.length - 4}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
