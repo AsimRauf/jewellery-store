@@ -66,31 +66,7 @@ export default function Hero() {
     }
   ];
 
-    const [imagesLoaded, setImagesLoaded] = useState(false);
-
     useEffect(() => {
-    // Preload images with high priority and track loading status
-    let loadedCount = 0;
-    const totalImages = slides.length;
-    
-    slides.forEach(slide => {
-      const img = new window.Image();
-      img.src = slide.image;
-      img.loading = 'eager';
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-          setImagesLoaded(true);
-        }
-      };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-          setImagesLoaded(true);
-        }
-      };
-    });
-
     // Set initial margin and mobile state based on screen width
     const updateLayout = () => {
       const width = window.innerWidth;
@@ -113,12 +89,10 @@ export default function Hero() {
     
     // Cleanup
     return () => window.removeEventListener('resize', updateLayout);
-  }, [slides]);
+  }, []);
 
-  // Auto-slide effect, only start after images are loaded
+  // Auto-slide effect
   useEffect(() => {
-    if (!imagesLoaded) return;
-    
     const interval = setInterval(() => {
       setTransitioning(true);
       setTimeout(() => {
@@ -128,7 +102,7 @@ export default function Hero() {
     }, 5000); // Change slide every 5 seconds
 
     return () => clearInterval(interval);
-  }, [slides.length, imagesLoaded]);
+  }, [slides.length]);
 
   // Manual slide navigation
   const goToSlide = (index: number) => {
@@ -173,7 +147,6 @@ export default function Hero() {
     >
       {/* Main container with fixed height for consistency */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[90vh] lg:h-[90vh] relative">
-        {imagesLoaded ? (
           <>
             {/* Flex container for layout control with fixed height */}
             <div className={`flex ${getImageContainerClass()} h-full w-full min-h-[90vh] lg:h-[90vh] lg:justify-between`}>
@@ -281,11 +254,6 @@ export default function Hero() {
               </div>
             </div>
           </>
-        ) : (
-          <div className="h-[90vh] w-full flex items-center justify-center bg-gray-200">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-amber-500"></div>
-          </div>
-        )}
       </div>
     </section>
   );
