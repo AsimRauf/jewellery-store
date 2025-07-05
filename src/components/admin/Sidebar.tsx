@@ -277,9 +277,9 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 border-r border-gray-200">
+        <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 border-r border-gray-200 flex flex-col">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-200">
+            <div className="px-6 py-5 border-b border-gray-200 flex-shrink-0">
                 <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
                 <p className="text-sm text-gray-500 mt-1">Jewelry Store</p>
             </div>
@@ -366,7 +366,7 @@ const Sidebar = () => {
                 ))}
             </nav>
             {/* Logout Button */}
-            <div className="px-3 py-4 border-t border-gray-200">
+            <div className="px-3 py-4 border-t border-gray-200 flex-shrink-0">
                 <button
                     onClick={handleLogout}
                     className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"

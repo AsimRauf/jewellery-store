@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import PaymentMethods from '../shared/PaymentMethods';
@@ -22,7 +24,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Column 1: About */}
           <div>
-            <h3 className="text-xl font-cinzel mb-4 text-amber-600">Arise Jewels</h3>
+            <h3 className="text-xl font-cinzel mb-4 text-amber-600">Arise Jewel</h3>
             <p className="text-gray-600 mb-4">
               Crafting timeless pieces that celebrate life&apos;s most precious moments. 
               Our commitment to quality and design excellence has made us a trusted name in fine jewelry since 1996.
@@ -150,7 +152,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="text-center text-gray-500 text-sm border-t border-gray-200 pt-6">
-          <p>© {new Date().getFullYear()} Arise Jewels. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Arise Jewel. All rights reserved.</p>
           <p className="mt-2">
             Designed with <span className="text-amber-500">♥</span> for luxury and elegance
           </p>

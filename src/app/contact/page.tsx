@@ -10,6 +10,14 @@ export default function ContactPage() {
     alert('Thank you for your message! We\'ll get back to you soon.');
   };
 
+  // Function to open Google Maps with the address
+  const openGoogleMaps = () => {
+    const address = "350 West Passaic Street Suite 401, Rochelle Park, NJ 07662, USA";
+    const encodedAddress = encodeURIComponent(address);
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(googleMapsUrl, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -42,11 +50,18 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Visit Our Showroom</h3>
-                    <p className="text-gray-600">
-                      123 Jewelry District<br />
-                      New York, NY 10001<br />
-                      United States
-                    </p>
+                    <div 
+                      className="text-gray-600 cursor-pointer hover:text-amber-600 transition-colors duration-200"
+                      onClick={openGoogleMaps}
+                      title="Click to open in Google Maps"
+                    >
+                      <p className="hover:underline">
+                        350 West Passaic Street<br />
+                        Suite 401<br />
+                        Rochelle Park, NJ 07662<br />
+                        USA
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -57,8 +72,8 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Call Us</h3>
                     <p className="text-gray-600">
-                      Phone: <a href="tel:+1234567890" className="text-amber-600 hover:text-amber-700">+1 (234) 567-8900</a><br />
-                      Toll Free: <a href="tel:+1800123456" className="text-amber-600 hover:text-amber-700">+1 (800) 123-4567</a>
+                      Tel: <a href="tel:+12113917745" className="text-amber-600 hover:text-amber-700">211-391-7745</a><br />
+                      Fax: <a href="tel:+12129976878" className="text-amber-600 hover:text-amber-700">212-997-6878</a>
                     </p>
                   </div>
                 </div>
@@ -206,7 +221,7 @@ export default function ContactPage() {
                 </button>
 
                 <p className="text-xs text-gray-500 text-center">
-                  * Required fields. We&apos;ll respond to your inquiry within 24 hours during business days.
+                  * Required fields. We'll respond to your inquiry within 24 hours during business days.
                 </p>
               </form>
             </div>
@@ -214,8 +229,38 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Specialties Section */}
+      {/* Google Maps Embed Section */}
       <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-cinzel text-amber-600 text-center mb-8">Find Us</h2>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3019.8234567890123!2d-74.0123456789!3d40.9123456789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s350%20West%20Passaic%20Street%2C%20Rochelle%20Park%2C%20NJ%2007662!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus"
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Our Location - 350 West Passaic Street, Rochelle Park, NJ"
+              ></iframe>
+            </div>
+            <div className="text-center mt-4">
+              <button
+                onClick={openGoogleMaps}
+                className="inline-flex items-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-md transition-colors duration-200"
+              >
+                <span className="mr-2">📍</span>
+                Open in Google Maps
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Specialties Section */}
+      <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-cinzel text-amber-600 text-center mb-12">How We Can Help You</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -237,7 +282,7 @@ export default function ContactPage() {
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Custom Jewelry Design</h3>
               <p className="text-gray-600 text-sm">
                 Work with our designers to create one-of-a-kind pieces that reflect your 
-                personal style and celebrate life&apos;s special moments.
+                personal style and celebrate life's special moments.
               </p>
             </div>
 
@@ -256,7 +301,7 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16">
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-cinzel text-amber-600 text-center mb-12">Frequently Asked Questions</h2>
           <div className="max-w-4xl mx-auto space-y-6">
@@ -272,7 +317,7 @@ export default function ContactPage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">How long does custom jewelry take?</h3>
               <p className="text-gray-600">
                 Custom jewelry timelines vary depending on complexity. Simple pieces may take 2-4 weeks, 
-                while intricate designs can take 6-8 weeks. We&apos;ll provide a timeline during consultation.
+                while intricate designs can take 6-8 weeks. We'll provide a timeline during consultation.
               </p>
             </div>
 
@@ -280,7 +325,31 @@ export default function ContactPage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Can I see gemstones before purchasing?</h3>
               <p className="text-gray-600">
                 Absolutely! We encourage clients to view gemstones in person or request detailed photos 
-                and videos before making a purchase. We want you to be
+                and videos before making a purchase. We want you to be completely satisfied with your selection.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Do you offer financing options?</h3>
+              <p className="text-gray-600">
+                Yes, we offer various financing options to make your dream jewelry more accessible. 
+                Contact us to discuss payment plans and financing solutions that work for your budget.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">What is your return policy?</h3>
+              <p className="text-gray-600">
+                We offer a 30-day return policy for most items in original condition. Custom pieces 
+                have different terms. Please contact us for specific details about returns and exchanges.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Do you provide certificates for gemstones?</h3>
+              <p className="text-gray-600">
+                Yes, all our premium gemstones come with certificates from recognized gemological institutes. 
+                We can also arrange certification for stones that don't already have documentation.
               </p>
             </div>
           </div>

@@ -2,9 +2,9 @@ import React from 'react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - Arise Jewels | Your Privacy Matters',
-  description: 'Learn about how Arise Jewels protects your privacy and handles your personal information. We are committed to keeping your data secure.',
-  keywords: 'privacy policy, data protection, arise jewels privacy, personal information security',
+  title: 'Privacy Policy - Arise Jewel | Your Privacy Matters',
+  description: 'Learn about how Arise Jewel protects your privacy and handles your personal information. We are committed to keeping your data secure.',
+  keywords: 'privacy policy, data protection, arise jewel privacy, personal information security',
 };
 
 const PrivacyPage = () => {
@@ -44,7 +44,7 @@ const PrivacyPage = () => {
               <h2 className="text-3xl font-cinzel text-amber-600 mb-6">Our Commitment to Your Privacy</h2>
               <div className="space-y-4 text-gray-700 leading-relaxed max-w-3xl mx-auto">
                 <p>
-                  At Arise Jewels, we are committed to protecting your privacy and ensuring the security 
+                  At Arise Jewel, we are committed to protecting your privacy and ensuring the security 
                   of your personal information. This Privacy Policy explains how we collect, use, disclose, 
                   and safeguard your information when you visit our website, make a purchase, or interact 
                   with our services.
@@ -242,118 +242,223 @@ const PrivacyPage = () => {
         </div>
       </section>
 
-      {/* Information Sharing */}
-    <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Information Sharing and Disclosure</h2>
-        <p className="text-gray-700 leading-relaxed mb-4">
-          We do not sell, trade, or rent your personal information to third parties. We may share 
-          your information in the following circumstances:
-        </p>
-        
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Service Providers</h3>
-        <p className="text-gray-700 leading-relaxed mb-4">
-          We may share information with trusted third-party service providers who assist us in:
-        </p>
-        <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-          <li>Payment processing</li>
-          <li>Shipping and delivery</li>
-          <li>Email marketing services</li>
-          <li>Website analytics</li>
-          <li>Customer service support</li>
-        </ul>
 
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Legal Requirements</h3>
-        <p className="text-gray-700 leading-relaxed mb-6">
-          We may disclose your information if required by law, regulation, court order, or 
-          government request, or to protect our rights and the safety of our customers.
-        </p>
-      </div>
 
-      {/* Cookies and Tracking */}
-      <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Cookies and Tracking Technologies</h2>
-        <p className="text-gray-700 leading-relaxed mb-4">
-          We use cookies and similar tracking technologies to enhance your browsing experience. 
-          Cookies are small files stored on your device that help us:
-        </p>
-        <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-          <li>Remember your preferences and settings</li>
-          <li>Keep you logged in to your account</li>
-          <li>Analyze website traffic and usage patterns</li>
-          <li>Provide personalized content and recommendations</li>
-        </ul>
-        <p className="text-gray-700 leading-relaxed">
-          You can control cookie settings through your browser preferences. However, disabling 
-          cookies may affect the functionality of our website.
-        </p>
-      </div>
 
-      {/* Third-Party Links */}
-      <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Third-Party Links</h2>
-        <p className="text-gray-700 leading-relaxed">
-          Our website may contain links to third-party websites. We are not responsible for the 
-          privacy practices or content of these external sites. We encourage you to review the 
-          privacy policies of any third-party sites you visit.
-        </p>
-      </div>
 
-      {/* Children's Privacy */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Children&apos;s Privacy</h2>
-        <p className="text-gray-700 leading-relaxed">
-          Our services are not intended for children under the age of 13. We do not knowingly 
-          collect personal information from children under 13. If we become aware that we have 
-          collected personal information from a child under 13, we will take steps to delete 
-          such information promptly.
-        </p>
-      </div>
 
-      {/* International Transfers */}
-      <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">International Data Transfers</h2>
-        <p className="text-gray-700 leading-relaxed">
-          Your information may be transferred to and processed in countries other than your 
-          country of residence. We ensure that such transfers comply with applicable data 
-          protection laws and implement appropriate safeguards to protect your information.
-        </p>
-      </div>
 
-      {/* Updates to Privacy Policy */}
-      <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Updates to This Privacy Policy</h2>
-        <p className="text-gray-700 leading-relaxed">
-          We may update this Privacy Policy from time to time to reflect changes in our practices 
-          or legal requirements. We will notify you of any material changes by posting the updated 
-          policy on our website and updating the &quot;Last Updated&quot; date. Your continued use of our 
-          services after such changes constitutes acceptance of the updated policy.
-        </p>
-      </div>
 
-      {/* Contact Information */}
-      <div className="mb-8 px-4 md:px-8">
-        <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Contact Us</h2>
-        <p className="text-gray-700 leading-relaxed mb-4">
-          If you have any questions about this Privacy Policy or our privacy practices, 
-          please contact us:
-        </p>
-        <div className="space-y-2 text-gray-700">
-          <p><strong>Email:</strong> privacy@arisejewels.com</p>
-          <p><strong>Phone:</strong> +1 (234) 567-8900</p>
-          <p><strong>Address:</strong> 123 Jewelry District, New York, NY 10001</p>
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* Privacy Policy Content */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            
+            {/* Information Sharing */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Information Sharing and Disclosure</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We do not sell, trade, or rent your personal information to third parties. We may share 
+                your information in the following circumstances:
+              </p>
+              
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Service Providers</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We may share information with trusted third-party service providers who assist us in:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
+                <li>Payment processing</li>
+                <li>Shipping and delivery</li>
+                <li>Email marketing services</li>
+                <li>Website analytics</li>
+                <li>Customer service support</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Legal Requirements</h3>
+              <p className="text-gray-700 leading-relaxed mb-6">
+                We may disclose your information if required by law, regulation, court order, or 
+                government request, or to protect our rights and the safety of our customers.
+              </p>
+            </div>
+
+            {/* Cookies and Tracking */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Cookies and Tracking Technologies</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We use cookies and similar tracking technologies to enhance your browsing experience. 
+                Cookies are small files stored on your device that help us:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
+                <li>Remember your preferences and settings</li>
+                <li>Keep you logged in to your account</li>
+                <li>Analyze website traffic and usage patterns</li>
+                <li>Provide personalized content and recommendations</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed">
+                You can control cookie settings through your browser preferences. However, disabling 
+                cookies may affect the functionality of our website.
+              </p>
+            </div>
+
+            {/* Third-Party Links */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Third-Party Links</h2>
+              <p className="text-gray-700 leading-relaxed">
+                Our website may contain links to third-party websites. We are not responsible for the 
+                privacy practices or content of these external sites. We encourage you to review the 
+                privacy policies of any third-party sites you visit.
+              </p>
+            </div>
+
+            {/* Children's Privacy */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Children's Privacy</h2>
+              <p className="text-gray-700 leading-relaxed">
+                Our services are not intended for children under the age of 13. We do not knowingly 
+                collect personal information from children under 13. If we become aware that we have 
+                collected personal information from a child under 13, we will take steps to delete 
+                such information promptly.
+              </p>
+            </div>
+
+            {/* International Transfers */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">International Data Transfers</h2>
+              <p className="text-gray-700 leading-relaxed">
+                Your information may be transferred to and processed in countries other than your 
+                country of residence. We ensure that such transfers comply with applicable data 
+                protection laws and implement appropriate safeguards to protect your information.
+              </p>
+            </div>
+
+            {/* Updates to Privacy Policy */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Updates to This Privacy Policy</h2>
+              <p className="text-gray-700 leading-relaxed">
+                We may update this Privacy Policy from time to time to reflect changes in our practices 
+                or legal requirements. We will notify you of any material changes by posting the updated 
+                policy on our website and updating the "Last Updated" date. Your continued use of our 
+                services after such changes constitutes acceptance of the updated policy.
+              </p>
+            </div>
+
+            {/* Contact Information */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Contact Us</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you have any questions about this Privacy Policy or our privacy practices, 
+                please contact us:
+              </p>
+              <div className="bg-amber-50 p-6 rounded-lg border-l-4 border-amber-500">
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-amber-600 font-semibold">📧 Email:</span>
+                    <a href="mailto:privacy@arisejewel.com" className="text-amber-600 hover:text-amber-700 underline">
+                      privacy@arisejewel.com
+                    </a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-amber-600 font-semibold">📞 Phone:</span>
+                    <a href="tel:+12113917745" className="text-amber-600 hover:text-amber-700 underline">
+                      211-391-7745
+                    </a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-amber-600 font-semibold">📠 Fax:</span>
+                    <span className="text-gray-700">212-997-6878</span>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-amber-600 font-semibold">📍 Address:</span>
+                    <div className="text-gray-700">
+                      350 West Passaic Street<br />
+                      Suite 401<br />
+                      Rochelle Park, NJ 07662<br />
+                      United States
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Retention */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">Data Retention</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                We retain your personal information for as long as necessary to fulfill the purposes 
+                outlined in this Privacy Policy, unless a longer retention period is required or 
+                permitted by law. The criteria we use to determine retention periods include:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
+                <li>The length of time we have an ongoing relationship with you</li>
+                <li>Whether there is a legal obligation to retain the data</li>
+                <li>Whether retention is advisable in light of our legal position</li>
+              </ul>
+            </div>
+
+            {/* California Privacy Rights */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">California Privacy Rights</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you are a California resident, you have additional rights under the California 
+                Consumer Privacy Act (CCPA), including:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
+                <li>The right to know what personal information we collect about you</li>
+                <li>The right to delete personal information we have collected from you</li>
+                <li>The right to opt-out of the sale of your personal information</li>
+                <li>The right to non-discrimination for exercising your privacy rights</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed">
+                To exercise these rights, please contact us using the information provided above.
+              </p>
+            </div>
+
+            {/* European Privacy Rights */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-cinzel text-amber-600 mb-4">European Privacy Rights (GDPR)</h2>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                If you are located in the European Economic Area (EEA), you have rights under the 
+                General Data Protection Regulation (GDPR), including:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
+                <li>Right of access to your personal data</li>
+                <li>Right to rectification of inaccurate data</li>
+                <li>Right to erasure ("right to be forgotten")</li>
+                <li>Right to restrict processing</li>
+                <li>Right to data portability</li>
+                <li>Right to object to processing</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed">
+                You also have the right to lodge a complaint with a supervisory authority if you 
+                believe our processing of your personal data violates applicable law.
+              </p>
+            </div>
+
+            {/* Effective Date */}
+            <div className="border-t border-gray-200 pt-6">
+              <p className="text-sm text-gray-500 text-center">
+                This Privacy Policy is effective as of {new Date().toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })} and applies to all information collected by Arise Jewel.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Effective Date */}
-      <div className="border-t border-gray-200 pt-6">
-        <p className="text-sm text-gray-500 text-center">
-          This Privacy Policy is effective as of {new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })} and applies to all information collected by Arise Jewels.
-        </p>
-      </div>
+      </section>
     </div>
   );
 };
