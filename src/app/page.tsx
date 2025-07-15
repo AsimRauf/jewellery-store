@@ -15,7 +15,7 @@ export default function Home() {
       <FeatureBox />
       <EngagementSection />
       <Reviews />
-      <Footer />
+      
     </main>
   );
 }
