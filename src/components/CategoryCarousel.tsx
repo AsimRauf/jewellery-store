@@ -4,6 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSwipeable } from 'react-swipeable';
+import { motion } from 'framer-motion';
+import { 
+  containerVariants, 
+  createStaggerContainer, 
+  slideUpVariants,
+  getTextVariants
+} from '@/lib/animations';
 
 // Category data
 const categories = [
@@ -96,9 +103,19 @@ export default function CategoryCarousel() {
   };
 
   return (
-    <section className="py-12 bg-white">
+    <motion.section 
+      className="py-12 bg-white"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-monomakh text-center mb-8">Shop by Category</h2>
+        <motion.h2 
+          className="text-3xl font-monomakh text-center mb-8"
+          variants={getTextVariants('left')}
+        >
+          Shop by Category
+        </motion.h2>
         
         <div className="relative" {...handlers}>
           {/* Mobile Carousel */}
@@ -163,26 +180,31 @@ export default function CategoryCarousel() {
           </div>
           
           {/* Desktop Grid */}
-          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <motion.div 
+            className="hidden md:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
+            variants={createStaggerContainer()}
+          >
             {categories.map((category) => (
-              <Link key={category.id} href={category.link} className="block group">
-                <div className="relative rounded-lg overflow-hidden mb-3 aspect-square shadow-sm bg-white p-4">
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={category.image}
-                      alt={category.title}
-                      fill
-                      className="object-contain group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 1024px) 50vw, 16vw"
-                    />
+              <motion.div key={category.id} variants={slideUpVariants}>
+                <Link href={category.link} className="block group">
+                  <div className="relative rounded-lg overflow-hidden mb-3 aspect-square shadow-sm bg-white p-4">
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={category.image}
+                        alt={category.title}
+                        fill
+                        className="object-contain group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 1024px) 50vw, 16vw"
+                      />
+                    </div>
                   </div>
-                </div>
-                <h3 className="text-center font-medium text-gray-800">{category.title}</h3>
-              </Link>
+                  <h3 className="text-center font-medium text-gray-800">{category.title}</h3>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

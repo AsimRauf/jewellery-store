@@ -3,6 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { 
+  heroImageVariants, 
+  getTextVariants, 
+  buttonVariants, 
+  containerVariants,
+  createStaggerContainer,
+  fadeInVariants
+} from "@/lib/animations";
 
 export default function Hero() {
   const [marginTop, setMarginTop] = useState('0');
@@ -184,10 +193,13 @@ export default function Hero() {
   }
 
   return (
-    <section 
+    <motion.section 
       className="w-full overflow-visible relative transition-colors duration-500 ease-in-out"
       style={{ backgroundColor }}
       ref={heroRef}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
     >
       {/* Main container with fixed height for consistency */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[90vh] lg:h-[90vh] relative">
@@ -196,14 +208,19 @@ export default function Hero() {
             <div className={`flex ${getImageContainerClass()} h-full w-full min-h-[90vh] lg:h-[90vh] lg:justify-between lg:gap-8`}>
               
               {/* Content section - Second on mobile, First on desktop - REDUCED WIDTH */}
-              <div className={`w-full lg:w-[35%] flex flex-col justify-center 
+              <motion.div 
+                className={`w-full lg:w-[35%] flex flex-col justify-center 
                               order-2 lg:order-1
                               pt-8 pb-16 lg:py-0 
                               px-4 sm:px-6 lg:px-0 lg:pr-4
                               text-center lg:text-left 
                               relative z-10
                               min-h-[40vh] lg:min-h-full
-                              lg:flex-shrink-0`}>
+                              lg:flex-shrink-0`}
+                initial="hidden"
+                animate="visible"
+                variants={getTextVariants('left')}
+              >
                 
                 {/* Heading with controlled spacing - using Monomakh */}
                 <div className={`transition-all duration-500 ease-in-out flex flex-col justify-center h-full ${transitioning ? 'opacity-50' : 'opacity-100'}`}>
@@ -222,36 +239,48 @@ export default function Hero() {
                   </p>
 
                   {/* Buttons with controlled spacing */}
-                  <div className="flex flex-col sm:flex-row gap-3 md:gap-4 
-                                  justify-center lg:justify-start">
-                    <Link
-                      href={currentSlideData.primaryButton.href}
-                      className={`inline-block 
-                                 px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
-                                 rounded-full font-medium text-sm md:text-base
-                                 transition-colors
-                                 whitespace-nowrap ${currentSlideData.buttonPrimary}`}
-                    >
-                      {currentSlideData.primaryButton.text}
-                    </Link>
-                    <Link
-                      href={currentSlideData.secondaryButton.href}
-                      className={`inline-block 
-                                 px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
-                                 rounded-full font-medium text-sm md:text-base
-                                 transition-colors
-                                 whitespace-nowrap ${currentSlideData.buttonSecondary}`}
-                    >
-                      {currentSlideData.secondaryButton.text}
-                    </Link>
-                  </div>
+                  <motion.div 
+                    className="flex flex-col sm:flex-row gap-3 md:gap-4 
+                                    justify-center lg:justify-start"
+                    initial="hidden"
+                    animate="visible"
+                    variants={createStaggerContainer()}
+                  >
+                    <motion.div variants={buttonVariants}>
+                      <Link
+                        href={currentSlideData.primaryButton.href}
+                        className={`inline-block 
+                                   px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
+                                   rounded-full font-medium text-sm md:text-base
+                                   transition-colors
+                                   whitespace-nowrap ${currentSlideData.buttonPrimary}`}
+                      >
+                        {currentSlideData.primaryButton.text}
+                      </Link>
+                    </motion.div>
+                    <motion.div variants={buttonVariants}>
+                      <Link
+                        href={currentSlideData.secondaryButton.href}
+                        className={`inline-block 
+                                   px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
+                                   rounded-full font-medium text-sm md:text-base
+                                   transition-colors
+                                   whitespace-nowrap ${currentSlideData.buttonSecondary}`}
+                      >
+                        {currentSlideData.secondaryButton.text}
+                      </Link>
+                    </motion.div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Image section - flush right on desktop, unchanged on mobile */}
-              <div 
+              <motion.div 
                 className="w-full lg:w-[65%] relative order-1 lg:order-2 flex items-end min-h-[50vh] lg:min-h-full pt-8 sm:pt-12 lg:pt-0 lg:flex-shrink-0"
                 style={{ marginTop }}
+                initial="hidden"
+                animate="visible"
+                variants={heroImageVariants}
               >
                 <div className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[75vh] xl:h-[80vh] w-full flex items-end 
                                 justify-center lg:justify-end relative overflow-visible">
@@ -278,11 +307,16 @@ export default function Hero() {
                       }}
                     />
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Carousel dots - centered at bottom */}
-            <div className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+            <motion.div 
+              className="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInVariants}
+            >
               <div className="flex justify-center gap-2">
                 {slides.map((_, index) => (
                   <button
@@ -297,9 +331,9 @@ export default function Hero() {
                   />
                 ))}
               </div>
-            </div>
+            </motion.div>
           </>
       </div>
-    </section>
+    </motion.section>
   );
 }

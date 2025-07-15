@@ -6,6 +6,8 @@ import { useUser } from '@/context/UserContext';
 import { useCart } from '@/context/CartContext';
 import { useState, useRef, useEffect } from 'react';
 import { RingEnums } from '@/constants/ringEnums';
+import { motion } from 'framer-motion';
+import { headerVariants } from '@/lib/animations';
 
 
 // Add these interfaces at the top of your file
@@ -548,7 +550,12 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full">
+      <motion.nav 
+        className="bg-transparent py-4 px-4 md:px-6 relative z-[50] w-full"
+        initial="hidden"
+        animate="visible"
+        variants={headerVariants}
+      >
         <div className="w-full mx-auto flex items-center justify-between">
           {/* Hamburger Menu - Mobile Only */}
           <button
@@ -716,10 +723,15 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Categories Bar - Desktop */}
-      <div className="hidden lg:block border-t border-gray-200 w-full relative">
+      <motion.div 
+        className="hidden lg:block border-t border-gray-200 w-full relative"
+        initial="hidden"
+        animate="visible"
+        variants={headerVariants}
+      >
         <div className="w-full mx-auto px-4 md:px-6">
           <ul className="flex justify-center space-x-8">
             {CATEGORIES.map((category, index) => (
@@ -733,7 +745,7 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Menu */}
       <div className={`
