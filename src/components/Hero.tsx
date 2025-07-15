@@ -29,6 +29,9 @@ export default function Hero() {
         href: "/settings/all?start=setting"
       },
       backgroundColor: '#f0d4a4', // Default background color
+      textColor: 'text-gray-800',
+      buttonPrimary: 'bg-black text-white hover:bg-gray-900',
+      buttonSecondary: 'border-2 border-black text-black hover:bg-black hover:text-white',
     },
     {
       id: 2,
@@ -46,6 +49,9 @@ export default function Hero() {
         href: "/about"
       },
       backgroundColor: '#FDF6EC', // A slightly different background color
+      textColor: 'text-gray-800',
+      buttonPrimary: 'bg-black text-white hover:bg-gray-900',
+      buttonSecondary: 'border-2 border-black text-black hover:bg-black hover:text-white',
     },
     {
       id: 3,
@@ -56,13 +62,56 @@ export default function Hero() {
       imagePosition: "right", // Image on the left
       primaryButton: {
         text: "Luxury Collection",
-        href: "/wedding"
+        href: "/wedding/all"
       },
       secondaryButton: {
         text: "Book Consultation",
         href: "/consultation"
       },
       backgroundColor: '#e6c3a3', // Soft beige color
+      textColor: 'text-gray-800',
+      buttonPrimary: 'bg-black text-white hover:bg-gray-900',
+      buttonSecondary: 'border-2 border-black text-black hover:bg-black hover:text-white',
+    },
+    {
+      id: 4,
+      title: "Precious Gemstones",
+      subtitle: "Nature's Treasures",
+      description: "Explore our stunning collection of loose gemstones, each carefully selected for their exceptional beauty, rarity, and natural brilliance.",
+      image: "/hero4.png",
+      imagePosition: "right", // Image on the right
+      primaryButton: {
+        text: "Browse Gemstones",
+        href: "/gemstone/all"
+      },
+      secondaryButton: {
+        text: "Custom Setting",
+        href: "/custom-gemstone"
+      },
+      backgroundColor: '#f5e6d3', // Warm cream color
+      textColor: 'text-slate-900',
+      buttonPrimary: 'bg-slate-900 text-white hover:bg-slate-800',
+      buttonSecondary: 'border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white',
+    },
+    {
+      id: 5,
+      title: "Emerald Collection",
+      subtitle: "Earth's Finest",
+      description: "Discover our magnificent selection of loose emeralds and green gemstones, each stone hand-picked for its vibrant color and exceptional clarity.",
+      image: "/hero5.png",
+      imagePosition: "right", // Image on the right
+      primaryButton: {
+        text: "Shop Emeralds",
+        href: "/gemstone/emerald"
+      },
+      secondaryButton: {
+        text: "View Collection",
+        href: "/gemstone/all"
+      },
+      backgroundColor: '#f0f4e8', // Light green-tinted cream background
+      textColor: 'text-emerald-900',
+      buttonPrimary: 'bg-emerald-800 text-white hover:bg-emerald-700',
+      buttonSecondary: 'border-2 border-emerald-800 text-emerald-800 hover:bg-emerald-800 hover:text-white',
     }
   ];
 
@@ -120,11 +169,6 @@ export default function Hero() {
     return "flex-col lg:flex-row"; // Column for mobile (image top, text bottom), row for desktop
   };
 
-  // Determine image justify content class
-  // const getImageJustifyClass = () => {
-  //   return "justify-center lg:justify-end"; // Center for mobile, right for desktop
-  // };
-
   const backgroundColor = transitioning
     ? lightenColor(currentSlideData.backgroundColor, 20) // Lighten during transition
     : currentSlideData.backgroundColor;
@@ -149,30 +193,31 @@ export default function Hero() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[90vh] lg:h-[90vh] relative">
           <>
             {/* Flex container for layout control with fixed height */}
-            <div className={`flex ${getImageContainerClass()} h-full w-full min-h-[90vh] lg:h-[90vh] lg:justify-between`}>
+            <div className={`flex ${getImageContainerClass()} h-full w-full min-h-[90vh] lg:h-[90vh] lg:justify-between lg:gap-8`}>
               
               {/* Content section - Second on mobile, First on desktop - REDUCED WIDTH */}
               <div className={`w-full lg:w-[35%] flex flex-col justify-center 
                               order-2 lg:order-1
                               pt-8 pb-16 lg:py-0 
-                              px-4 sm:px-6 lg:px-0 lg:mr-8 xl:mr-12
+                              px-4 sm:px-6 lg:px-0 lg:pr-4
                               text-center lg:text-left 
                               relative z-10
-                              min-h-[40vh] lg:min-h-full`}>
+                              min-h-[40vh] lg:min-h-full
+                              lg:flex-shrink-0`}>
                 
                 {/* Heading with controlled spacing - using Monomakh */}
                 <div className={`transition-all duration-500 ease-in-out flex flex-col justify-center h-full ${transitioning ? 'opacity-50' : 'opacity-100'}`}>
-                  <h1 className="font-monomakh text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 
-                                 font-bold leading-tight mb-3 md:mb-4 lg:mb-6">
+                  <h1 className={`font-monomakh text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl 
+                                 font-bold leading-tight mb-3 md:mb-4 lg:mb-6 ${currentSlideData.textColor}`}>
                     {currentSlideData.title}
-                    <span className="block text-gray-800 whitespace-nowrap">{currentSlideData.subtitle}</span>
+                    <span className={`block whitespace-nowrap ${currentSlideData.textColor}`}>{currentSlideData.subtitle}</span>
                   </h1>
 
                   {/* Description with controlled width and spacing */}
-                  <p className="font-raleway text-sm md:text-base lg:text-lg xl:text-xl 
-                                text-gray-800 
+                  <p className={`font-raleway text-sm md:text-base lg:text-lg xl:text-xl 
+                                ${currentSlideData.textColor}
                                 max-w-lg mx-auto lg:mx-0 
-                                mb-6 md:mb-8 lg:mb-10">
+                                mb-6 md:mb-8 lg:mb-10`}>
                     {currentSlideData.description}
                   </p>
 
@@ -181,21 +226,21 @@ export default function Hero() {
                                   justify-center lg:justify-start">
                     <Link
                       href={currentSlideData.primaryButton.href}
-                      className="inline-block bg-black text-white 
+                      className={`inline-block 
                                  px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
                                  rounded-full font-medium text-sm md:text-base
-                                 hover:bg-gray-900 transition-colors
-                                 whitespace-nowrap"
+                                 transition-colors
+                                 whitespace-nowrap ${currentSlideData.buttonPrimary}`}
                     >
                       {currentSlideData.primaryButton.text}
                     </Link>
                     <Link
                       href={currentSlideData.secondaryButton.href}
-                      className="inline-block border-2 border-black text-black 
+                      className={`inline-block 
                                  px-5 py-2.5 md:px-6 md:py-3 lg:px-8 lg:py-4 
                                  rounded-full font-medium text-sm md:text-base
-                                 hover:bg-black hover:text-white transition-colors
-                                 whitespace-nowrap"
+                                 transition-colors
+                                 whitespace-nowrap ${currentSlideData.buttonSecondary}`}
                     >
                       {currentSlideData.secondaryButton.text}
                     </Link>
@@ -205,7 +250,7 @@ export default function Hero() {
 
               {/* Image section - flush right on desktop, unchanged on mobile */}
               <div 
-                className="w-full lg:w-[65%] relative order-1 lg:order-2 flex items-end min-h-[50vh] lg:min-h-full pt-8 sm:pt-12 lg:pt-0"
+                className="w-full lg:w-[65%] relative order-1 lg:order-2 flex items-end min-h-[50vh] lg:min-h-full pt-8 sm:pt-12 lg:pt-0 lg:flex-shrink-0"
                 style={{ marginTop }}
               >
                 <div className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[75vh] xl:h-[80vh] w-full flex items-end 
