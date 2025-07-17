@@ -920,18 +920,20 @@ export default function Navbar() {
                                 className="block py-2 text-gray-600 hover:text-amber-500 flex items-center"
                                 onClick={() => setIsMobileMenuOpen(false)}
                               >
-                                {metal.name}
-                                {metal.icon && (
-                                  <span className="icon ml-2">
-                                    <Image
-                                      src={metal.icon}
-                                      alt=""
-                                      width={16}
-                                      height={16}
-                                      className="object-contain"
-                                    />
-                                  </span>
-                                )}
+                                <span
+                                  className="w-4 h-4 rounded-full mr-3"
+                                  style={{
+                                    background:
+                                      metal.name.includes('Yellow Gold') ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                                      metal.name.includes('White Gold') ? 'linear-gradient(135deg, #E0E0E0, #C0C0C0)' :
+                                      metal.name.includes('Rose Gold') ? 'linear-gradient(135deg, #F7CDCD, #E8A090)' :
+                                      metal.name.includes('Platinum') ? 'linear-gradient(135deg, #E5E4E2, #CECECE)' :
+                                      metal.name.includes('Palladium') ? 'linear-gradient(135deg, #D3D3D3, #B0B0B0)' :
+                                      metal.name.includes('Two Tone') ? 'linear-gradient(135deg, #FFD700, #C0C0C0)' :
+                                      'gray'
+                                  }}
+                                ></span>
+                                <span>{metal.name}</span>
                               </Link>
                             ))}
                           </>
