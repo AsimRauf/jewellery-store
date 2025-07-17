@@ -4,10 +4,10 @@ import Link from 'next/link';
 
 export default function HeadlineBanner() {
   return (
-    <div className="bg-[#f0d4a4] text-gray-800 text-xs py-2 w-full overflow-hidden">
+    <div className="bg-[#f0d4a4] text-gray-800 text-xs py-2 w-full overflow-hidden" suppressHydrationWarning>
       <div className="w-full mx-auto flex flex-row justify-center items-center px-4">
-        <Link 
-          href="/payment-options" 
+        <Link
+          href="/payment-options"
           className="hover:underline flex items-center mx-2 md:mx-4 text-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,8 +16,8 @@ export default function HeadlineBanner() {
           <span className="whitespace-nowrap text-[10px] md:text-xs">Flexible Payment Options</span>
         </Link>
         <div className="mx-2 md:mx-4 h-3 md:h-4 border-r border-gray-500"></div>
-        <Link 
-          href="/customer-service" 
+        <Link
+          href="/customer-service"
           className="hover:underline flex items-center mx-2 md:mx-4 text-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-3.5 md:w-3.5 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

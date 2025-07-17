@@ -574,10 +574,10 @@ export default function Navbar() {
                 <Image
                   src="/main_logo.png"
                   alt="Jewelry Store"
-                  width={80} // Increased width
-                  height={30} // Increased height
+                  width={100}
+                  height={45}
                   style={{ paddingLeft: 10 }}
-                  className="object-contain " // Added shadow
+                  className="object-contain drop-shadow-lg"
                 />
               </div>
             </Link>
@@ -829,14 +829,14 @@ export default function Navbar() {
 
           {/* Mobile Categories with Expandable Subcategories */}
           <ul className="p-4">
-            {CATEGORIES.map((category) => (
+            {CATEGORIES.map((category, index) => (
               <li key={category.path} className="border-b border-gray-100 last:border-none">
                 {/* Change this condition to check for styles, metals, or featured items too */}
                 {(category.subcategories.length > 0 || category.styles?.length || category.metals?.length || category.featured?.length) ? (
                   <div className="py-4">
                     <div
                       className="flex justify-between items-center text-gray-700 hover:text-amber-500 transition-colors cursor-pointer"
-                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name, 0)}
+                      onClick={() => toggleMegaMenu(category.name === activeMegaMenu ? '' : category.name, index)}
                     >
                       <span>{category.name}</span>
                       <svg

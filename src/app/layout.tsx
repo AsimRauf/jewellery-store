@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable}`}>
+    <html lang="en" className={`${poppins.variable}`} suppressHydrationWarning>
       <head>
         <link href="https://db.onlinewebfonts.com/c/0928a012dc26f49ac4fbc90fa9f7460a?family=Monomakh+Unicode" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,7 +21,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
       </head>
-      <body className="font-poppins">
+      <body className="font-poppins" suppressHydrationWarning>
         <UserProvider>
           <CartProvider>
             <ClientLayout>{children}</ClientLayout>
