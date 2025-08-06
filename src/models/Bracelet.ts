@@ -80,6 +80,7 @@ export interface IBracelet {
   description?: string;
   features?: string[];
   care_instructions?: string;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -170,7 +171,8 @@ const BraceletSchema = new Schema(
     isAvailable: { type: Boolean, default: true },
     description: { type: String },
     features: { type: [String], default: [] },
-    care_instructions: { type: String }
+    care_instructions: { type: String },
+    totalPieces: { type: Number, default: 0 }
   },
   {
     timestamps: true

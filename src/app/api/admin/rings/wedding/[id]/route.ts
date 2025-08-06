@@ -61,7 +61,8 @@ export async function PUT(
       'isFeatured',
       'isNew',
       'onSale',
-      'originalPrice'
+      'originalPrice',
+      'totalPieces'
     ];
     
     const filteredData: Record<string, unknown> = {};

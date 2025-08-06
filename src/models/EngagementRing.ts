@@ -64,6 +64,7 @@ export interface IEngagementRing extends Document {
   isNewProduct?: boolean;
   onSale?: boolean;
   originalPrice?: number;
+  totalPieces?: number;
 }
 
 // Define interface for EngagementRing methods
@@ -283,6 +284,10 @@ const EngagementRingSchema = new mongoose.Schema<IEngagementRing, EngagementRing
   },
   originalPrice: {
     type: Number
+  },
+  totalPieces: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true,

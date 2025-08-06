@@ -56,6 +56,7 @@ interface WeddingRing {
   isNew?: boolean;
   onSale?: boolean;
   originalPrice?: number;
+  totalPieces?: number;
 }
 
 export default function EditWeddingRing({ params }: { params: Promise<{ id: string }> }) {
@@ -1221,6 +1222,23 @@ export default function EditWeddingRing({ params }: { params: Promise<{ id: stri
             </div>
           )}
         </div>
+
+       {/* Stock */}
+       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+         <h2 className="text-xl font-semibold text-gray-900 mb-4">Stock</h2>
+         <div>
+           <label className="block text-sm font-medium text-gray-700 mb-2">
+             Total Pieces
+           </label>
+           <input
+             type="number"
+             value={ring.totalPieces || 0}
+             onChange={(e) => handleFieldChange('totalPieces', parseInt(e.target.value) || 0)}
+             min="0"
+             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+           />
+         </div>
+       </div>
 
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4">

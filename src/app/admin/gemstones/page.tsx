@@ -42,6 +42,7 @@ interface FormDataType {
   isAvailable: boolean;
   description: string;
   images?: Array<{ url: string; publicId: string }>;
+  totalPieces?: number;
   [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | undefined;
 }
 
@@ -104,6 +105,7 @@ const formSections: FormSection[] = [
     title: "Description",
     fields: [
       { name: "description", label: "Description", type: "textarea" },
+      { name: "totalPieces", label: "Total Pieces", type: "number", min: 0 }
     ]
   }
 ];
@@ -133,7 +135,8 @@ export default function AddGemstone() {
     salePrice: 0,
     discountPercentage: 0,
     isAvailable: true,
-    description: ''
+    description: '',
+    totalPieces: 0
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);

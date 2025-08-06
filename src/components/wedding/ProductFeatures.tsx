@@ -15,6 +15,7 @@ interface ProductFeaturesProps {
       color: string;
       clarity: string;
     };
+    totalPieces?: number;
   };
   selectedMetal: {
     karat: string;
@@ -55,6 +56,11 @@ export default function ProductFeatures({ product, selectedMetal }: ProductFeatu
       label: 'Type',
       value: product.type && product.type.length > 0 ? product.type.join(', ') : null,
       icon: '/icons/features/type.svg'
+    },
+    {
+      label: 'Total Pieces',
+      value: product.totalPieces ? String(product.totalPieces) : null,
+      icon: '/icons/features/pieces.svg'
     }
   ].filter(feature => feature.value !== null);
 

@@ -43,6 +43,7 @@ interface IEternityRing {
   description?: string;
   isActive: boolean;
   isFeatured: boolean;
+  totalPieces?: number;
 }
 
 const EternityRingSchema = new mongoose.Schema<IEternityRing>({
@@ -146,9 +147,13 @@ const EternityRingSchema = new mongoose.Schema<IEternityRing>({
     type: Boolean, 
     default: true 
   },
-  isFeatured: { 
-    type: Boolean, 
-    default: false 
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  totalPieces: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

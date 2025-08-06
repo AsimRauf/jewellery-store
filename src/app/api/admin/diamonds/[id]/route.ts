@@ -75,8 +75,8 @@ export async function PUT(
             }
           } else if (typeof value === 'string') {
             // Convert string values to appropriate types
-            if (key === 'carat' || key === 'price' || key === 'salePrice' || key === 'discountPercentage' || 
-                key === 'crownAngle' || key === 'crownHeight' || key === 'pavilionAngle' || key === 'pavilionDepth') {
+            if (key === 'carat' || key === 'price' || key === 'salePrice' || key === 'discountPercentage' ||
+                key === 'crownAngle' || key === 'crownHeight' || key === 'pavilionAngle' || key === 'pavilionDepth' || key === 'totalPieces') {
               updateData[key] = value === '' ? 0 : parseFloat(value);
             } else if (key === 'isAvailable') {
               updateData[key] = value === 'true';

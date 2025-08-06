@@ -428,14 +428,14 @@ export default function WeddingRingDetailPage() {
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              disabled={addingToCart || !selectedSize || !selectedMetal}
+              disabled={addingToCart || !selectedSize || !selectedMetal || (product.totalPieces !== undefined && product.totalPieces <= 0)}
               className={`w-full py-3 px-6 rounded-full font-medium text-white 
-                ${addingToCart || !selectedSize || !selectedMetal
+                ${addingToCart || !selectedSize || !selectedMetal || (product.totalPieces !== undefined && product.totalPieces <= 0)
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-amber-500 hover:bg-amber-600'} 
                 transition-colors`}
             >
-              {addingToCart ? 'Adding...' : 'Add to Cart'}
+              {addingToCart ? 'Adding...' : (product.totalPieces !== undefined && product.totalPieces <= 0 ? 'Out of Stock' : 'Add to Cart')}
             </button>
   
             {/* Request Information Button */}

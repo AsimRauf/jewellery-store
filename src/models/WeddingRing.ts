@@ -55,6 +55,7 @@ export interface IWeddingRing extends Document {
   isNewProduct?: boolean;
   onSale?: boolean;
   originalPrice?: number;
+  totalPieces?: number;
 }
 
 // Define interface for WeddingRing methods
@@ -237,6 +238,10 @@ const WeddingRingSchema = new mongoose.Schema<IWeddingRing, WeddingRingModel, IW
   },
   originalPrice: {
     type: Number
+  },
+  totalPieces: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true,

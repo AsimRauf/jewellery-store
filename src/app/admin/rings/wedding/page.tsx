@@ -90,7 +90,8 @@ interface FormDataType {
   description: string;
   isActive: boolean;
   isFeatured: boolean;
-  [key: string]: FormDataValue;
+  totalPieces?: number;
+  [key: string]: FormDataValue | undefined;
 }
 
 const formSections: FormSection[] = [
@@ -146,7 +147,8 @@ const formSections: FormSection[] = [
     title: "Additional Information",
     fields: [
       { name: "description", label: "Product Description", type: "textarea", required: true },
-      { name: "media.video", label: "Video URL", type: "text" }
+      { name: "media.video", label: "Video URL", type: "text" },
+      { name: "totalPieces", label: "Total Pieces", type: "number", min: 0 }
     ]
   }
 ];
@@ -677,7 +679,8 @@ export default function AddWeddingRing() {
     },
     description: '',
     isActive: true,
-    isFeatured: false
+    isFeatured: false,
+    totalPieces: 0
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);

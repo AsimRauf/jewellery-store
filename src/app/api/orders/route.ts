@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB } from '@/utils/db'; 
+import { connectDB } from '@/utils/db';
 import Order from '@/models/Order';
+import mongoose from 'mongoose';
 
 // Add interface for order item structure
 interface OrderItem {
@@ -93,6 +94,12 @@ export async function POST(request: NextRequest) {
 
     console.log('💾 Saving order...');
     const savedOrder = await order.save();
+
+    // Reduce stock
+    for (const item of savedOrder.items) {
+      const productModel = mongoose.model(item.productType);
+      await productModel.findByIdAndUpdate(item.productId, { $inc: { totalPieces: -item.quantity } });
+    }
     
     console.log('✅ Order created successfully:', {
       id: savedOrder._id,

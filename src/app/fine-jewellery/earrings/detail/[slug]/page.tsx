@@ -45,6 +45,7 @@ import { EarringProduct } from '@/types/product';
   careInstructions?: string;
   isAvailable: boolean;
   stockQuantity?: number;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -364,10 +365,10 @@ export default function EarringDetailPage() {
               </div>
               <button
                 onClick={handleAddToCart}
-                disabled={addingToCart}
+                disabled={addingToCart || (earring.totalPieces !== undefined && earring.totalPieces <= 0)}
                 className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {addingToCart ? 'Adding...' : 'Add to Cart'}
+                {addingToCart ? 'Adding...' : (earring.totalPieces !== undefined && earring.totalPieces <= 0 ? 'Out of Stock' : 'Add to Cart')}
               </button>
             </div>
           )}

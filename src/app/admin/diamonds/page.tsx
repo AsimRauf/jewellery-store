@@ -45,6 +45,7 @@ interface FormDataType {
   discountPercentage: number;
   isAvailable: boolean;
   images?: Array<{ url: string; publicId: string }>;
+  totalPieces?: number;
   // Add 'unknown' to the index signature types
   [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | undefined | unknown;
 }
@@ -112,6 +113,7 @@ const formSections: FormSection[] = [
     title: "Certification",
     fields: [
       { name: "certificateLab", label: "Certificate Lab", type: "select", options: DiamondEnums.CERTIFICATE_LABS },
+      { name: "totalPieces", label: "Total Pieces", type: "number", min: 0 }
     ]
   }
 ];
@@ -143,7 +145,8 @@ export default function AddDiamond() {
     price: 0,
     salePrice: 0,
     discountPercentage: 0,
-    isAvailable: true
+    isAvailable: true,
+    totalPieces: 0
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -123,6 +123,7 @@ export interface IDiamond {
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -221,6 +222,7 @@ const DiamondSchema: Schema = new Schema(
       }
     },
     isAvailable: { type: Boolean, default: true },
+    totalPieces: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },

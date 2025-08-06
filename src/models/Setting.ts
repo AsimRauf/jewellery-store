@@ -58,6 +58,7 @@ export interface ISetting extends Document {
   compatibleStoneShapes: string[]; // New field to indicate which stone shapes are compatible
   settingHeight?: number; // Height of the setting in mm
   bandWidth?: number; // Width of the band in mm
+  totalPieces?: number;
 }
 
 // Define interface for Setting methods
@@ -250,6 +251,10 @@ const SettingSchema = new mongoose.Schema<ISetting, SettingModel, ISettingMethod
   },
   bandWidth: {
     type: Number
+  },
+  totalPieces: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true,

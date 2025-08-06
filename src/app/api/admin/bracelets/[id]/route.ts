@@ -87,8 +87,8 @@ export async function PUT(
             }
           } else if (typeof value === 'string') {
             // Convert string values to appropriate types
-            if (key === 'price' || key === 'salePrice' || key === 'discountPercentage' || 
-                key === 'length' || key === 'width' || key === 'minLength' || key === 'maxLength') {
+            if (key === 'price' || key === 'salePrice' || key === 'discountPercentage' ||
+                key === 'length' || key === 'width' || key === 'minLength' || key === 'maxLength' || key === 'totalPieces') {
               updateData[key] = value === '' ? 0 : parseFloat(value);
             } else if (key === 'adjustable' || key === 'isAvailable') {
               updateData[key] = value === 'true';

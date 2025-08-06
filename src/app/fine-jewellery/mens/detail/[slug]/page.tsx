@@ -54,6 +54,7 @@ import { MensJewelryProduct } from '@/types/product';
   careInstructions?: string;
   isAvailable: boolean;
   stockQuantity?: number;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -461,14 +462,14 @@ export default function MensJewelryDetailPage() {
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            disabled={!product.isAvailable}
+            disabled={!product.isAvailable || (product.totalPieces !== undefined && product.totalPieces <= 0)}
             className={`w-full py-3 px-6 rounded-lg font-medium text-white ${
-              product.isAvailable
+              product.isAvailable && (product.totalPieces === undefined || product.totalPieces > 0)
                 ? 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
                 : 'bg-gray-400 cursor-not-allowed'
             }`}
           >
-            {product.isAvailable ? 'Add to Cart' : 'Out of Stock'}
+            {product.isAvailable && (product.totalPieces === undefined || product.totalPieces > 0) ? 'Add to Cart' : 'Out of Stock'}
           </button>
 
           {/* Stock Status */}

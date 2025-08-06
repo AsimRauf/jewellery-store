@@ -50,6 +50,9 @@ export async function PUT(
     
     // Handle metalColorImages if provided
     const filteredData = { ...updateData };
+    if (updateData.totalPieces) {
+      filteredData.totalPieces = parseInt(updateData.totalPieces, 10);
+    }
     
     if (updateData.metalColorImages && typeof updateData.metalColorImages === 'object') {
       // Convert object to Map for Mongoose

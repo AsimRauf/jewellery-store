@@ -51,6 +51,7 @@ export interface WeddingRing {
   isNew?: boolean;
   onSale?: boolean;
   originalPrice?: number;
+  totalPieces?: number;
 }
 
 export interface FilterState {

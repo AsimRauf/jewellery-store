@@ -59,6 +59,7 @@ interface Setting {
   isNew?: boolean;
   onSale?: boolean;
   originalPrice?: number;
+  totalPieces?: number;
 }
 
 export default function EditSetting({ params }: { params: Promise<{ id: string }> }) {
@@ -1084,6 +1085,23 @@ export default function EditSetting({ params }: { params: Promise<{ id: string }
             </div>
           )}
         </div>
+
+        {/* Stock */}
+       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+         <h2 className="text-xl font-semibold text-gray-900 mb-4">Stock</h2>
+         <div>
+           <label className="block text-sm font-medium text-gray-700 mb-2">
+             Total Pieces
+           </label>
+           <input
+             type="number"
+             value={setting.totalPieces || 0}
+             onChange={(e) => updateSettingField('totalPieces', parseInt(e.target.value) || 0)}
+             min="0"
+             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+           />
+         </div>
+       </div>
 
         {/* Submit Button */}
         <div className="flex justify-end space-x-4">

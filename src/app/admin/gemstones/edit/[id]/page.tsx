@@ -45,6 +45,7 @@ interface Gemstone {
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
   description?: string;
+  totalPieces?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,7 +81,8 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
     discountPercentage: 0,
     images: [] as Array<{ url: string; publicId: string }>,
     isAvailable: true,
-    description: ''
+    description: '',
+    totalPieces: 0
   });
 
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
@@ -121,7 +123,8 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
         discountPercentage: data.discountPercentage || 0,
         images: data.images || [],
         isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-        description: data.description || ''
+        description: data.description || '',
+        totalPieces: data.totalPieces || 0
       });
     } catch (error) {
       console.error('Error fetching gemstone:', error);
@@ -713,6 +716,24 @@ export default function EditGemstonePage({ params }: { params: Promise<{ id: str
               <label className="ml-2 block text-sm text-gray-900">
                 Available for purchase
               </label>
+            </div>
+          </div>
+
+          {/* Stock */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-6">Stock</h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Total Pieces
+              </label>
+              <input
+                type="number"
+                name="totalPieces"
+                value={formData.totalPieces}
+                onChange={handleInputChange}
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 

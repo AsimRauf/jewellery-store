@@ -143,6 +143,7 @@ export interface IGemstone {
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
   description?: string;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -228,6 +229,7 @@ const GemstoneSchema = new Schema(
     },
     isAvailable: { type: Boolean, default: true },
     description: { type: String },
+    totalPieces: { type: Number, default: 0 },
   },
   {
     timestamps: true

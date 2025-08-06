@@ -78,6 +78,7 @@ export interface IEarring {
   care_instructions?: string;
   createdAt: Date;
   updatedAt: Date;
+  totalPieces?: number;
 }
 
 // Define the image schema
@@ -163,7 +164,8 @@ const EarringSchema = new Schema(
     isAvailable: { type: Boolean, default: true },
     description: { type: String },
     features: { type: [String], default: [] },
-    care_instructions: { type: String }
+    care_instructions: { type: String },
+    totalPieces: { type: Number, default: 0 }
   },
   {
     timestamps: true

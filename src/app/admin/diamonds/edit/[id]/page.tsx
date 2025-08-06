@@ -48,6 +48,7 @@ interface Diamond {
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
+  totalPieces?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -85,7 +86,8 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
     salePrice: 0,
     discountPercentage: 0,
     images: [] as Array<{ url: string; publicId: string }>,
-    isAvailable: true
+    isAvailable: true,
+    totalPieces: 0
   });
 
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
@@ -130,7 +132,8 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
         salePrice: data.salePrice || 0,
         discountPercentage: data.discountPercentage || 0,
         images: data.images || [],
-        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true
+        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+        totalPieces: data.totalPieces || 0
       });
     } catch (error) {
       console.error('Error fetching diamond:', error);
@@ -690,6 +693,24 @@ export default function EditDiamondPage({ params }: { params: Promise<{ id: stri
               <label className="ml-2 block text-sm text-gray-900">
                 Available for purchase
               </label>
+            </div>
+          </div>
+
+          {/* Stock */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Stock</h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Total Pieces
+              </label>
+              <input
+                type="number"
+                name="totalPieces"
+                value={formData.totalPieces}
+                onChange={handleInputChange}
+                min="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
 

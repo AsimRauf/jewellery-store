@@ -33,6 +33,7 @@ interface FormDataType {
   description: string;
   features: string[];
   images?: Array<{ url: string; publicId: string }>;
+  totalPieces?: number;
   [key: string]: string | number | boolean | Array<string> | Array<{ url: string; publicId: string }> | undefined;
 }
 
@@ -86,6 +87,7 @@ const formSections: FormSection[] = [
     fields: [
       { name: "description", label: "Description", type: "textarea" },
       { name: "features", label: "Features (comma-separated)", type: "textarea", placeholder: "e.g., Hypoallergenic, Lightweight, Adjustable" },
+      { name: "totalPieces", label: "Total Pieces", type: "number", min: 0 }
     ]
   }
 ];
@@ -112,7 +114,8 @@ export default function AddEarring() {
     discountPercentage: 0,
     isAvailable: true,
     description: '',
-    features: []
+    features: [],
+    totalPieces: 0
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);

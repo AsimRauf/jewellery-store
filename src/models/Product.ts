@@ -15,6 +15,7 @@ export interface IProduct extends Document {
     }>;
   };
   title?: string;
+  totalPieces?: number;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -23,6 +24,7 @@ const ProductSchema: Schema = new Schema({
   slug: { type: String, unique: true, index: true },
   productType: { type: String, required: true },
   price: { type: Number, required: true },
+  totalPieces: { type: Number, default: 0 },
   images: { type: Array },
   metalOptions: { type: Array },
   media: { type: Object },

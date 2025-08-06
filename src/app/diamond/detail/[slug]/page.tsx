@@ -38,6 +38,7 @@ interface DiamondDetail {
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
   isAvailable: boolean;
+  totalPieces?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -329,10 +330,10 @@ export default function DiamondDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <button
               onClick={handleAddToCart}
-              disabled={addingToCart || !diamond.isAvailable}
-              className="w-full py-3 px-6 rounded-full font-medium text-white bg-amber-500 hover:bg-amber-600 transition-colors"
+              disabled={addingToCart || !diamond.isAvailable || (diamond.totalPieces !== undefined && diamond.totalPieces <= 0)}
+              className="w-full py-3 px-6 rounded-full font-medium text-white bg-amber-500 hover:bg-amber-600 transition-colors disabled:bg-gray-400"
             >
-              {addingToCart ? 'Adding...' : 'Add to Cart'}
+              {addingToCart ? 'Adding...' : (diamond.totalPieces !== undefined && diamond.totalPieces <= 0 ? 'Out of Stock' : 'Add to Cart')}
             </button>
 
             {isSettingSelected ? (
