@@ -69,6 +69,7 @@ export enum GemstoneShape {
 export enum GemstoneColor {
   RED = 'Red',
   BLUE = 'Blue',
+  TEAL_BLUE = 'Teal Blue',
   GREEN = 'Green',
   YELLOW = 'Yellow',
   PURPLE = 'Purple',
