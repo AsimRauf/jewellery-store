@@ -46,8 +46,8 @@ export enum GemstoneType {
 }
 
 export enum GemstoneSource {
-  NATURAL = 'natural',
-  LAB = 'lab'
+  NATURAL = 'Natural',
+  LAB = 'Lab'
 }
 
 export enum GemstoneShape {
@@ -124,6 +124,7 @@ export enum GemstoneOrigin {
 
 export enum GemstoneTreatment {
   NONE = 'None',
+  NO_HEAT = 'No Heat',
   HEAT = 'Heat',
   IRRADIATION = 'Irradiation',
   FRACTURE_FILLING = 'Fracture Filling',

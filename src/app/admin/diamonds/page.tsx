@@ -156,17 +156,14 @@ export default function AddDiamond() {
 
   // Handle field change
   const handleFieldChange = (name: string, value: unknown) => {
-    const fields = name.split('.');
-    
-    if (fields.length === 1) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    } else {
-      setFormData(prev => {
-        const result = { ...prev };
-        let current: Record<string, unknown> = result as Record<string, unknown>;
+    setFormData(prev => {
+      const newFormData = { ...prev };
+      const fields = name.split('.');
+      
+      if (fields.length === 1) {
+        (newFormData as Record<string, unknown>)[name] = value;
+      } else {
+        let current: Record<string, unknown> = newFormData as Record<string, unknown>;
         
         // Traverse the object until the second-to-last field
         for (let i = 0; i < fields.length - 1; i++) {
@@ -178,18 +175,16 @@ export default function AddDiamond() {
         
         // Set the value on the last field
         current[fields[fields.length - 1]] = value;
-        return result;
-      });
-    }
+      }
 
-    // Auto-calculate discount percentage when price and sale price are set
-    if ((name === 'price' || name === 'salePrice') && formData.price > 0 && formData.salePrice > 0) {
-      const discountPercentage = Math.round(((formData.price - formData.salePrice) / formData.price) * 100);
-      setFormData(prev => ({
-        ...prev,
-        discountPercentage
-      }));
-    }
+      // Auto-calculate discount percentage when price and sale price are set
+      if ((name === 'price' || name === 'salePrice') && newFormData.price > 0 && newFormData.salePrice > 0) {
+        const discountPercentage = Math.round(((newFormData.price - newFormData.salePrice) / newFormData.price) * 100);
+        newFormData.discountPercentage = discountPercentage;
+      }
+      
+      return newFormData;
+    });
   };
 
   // Helper function to convert File to base64

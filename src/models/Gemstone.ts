@@ -19,8 +19,8 @@ export const GemstoneType = {
 };
 
 export const GemstoneSource = {
-  NATURAL: 'natural',
-  LAB: 'lab'
+  NATURAL: 'Natural',
+  LAB: 'Lab'
 };
 
 export const GemstoneShape = {
@@ -97,6 +97,7 @@ export const GemstoneOrigin = {
 
 export const GemstoneTreatment = {
   NONE: 'None',
+  NO_HEAT: 'No Heat',
   HEAT: 'Heat',
   IRRADIATION: 'Irradiation',
   FRACTURE_FILLING: 'Fracture Filling',

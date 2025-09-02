@@ -83,6 +83,7 @@ export interface IMensJewelry {
   salePrice?: number;
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
+  video?: { url: string; publicId: string };
   isAvailable: boolean;
   description?: string;
   features?: string[];
@@ -94,6 +95,19 @@ export interface IMensJewelry {
 
 // Define the image schema
 const ImageSchema = new Schema({
+  url: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  publicId: {
+    type: String,
+    required: true,
+    trim: true
+  }
+}, { _id: false });
+
+const VideoSchema = new Schema({
   url: {
     type: String,
     required: true,
@@ -194,6 +208,9 @@ const MensJewelrySchema = new Schema(
     images: {
       type: [ImageSchema],
       default: []
+    },
+    video: {
+      type: VideoSchema
     },
     isAvailable: { type: Boolean, default: true },
     description: { type: String },

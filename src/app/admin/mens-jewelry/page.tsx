@@ -47,6 +47,7 @@ interface FormDataType {
   description?: string;
   features: string[];
   images?: Array<{ url: string; publicId: string }>;
+  video?: { url: string; publicId: string };
   [key: string]: any;
 }
 
@@ -153,44 +154,42 @@ export default function AddMensJewelry() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
+  const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
   const [gemstoneFields, setGemstoneFields] = useState<Array<{ type: string; carat?: number; color?: string; clarity?: string }>>([]);
 
   // Handle field change
   const handleFieldChange = (name: string, value: any) => {
     setFormData(prev => {
-      const newData = { ...prev };
+      const newFormData = { ...prev };
       
       // Handle engraving fields
       if (name === 'engravingAvailable') {
-        newData.engraving = {
+        newFormData.engraving = {
           ...prev.engraving,
           available: value
         };
       } else if (name === 'engravingMaxCharacters') {
-        newData.engraving = {
+        newFormData.engraving = {
           ...prev.engraving,
           maxCharacters: value
         };
       } else if (name === 'engravingFonts') {
-        newData.engraving = {
+        newFormData.engraving = {
           ...prev.engraving,
           fonts: value ? value.split(',').map((f: string) => f.trim()) : []
         };
       } else {
-        newData[name] = value;
+        (newFormData as Record<string, unknown>)[name] = value;
+      }
+
+      // Auto-calculate discount percentage when price and sale price are set
+      if ((name === 'price' || name === 'salePrice') && newFormData.price > 0 && newFormData.salePrice && newFormData.salePrice > 0) {
+        const discountPercentage = Math.round(((newFormData.price - newFormData.salePrice) / newFormData.price) * 100);
+        newFormData.discountPercentage = discountPercentage;
       }
       
-      return newData;
+      return newFormData;
     });
-
-    // Auto-calculate discount percentage when price and sale price are set
-    if ((name === 'price' || name === 'salePrice') && formData.price > 0 && formData.salePrice && formData.salePrice > 0) {
-      const discountPercentage = Math.round(((formData.price - formData.salePrice) / formData.price) * 100);
-      setFormData(prev => ({
-        ...prev,
-        discountPercentage
-      }));
-    }
   };
 
   // Add gemstone field
@@ -245,7 +244,7 @@ export default function AddMensJewelry() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 file: base64,
                 category: `mens-jewelry/${formData.metal}`
               })
@@ -263,10 +262,36 @@ export default function AddMensJewelry() {
         toast.success('Images uploaded successfully', { id: 'uploadProgress' });
       }
 
+      // Upload video
+      let uploadedVideo: { url: string; publicId: string } | undefined;
+      if (temporaryVideo) {
+        toast.loading('Uploading video...', { id: 'uploadVideoProgress' });
+        
+        const base64 = await convertToBase64(temporaryVideo);
+        const response = await fetch('/api/upload/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            file: base64,
+            category: `mens-jewelry/${formData.metal}`
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload video');
+        }
+
+        uploadedVideo = await response.json();
+        toast.success('Video uploaded successfully', { id: 'uploadVideoProgress' });
+      }
+
       // Prepare final data
       const finalData = {
         ...formData,
         images: uploadedImages,
+        video: uploadedVideo,
         gemstones: gemstoneFields.filter(g => g.type),
         features: Array.isArray(formData.features) ? formData.features :
         formData.features && typeof formData.features === 'string' ?
@@ -428,9 +453,9 @@ export default function AddMensJewelry() {
           
           <ImageUpload
             onImagesSelect={setTemporaryImages}
-            onVideoSelect={() => {}}
+            onVideoSelect={setTemporaryVideo}
             temporaryImages={temporaryImages}
-            temporaryVideo={null}
+            temporaryVideo={temporaryVideo}
             maxImages={8}
             previewUrls={[]}
           />

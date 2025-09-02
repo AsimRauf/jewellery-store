@@ -146,19 +146,20 @@ export default function AddGemstone() {
 
   // Handle field change
   const handleFieldChange = (name: keyof FormDataType, value: FormDataType[keyof FormDataType]) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Auto-calculate discount percentage when price and sale price are set
-    if ((name === 'price' || name === 'salePrice') && formData.price > 0 && formData.salePrice > 0) {
-      const discountPercentage = Math.round(((formData.price - formData.salePrice) / formData.price) * 100);
-      setFormData(prev => ({
+    setFormData(prev => {
+      const newFormData = {
         ...prev,
-        discountPercentage
-      }));
-    }
+        [name]: value
+      };
+
+      // Auto-calculate discount percentage when price and sale price are set
+      if ((name === 'price' || name === 'salePrice') && newFormData.price > 0 && newFormData.salePrice > 0) {
+        const discountPercentage = Math.round(((newFormData.price - newFormData.salePrice) / newFormData.price) * 100);
+        newFormData.discountPercentage = discountPercentage;
+      }
+      
+      return newFormData;
+    });
   };
 
   // Helper function to convert File to base64
