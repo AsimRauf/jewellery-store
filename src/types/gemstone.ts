@@ -21,6 +21,7 @@ export interface Gemstone {
   salePrice?: number;
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
+  video?: { url: string; publicId: string };
   isAvailable: boolean;
   description?: string;
   createdAt?: Date;

@@ -122,6 +122,7 @@ export interface IDiamond {
   salePrice?: number;
   discountPercentage?: number;
   images?: Array<{ url: string; publicId: string }>;
+  video?: { url: string; publicId: string };
   isAvailable: boolean;
   totalPieces?: number;
   createdAt: Date;
@@ -141,6 +142,19 @@ const ImageSchema = new Schema({
     trim: true
   }
 }, { _id: false });  // Add this option to prevent Mongoose from adding _id to each image
+
+const VideoSchema = new Schema({
+  url: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  publicId: {
+    type: String,
+    required: true,
+    trim: true
+  }
+}, { _id: false });
 
 const DiamondSchema: Schema = new Schema(
   {
@@ -220,6 +234,9 @@ const DiamondSchema: Schema = new Schema(
         },
         message: 'Images must be an array of objects with url and publicId strings'
       }
+    },
+    video: {
+      type: VideoSchema
     },
     isAvailable: { type: Boolean, default: true },
     totalPieces: { type: Number, default: 0 },

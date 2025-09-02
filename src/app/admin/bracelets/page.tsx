@@ -37,7 +37,8 @@ interface FormDataType {
   features: string[];
   images?: Array<{ url: string; publicId: string }>;
   totalPieces?: number;
-  [key: string]: string | number | boolean | Array<string> | Array<{ url: string; publicId: string }> | undefined;
+  video?: { url: string; publicId: string };
+  [key: string]: string | number | boolean | Array<string> | Array<{ url: string; publicId: string }> | { url: string; publicId: string } | undefined;
 }
 
 // Define form sections
@@ -131,6 +132,7 @@ export default function AddBracelet() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
+  const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
 
   // Handle field change
   const handleFieldChange = (name: keyof FormDataType, value: FormDataType[keyof FormDataType]) => {
@@ -184,7 +186,7 @@ export default function AddBracelet() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 file: base64,
                 category: `bracelets/${formData.metal}`
               })
@@ -202,12 +204,38 @@ export default function AddBracelet() {
         toast.success('Bracelet images uploaded successfully', { id: 'uploadProgress' });
       }
 
+      // Upload video
+      let uploadedVideo: { url: string; publicId: string } | undefined;
+      if (temporaryVideo) {
+        toast.loading('Uploading bracelet video...', { id: 'uploadVideoProgress' });
+        
+        const base64 = await convertToBase64(temporaryVideo);
+        const response = await fetch('/api/upload/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            file: base64,
+            category: `bracelets/${formData.metal}`
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload video');
+        }
+
+        uploadedVideo = await response.json();
+        toast.success('Bracelet video uploaded successfully', { id: 'uploadVideoProgress' });
+      }
+
       // Prepare final data
       const finalData = {
         ...formData,
         images: uploadedImages,
-        features: Array.isArray(formData.features) ? formData.features : 
-                 formData.features && typeof formData.features === 'string' ? 
+        video: uploadedVideo,
+        features: Array.isArray(formData.features) ? formData.features :
+                 formData.features && typeof formData.features === 'string' ?
                  (formData.features as string).split(',').map(f => f.trim()).filter(f => f) : []
       };
 
@@ -352,9 +380,9 @@ export default function AddBracelet() {
           
           <ImageUpload
             onImagesSelect={setTemporaryImages}
-            onVideoSelect={() => {}} // Not needed for bracelets
+            onVideoSelect={setTemporaryVideo}
             temporaryImages={temporaryImages}
-            temporaryVideo={null}
+            temporaryVideo={temporaryVideo}
             maxImages={5}
             previewUrls={[]}
           />

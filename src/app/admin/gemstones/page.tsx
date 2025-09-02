@@ -43,7 +43,8 @@ interface FormDataType {
   description: string;
   images?: Array<{ url: string; publicId: string }>;
   totalPieces?: number;
-  [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | undefined;
+  video?: { url: string; publicId: string };
+  [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | { url: string; publicId: string } | undefined;
 }
 
 // Define form sections
@@ -141,6 +142,7 @@ export default function AddGemstone() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [temporaryImages, setTemporaryImages] = useState<File[]>([]);
+  const [temporaryVideo, setTemporaryVideo] = useState<File | null>(null);
 
   // Handle field change
   const handleFieldChange = (name: keyof FormDataType, value: FormDataType[keyof FormDataType]) => {
@@ -187,7 +189,7 @@ export default function AddGemstone() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 file: base64,
                 category: `gemstones/${formData.source}`
               })
@@ -205,10 +207,36 @@ export default function AddGemstone() {
         toast.success('Gemstone images uploaded successfully', { id: 'uploadProgress' });
       }
 
+      // Upload video
+      let uploadedVideo: { url: string; publicId: string } | undefined;
+      if (temporaryVideo) {
+        toast.loading('Uploading gemstone video...', { id: 'uploadVideoProgress' });
+        
+        const base64 = await convertToBase64(temporaryVideo);
+        const response = await fetch('/api/upload/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            file: base64,
+            category: `gemstones/${formData.source}`
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload video');
+        }
+
+        uploadedVideo = await response.json();
+        toast.success('Gemstone video uploaded successfully', { id: 'uploadVideoProgress' });
+      }
+
       // Prepare final data
       const finalData = {
         ...formData,
-        images: uploadedImages
+        images: uploadedImages,
+        video: uploadedVideo
       };
 
       // Save gemstone data
@@ -322,9 +350,9 @@ export default function AddGemstone() {
           
           <ImageUpload
             onImagesSelect={setTemporaryImages}
-            onVideoSelect={() => {}} // Not needed for gemstones
+            onVideoSelect={setTemporaryVideo}
             temporaryImages={temporaryImages}
-            temporaryVideo={null}
+            temporaryVideo={temporaryVideo}
             maxImages={5}
             previewUrls={[]}
           />

@@ -45,9 +45,10 @@ interface FormDataType {
   discountPercentage: number;
   isAvailable: boolean;
   images?: Array<{ url: string; publicId: string }>;
+  video?: { url: string; publicId: string };
   totalPieces?: number;
   // Add 'unknown' to the index signature types
-  [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | undefined | unknown;
+  [key: string]: string | number | boolean | Array<{ url: string; publicId: string }> | { url: string; publicId: string } | undefined | unknown;
 }
 
 // Define form sections
@@ -237,10 +238,36 @@ export default function AddDiamond() {
         toast.success('Diamond images uploaded successfully', { id: 'uploadProgress' });
       }
 
+      // Upload video
+      let uploadedVideo: { url: string; publicId: string } | undefined;
+      if (temporaryVideo) {
+        toast.loading('Uploading diamond video...', { id: 'uploadVideoProgress' });
+        
+        const base64 = await convertToBase64(temporaryVideo);
+        const response = await fetch('/api/upload/video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            file: base64,
+            category: `diamonds/${formData.type}`
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload video');
+        }
+
+        uploadedVideo = await response.json();
+        toast.success('Diamond video uploaded successfully', { id: 'uploadVideoProgress' });
+      }
+
       // Prepare final data
       const finalData = {
         ...formData,
-        images: uploadedImages
+        images: uploadedImages,
+        video: uploadedVideo
       };
 
       // Save diamond data

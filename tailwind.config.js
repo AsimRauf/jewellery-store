@@ -7,6 +7,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@heroui/theme/dist/components/(number-input|button|ripple|spinner|form).js"
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {

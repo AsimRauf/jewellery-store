@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
     // If the category is 'settings', use a dedicated folder
     if (category === 'settings') {
       folderPath = 'jewelry-store/rings/settings';
+    } else if (category.startsWith('gemstones')) {
+      folderPath = `jewelry-store/gemstones/${category.split('/')[1]}`;
     }
 
     try {

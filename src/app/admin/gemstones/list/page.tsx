@@ -38,8 +38,12 @@ interface Gemstone {
     url: string;
     publicId: string;
   }>;
-  isAvailable: boolean;
-  createdAt: string;
+ video?: {
+   url: string;
+   publicId: string;
+ };
+ isAvailable: boolean;
+ createdAt: string;
   updatedAt: string;
 }
 
